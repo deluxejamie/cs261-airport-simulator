@@ -28,4 +28,4 @@ jobs:
 
       - run: cd frontend && npm ci
       - run: cd frontend && npm run build --if-present
-      - run: cd frontend && npm test --passWithNoTests
+      - run: cd frontend && npm test
