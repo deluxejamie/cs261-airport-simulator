@@ -22,6 +22,11 @@ public class Runway {
         this.status = status;
     }
 
+    public void setOccupied(Aircraft aircraft)
+    {
+        this.occupied = aircraft;
+    }
+
     public RunwayMode getMode() {
         return mode;
     }
@@ -51,5 +56,5 @@ public class Runway {
     private final int runwayNumber;
     private final double length;
     private final double bearing;
-    private final Aircraft occupied;
+    private Aircraft occupied;
 }
