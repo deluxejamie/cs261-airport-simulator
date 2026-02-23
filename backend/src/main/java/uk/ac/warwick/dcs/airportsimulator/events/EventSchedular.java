@@ -4,6 +4,13 @@ import java.util.PriorityQueue;
 
 public class EventSchedular {
 
+    public EventSchedular()
+    {
+        this.events = new PriorityQueue<Event>(
+            (a,b) -> Double.compare(a.getScheduledTime(), b.getScheduledTime())
+        );
+    }
+
     public void addEvent(Event e)
     {
         events.add(e);
