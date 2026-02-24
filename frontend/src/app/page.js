@@ -12,9 +12,9 @@ const RunwayModes = {
 // https://react.dev/learn/reusing-logic-with-custom-hooks
 // https://mantine.dev/hooks
 
-const useRunways = () => {
+export const useRunways = () => {
 	const [values, { append: valuesAppend, filter: valuesFilter }] = useListState(
-		[{ id: 2, mode: RunwayModes.MIXED_MODE }],
+		[],
 	);
 	const [counter, { increment: incrementCounter }] = useCounter(0);
 
@@ -70,6 +70,5 @@ export default function Home() {
 		removeRunway,
 	} = useRunways();
 
-	
 	return <></>;
 }
