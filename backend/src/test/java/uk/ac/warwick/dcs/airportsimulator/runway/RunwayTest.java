@@ -69,7 +69,6 @@ class RunwayTest {
 
     @Test
     void setters_shouldAllowPuttingObjectIntoDifferentStates() {
-        // 这个测试更贴近“把对象放到各种可能状态 + 触发状态变化事件”的思想 :contentReference[oaicite:1]{index=1}
         Runway runway = new Runway(4, 4000.0, 135.0,
                 RunwayMode.LANDING, RunwayStatus.AVAILABLE, null);
 
