@@ -134,7 +134,6 @@ public class DataBaseTest
             final EventLogEntryEntity lhs = eventLog.get(i);
             final EventLogEntryEntity rhs = entries.get(i);
             assertEquals(lhs.getSimulationId(), rhs.getSimulationId());
-            System.out.println(lhs.getEventType() + ":" +  rhs.getEventType());
             assertEquals(lhs.getEventType(), rhs.getEventType());
             assertEquals(lhs.getSimTimestamp(), rhs.getSimTimestamp());
             assertEquals(lhs.getAttributes(), rhs.getAttributes());
