@@ -2,8 +2,16 @@ package uk.ac.warwick.dcs.airportsimulator.events;
 
 import java.util.PriorityQueue;
 
+
+/**
+ * EventSchedular handles executing events at the correct time and 
+ * in the correct order
+ */
 public class EventSchedular {
 
+    /**
+     * Constructs a empty EventSchedular
+     */
     public EventSchedular()
     {
         this.events = new PriorityQueue<Event>(
@@ -11,11 +19,22 @@ public class EventSchedular {
         );
     }
 
+    /**
+     * Adds an event to the EventSchedular
+     *
+     * @param e Event to add
+     */
     public void addEvent(Event e)
     {
         events.add(e);
     }
 
+    /**
+     * Executes all the events up to and including to the current simTime
+     * Events are executed in order, such that older events are executed first
+     *
+     * @param simTime the current simTime
+     */
     public void step(double simTime)
     {
         while (!events.isEmpty() && events.peek().getScheduledTime() <= simTime)
@@ -28,5 +47,6 @@ public class EventSchedular {
         }
     }
 
+    /* Stores events in the correct ordering */
     private PriorityQueue<Event> events;
 }
