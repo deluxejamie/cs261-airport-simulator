@@ -1,11 +1,26 @@
 "use client";
-import { useListState, useCounter, useSetState } from "@mantine/hooks";
+import { useListState, useCounter, useSetState, useMap } from "@mantine/hooks";
 
 export const RunwayModes = {
 	MIXED_MODE: "mixed_mode",
 	TAKEOFF_ONLY: "takeoff",
 	LANDING_ONLY: "landing",
 };
+
+export const EmergencyStatus = {
+	NONE: "none",
+	MECHANICAL_FAIL: "mech_fail",
+	PASSENGER_HEALTH: "passenger_health",
+};
+
+export const FlightType = {
+	ARRIVAL: "arrival",
+	DEPARTURE: "departure",
+};
+
+const isPositiveInteger = (s) => Number.isInteger(s) && s > 0;
+const isNaturalNumber = (s) => Number.isInteger(s) && s >= 0;
+const isValueInEnum = (e, v) => Object.values(e).includes(v);
 
 const DEFAULT_MAX_WAIT_MINUTES_BEFORE_TAKEOFF = 10;
 const DEFAULT_FUEL_MINUTES_THRESHOLD_BEFORE_DIVERTED = 10;
@@ -24,8 +39,7 @@ export const useRunways = () => {
 	const [counter, { increment: incrementCounter }] = useCounter(0);
 
 	const addRunway = (mode) => {
-		if (!Object.values(RunwayModes).includes(mode))
-			throw Error("Invalid runway mode");
+		if (!isValueInEnum(RunwayModes, mode)) throw Error("Invalid runway mode");
 
 		if (values.length == 10)
 			throw Error("There are already 10 runways being stored (max reached)");
@@ -76,7 +90,7 @@ export const useAdvancedConfig = () => {
 
 	const setMaxDelayBeforeCancelled = (val) => {
 		// This also checks whether val is of number type
-		if (!Number.isInteger(val) || val < 0) {
+		if (!isNaturalNumber(val)) {
 			throw Error("Improper argument provided");
 		}
 		setConfig({ maxDelayBeforeCancelled: val });
@@ -84,7 +98,7 @@ export const useAdvancedConfig = () => {
 
 	const setFuelThresholdBeforeRedirected = (val) => {
 		// This also checks whether val is of number type
-		if (!Number.isInteger(val) || val < 0) {
+		if (!isNaturalNumber(val)) {
 			throw Error("Improper argument provided");
 		}
 		setConfig({ setFuelThresholdBeforeRedirected: val });
@@ -92,7 +106,7 @@ export const useAdvancedConfig = () => {
 
 	const setTimeTakenForTakeoff = (val) => {
 		// This also checks whether val is of number type
-		if (!Number.isInteger(val) || val <= 0) {
+		if (!isPositiveInteger(val)) {
 			throw Error("Improper argument provided");
 		}
 		setConfig({ timeTakenForTakeoff: val });
@@ -100,7 +114,7 @@ export const useAdvancedConfig = () => {
 
 	const setTimeTakenForLanding = (val) => {
 		// This also checks whether val is of number type
-		if (!Number.isInteger(val) || val <= 0) {
+		if (!isPositiveInteger(val)) {
 			throw Error("Improper argument provided");
 		}
 		setConfig({ timeTakenForLanding: val });
@@ -128,3 +142,98 @@ export const useAdvancedConfig = () => {
 		setTimeTakenForLanding,
 	};
 };
+
+export const useFlightSchedule = () => {
+	const [flights] = useMap();
+	const [flightNumber, { increment: incrementFlightNumber }] = useCounter(0);
+	const addDepartureFlight = (operator, expected_departure_time) => {
+		if (
+			typeof operator != "string" ||
+			!isNaturalNumber(expected_departure_time)
+		)
+			throw Error("Invalid input parameters");
+		if (!isNaturalNumber(observed_departure_time)) {
+			// todo: generate observed departure time using normal distribution
+			observed_departure_time = 0;
+		}
+		const flight = {
+			callsign: operator.toUpperCase() + "-" + flightNumber.toString(),
+			expected_departure_time,
+			observed_departure_time,
+		};
+		const res = flights.set(flight.callsign, flight);
+		incrementFlightNumber();
+		return res;
+	};
+
+	const addArrivalFlight = (
+		operator,
+		emergency_status,
+		remaining_fuel_mins,
+		expected_arrival_time,
+		observed_arrival_time,
+	) => {
+		if (
+			typeof operator != "string" ||
+			!isValueInEnum(EmergencyStatus, emergency_status) ||
+			!isNaturalNumber(remaining_fuel_mins) ||
+			!isNaturalNumber(expected_arrival_time)
+		)
+			throw Error("Invalid input parameters");
+
+		if (!isNaturalNumber(observed_arrival_time)) {
+			// todo: generate observed arrival time
+			observed_arrival_time = 0;
+		}
+		const flight = {
+			callsign: operator.toUpperCase() + "-" + flightNumber.toString(),
+			expected_arrival_time,
+			observed_arrival_time,
+			emergency_status,
+			remaining_fuel_mins,
+		};
+		const res = flights.set(flight.callsign, flight);
+		incrementFlightNumber();
+		return res;
+	};
+
+	const removeFlight = (callsign) => {
+		const found = flights.delete(callsign);
+		if (!found)
+			throw Error("Unable to remove flight, was not found within schedule");
+	};
+
+	return {
+		/**
+		 * A map from callsign (can be used as a key) to the schedule data
+		 * @type {Map<String,{type: FlightType.ARRIVAL, callsign: String, expected_arrival_time:Number, observed_arrival_time: Number, emergency_status: EmergencyStatus, remaining_fuel_mins: Number}
+		 * | { type: FlightType.DEPARTURE, callsign: String, expected_departure_time:Number, observed_departure_time:Number}>}
+		 * @see https://mantine.dev/hooks/use-map/ I would recommend using these docs to see how to display the flight schedule. Use the callsign as a key.
+		 */
+		flights,
+
+		/**
+		 * Add a new departure flight to the schedule
+		 * @param {String} operator The aircraft's operator e.g. EASYJET
+		 * @param {Number} expected_departure_time The expected departure time (mins from start of simulation) when this plane should depart
+		 * @param {Number} observed_departure_time [OPTIONAL] The observed departure time (mins from the start of the simulation) when this plane should depart. If not provided, will be generated using normal dist from expected.
+		 */
+		addDepartureFlight,
+
+		/**
+		 * Adds a new arrival flight to the schedule
+		 * @param {String} operator The aircraft's operator e.g. EASYJET
+		 * @param {valueof EmergencyStatus} emergency_status The emergency status of this flight
+		 * @param {Number} remaining_fuel_mins The number of minutes remaining before this flight has no fuel
+		 * @param {Number} expected_arrival_time The expected arrival time (mins from start of simulation) when this plane should arrive
+		 * @param {Number} observed_arrival_time [OPTIONAL] The observed arrival time (mins from the start of the simulation) when this plane should arrive. If not provided, will be generated using normal dist from expected.
+		 */
+		addArrivalFlight,
+		/**
+		 * @param {String} callsign
+		 */
+		removeFlight,
+	};
+};
+
+export const useHazardSchedule = () => {};
