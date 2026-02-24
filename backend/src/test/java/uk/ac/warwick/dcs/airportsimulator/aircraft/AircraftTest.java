@@ -72,7 +72,7 @@ class AircraftTest {
 
     @Test
     void isFuelCritical_shouldBeFalseWhenFuelIsExactly10() {
-        // fuel critical condition is: getFuelRemaining(simTime) < 10 :contentReference[oaicite:1]{index=1}
+        // fuel critical condition is: getFuelRemaining(simTime) < 10
         Aircraft a = new Aircraft(
                 "CS3", "OP", "AAA", "BBB",
                 0.0, 0, 0,
