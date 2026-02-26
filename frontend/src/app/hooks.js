@@ -14,9 +14,40 @@ export const FlightType = {
   DEPARTURE: "departure",
 };
 
+export const HazardType = {
+  RUNWAY_CLOSURE: "runway_closure",
+  EMERGENCY_EVENT: "emergency_event",
+};
+
+export const RunwayClosureMode = {
+  SNOW_CLEARANCE: "snow_clearance",
+  RUNWAY_INSPECTION: "runway_inspection",
+  EQUIPMENT_FAILURE: "equipment_failure",
+};
+
+const OBSERVED_TIME_STD_DEV_MINUTES = 5;
+
 const isNaturalNumber = (value) => Number.isInteger(value) && value >= 0;
 const isPositiveInteger = (value) => Number.isInteger(value) && value > 0;
 const isValueInEnum = (enumObj, value) => Object.values(enumObj).includes(value);
+
+const normalizeOperatorForCallsign = (operator) => {
+  if (typeof operator !== "string") {
+    throw new Error("Aircraft operator must be a valid string");
+  }
+
+  const normalized = operator
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  if (normalized.length < 2) {
+    throw new Error("Aircraft operator must contain at least 2 characters");
+  }
+
+  return normalized;
+};
 
 const normalSample = (mean, stdDev) => {
   let u = 0;
@@ -25,102 +56,84 @@ const normalSample = (mean, stdDev) => {
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
 
-  const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-  return Math.round(mean + z * stdDev);
+  const gaussian = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  return Math.round(mean + gaussian * stdDev);
 };
 
-const generateObservedTime = (expectedTime, stdDevMinutes = 5) => {
-  const sampled = normalSample(expectedTime, stdDevMinutes);
-  return Math.max(0, sampled);
-};
+const generateObservedTime = (expectedTime) =>
+  Math.max(0, normalSample(expectedTime, OBSERVED_TIME_STD_DEV_MINUTES));
 
 export const useFlightSchedule = () => {
   const [flights, setFlights] = useState([]);
-  const [flightNumber, setFlightNumber] = useState(1);
+  const [callsignCounter, setCallsignCounter] = useState(1);
 
-  const nextCallsign = useCallback(
+  const generateCallsign = useCallback(
     (operator) => {
-      if (typeof operator !== "string" || operator.trim().length < 2) {
-        throw new Error("Operator must be a non-empty string");
-      }
-      return `${operator.trim().toUpperCase()}-${flightNumber}`;
+      const operatorPrefix = normalizeOperatorForCallsign(operator);
+      return `${operatorPrefix}-${callsignCounter}`;
     },
-    [flightNumber],
+    [callsignCounter],
   );
 
   const addDepartureFlight = useCallback(
-    (operator, expectedDepartureTime, observedDepartureTime) => {
+    (operator, expectedDepartureTime) => {
       if (!isNaturalNumber(expectedDepartureTime)) {
         throw new Error("Expected departure time must be a natural number");
       }
 
-      const callsign = nextCallsign(operator);
-      const observed = isNaturalNumber(observedDepartureTime)
-        ? observedDepartureTime
-        : generateObservedTime(expectedDepartureTime, 5);
-
-      const flight = {
+      const normalizedOperator = normalizeOperatorForCallsign(operator);
+      const departure = {
         type: FlightType.DEPARTURE,
-        callsign,
-        operator: operator.trim(),
+        operator: normalizedOperator,
+        callsign: generateCallsign(operator),
         expected_departure_time: expectedDepartureTime,
-        observed_departure_time: observed,
+        observed_departure_time: generateObservedTime(expectedDepartureTime),
       };
 
-      setFlights((prev) => [...prev, flight]);
-      setFlightNumber((prev) => prev + 1);
-      return flight;
+      setFlights((prev) => [...prev, departure]);
+      setCallsignCounter((prev) => prev + 1);
+      return departure;
     },
-    [nextCallsign],
+    [generateCallsign],
   );
 
   const addArrivalFlight = useCallback(
-    (
-      operator,
-      emergencyStatus,
-      remainingFuelMins,
-      expectedArrivalTime,
-      observedArrivalTime,
-    ) => {
-      if (!isValueInEnum(EmergencyStatus, emergencyStatus)) {
-        throw new Error("Invalid emergency status");
-      }
-      if (!isPositiveInteger(remainingFuelMins)) {
-        throw new Error("Remaining fuel minutes must be positive");
-      }
+    (operator, expectedArrivalTime, remainingFuelMinutes, emergencyStatus) => {
       if (!isNaturalNumber(expectedArrivalTime)) {
         throw new Error("Expected arrival time must be a natural number");
       }
+      if (!isPositiveInteger(remainingFuelMinutes)) {
+        throw new Error("Fuel at arrival must be a positive integer");
+      }
+      if (!isValueInEnum(EmergencyStatus, emergencyStatus)) {
+        throw new Error("Emergency status is invalid");
+      }
 
-      const callsign = nextCallsign(operator);
-      const observed = isNaturalNumber(observedArrivalTime)
-        ? observedArrivalTime
-        : generateObservedTime(expectedArrivalTime, 5);
-
-      const flight = {
+      const normalizedOperator = normalizeOperatorForCallsign(operator);
+      const arrival = {
         type: FlightType.ARRIVAL,
-        callsign,
-        operator: operator.trim(),
+        operator: normalizedOperator,
+        callsign: generateCallsign(operator),
+        remaining_fuel_mins: remainingFuelMinutes,
         emergency_status: emergencyStatus,
-        remaining_fuel_mins: remainingFuelMins,
         expected_arrival_time: expectedArrivalTime,
-        observed_arrival_time: observed,
+        observed_arrival_time: generateObservedTime(expectedArrivalTime),
       };
 
-      setFlights((prev) => [...prev, flight]);
-      setFlightNumber((prev) => prev + 1);
-      return flight;
+      setFlights((prev) => [...prev, arrival]);
+      setCallsignCounter((prev) => prev + 1);
+      return arrival;
     },
-    [nextCallsign],
+    [generateCallsign],
   );
 
   const removeFlight = useCallback((callsign) => {
     setFlights((prev) => {
-      const next = prev.filter((f) => f.callsign !== callsign);
-      if (next.length === prev.length) {
-        throw new Error("Unable to remove flight, it was not found");
+      const nextFlights = prev.filter((flight) => flight.callsign !== callsign);
+      if (nextFlights.length === prev.length) {
+        throw new Error("Unable to remove flight, callsign was not found");
       }
-      return next;
+      return nextFlights;
     });
   }, []);
 
@@ -129,5 +142,77 @@ export const useFlightSchedule = () => {
     addDepartureFlight,
     addArrivalFlight,
     removeFlight,
+  };
+};
+
+export const useHazardSchedule = () => {
+  const [hazards, setHazards] = useState([]);
+  const [hazardIdCounter, setHazardIdCounter] = useState(1);
+
+  const addRunwayClosureHazard = useCallback(
+    (startTimeMinutes, durationMinutes, affectedRunway, closureMode) => {
+      if (!isNaturalNumber(startTimeMinutes)) {
+        throw new Error("Runway closure start time must be a natural number");
+      }
+      if (!isPositiveInteger(durationMinutes)) {
+        throw new Error("Runway closure duration must be a positive integer");
+      }
+      if (!isPositiveInteger(affectedRunway)) {
+        throw new Error("Affected runway must be a positive integer");
+      }
+      if (!isValueInEnum(RunwayClosureMode, closureMode)) {
+        throw new Error("Runway closure mode is invalid");
+      }
+
+      const hazard = {
+        id: hazardIdCounter,
+        type: HazardType.RUNWAY_CLOSURE,
+        start_time_mins: startTimeMinutes,
+        duration_mins: durationMinutes,
+        affected_runway: affectedRunway,
+        closure_mode: closureMode,
+      };
+
+      setHazards((prev) => [...prev, hazard]);
+      setHazardIdCounter((prev) => prev + 1);
+      return hazard;
+    },
+    [hazardIdCounter],
+  );
+
+  const addEmergencyEventHazard = useCallback(
+    (arrivalCallsign) => {
+      if (typeof arrivalCallsign !== "string" || arrivalCallsign.trim().length === 0) {
+        throw new Error("Emergency event must target a valid arrival callsign");
+      }
+
+      const hazard = {
+        id: hazardIdCounter,
+        type: HazardType.EMERGENCY_EVENT,
+        target_arrival_callsign: arrivalCallsign,
+      };
+
+      setHazards((prev) => [...prev, hazard]);
+      setHazardIdCounter((prev) => prev + 1);
+      return hazard;
+    },
+    [hazardIdCounter],
+  );
+
+  const removeHazard = useCallback((hazardId) => {
+    setHazards((prev) => {
+      const nextHazards = prev.filter((hazard) => hazard.id !== hazardId);
+      if (nextHazards.length === prev.length) {
+        throw new Error("Unable to remove hazard, id was not found");
+      }
+      return nextHazards;
+    });
+  }, []);
+
+  return {
+    hazards,
+    addRunwayClosureHazard,
+    addEmergencyEventHazard,
+    removeHazard,
   };
 };
