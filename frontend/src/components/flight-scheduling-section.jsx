@@ -200,5 +200,3 @@ export default function FlightSchedulingSection({ onFlightsChange }) {
     </Card>
   );
 }
-frontend/src/components/hazard-scheduling-section.jsx
-frontend/src/compone
