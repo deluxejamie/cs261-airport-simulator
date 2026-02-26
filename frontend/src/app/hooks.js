@@ -216,3 +216,58 @@ export const useHazardSchedule = () => {
     removeHazard,
   };
 };
+
+
+export const DEFAULT_MAX_WAIT_BEFORE_TAKEOFF_MINS = 10;
+export const DEFAULT_FUEL_THRESHOLD_BEFORE_DIVERSION_MINS = 10;
+export const DEFAULT_TAKEOFF_DURATION_MINS = 5;
+export const DEFAULT_LANDING_DURATION_MINS = 5;
+
+export const useAdvancedConfig = () => {
+  const [advancedConfig, setAdvancedConfig] = useState({
+    max_wait_before_takeoff_mins: DEFAULT_MAX_WAIT_BEFORE_TAKEOFF_MINS,
+    fuel_threshold_before_diversion_mins:
+      DEFAULT_FUEL_THRESHOLD_BEFORE_DIVERSION_MINS,
+    takeoff_duration_mins: DEFAULT_TAKEOFF_DURATION_MINS,
+    landing_duration_mins: DEFAULT_LANDING_DURATION_MINS,
+  });
+
+  const setMaxWaitBeforeTakeoff = useCallback((value) => {
+    if (!isNaturalNumber(value)) {
+      throw new Error("Max waiting time before takeoff must be a natural number");
+    }
+    setAdvancedConfig((prev) => ({ ...prev, max_wait_before_takeoff_mins: value }));
+  }, []);
+
+  const setFuelThresholdBeforeDiversion = useCallback((value) => {
+    if (!isNaturalNumber(value)) {
+      throw new Error("Fuel threshold before diversion must be a natural number");
+    }
+    setAdvancedConfig((prev) => ({
+      ...prev,
+      fuel_threshold_before_diversion_mins: value,
+    }));
+  }, []);
+
+  const setTakeoffDuration = useCallback((value) => {
+    if (!isPositiveInteger(value)) {
+      throw new Error("Time taken for takeoff must be a positive integer");
+    }
+    setAdvancedConfig((prev) => ({ ...prev, takeoff_duration_mins: value }));
+  }, []);
+
+  const setLandingDuration = useCallback((value) => {
+    if (!isPositiveInteger(value)) {
+      throw new Error("Time taken for landing must be a positive integer");
+    }
+    setAdvancedConfig((prev) => ({ ...prev, landing_duration_mins: value }));
+  }, []);
+
+  return {
+    advancedConfig,
+    setMaxWaitBeforeTakeoff,
+    setFuelThresholdBeforeDiversion,
+    setTakeoffDuration,
+    setLandingDuration,
+  };
+};
