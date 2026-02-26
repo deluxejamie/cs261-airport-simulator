@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge, Card, Stack, Text, Title } from "@mantine/core";
-import FlightSchedulingSection from "@/components/flight-scheduling-section";
+import FlightSchedulingSection from "./flight-scheduling-section";
+import HazardSchedulingSection from "./hazard-scheduling-section";
+import { FlightType } from "../app/hooks";
 
 export default function SimulationConfigForm() {
   const [flights, setFlights] = useState([]);
+  const [hazards, setHazards] = useState([]);
+
+  const arrivalCallsigns = useMemo(
+    () =>
+      flights
+        .filter((flight) => flight.type === FlightType.ARRIVAL)
+        .map((flight) => flight.callsign),
+    [flights],
+  );
 
   return (
     <Stack maw={980} mx="auto" p="xl" gap="lg">
       <div>
         <Title order={1}>Airport Simulator</Title>
-        <Text c="dimmed">Configuration view · Ticket 1 only</Text>
+        <Text c="dimmed">Configuration view · Ticket 1 + Ticket 2</Text>
       </div>
 
       <Card withBorder radius="md" p="lg">
@@ -24,6 +35,23 @@ export default function SimulationConfigForm() {
 
           <Text size="sm" c="dimmed">
             Scheduled flights in state: {flights.length}
+          </Text>
+        </Stack>
+      </Card>
+
+      <Card withBorder radius="md" p="lg">
+        <Stack>
+          <Badge variant="light" w="fit-content">
+            Hazards scheduling
+          </Badge>
+
+          <HazardSchedulingSection
+            onHazardsChange={setHazards}
+            arrivalCallsigns={arrivalCallsigns}
+          />
+
+          <Text size="sm" c="dimmed">
+            Scheduled hazards in state: {hazards.length}
           </Text>
         </Stack>
       </Card>
