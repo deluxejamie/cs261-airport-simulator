@@ -144,9 +144,9 @@ export const useAdvancedConfig = () => {
 };
 
 export const useFlightSchedule = () => {
-	const [flights] = useMap();
+	const flights = useMap();
 	const [flightNumber, { increment: incrementFlightNumber }] = useCounter(0);
-	const addDepartureFlight = (operator, expected_departure_time) => {
+	const addDepartureFlight = (operator, expected_departure_time, repeating) => {
 		if (
 			typeof operator != "string" ||
 			!isNaturalNumber(expected_departure_time)
@@ -156,10 +156,20 @@ export const useFlightSchedule = () => {
 			// todo: generate observed departure time using normal distribution
 			observed_departure_time = 0;
 		}
+
+		if (
+			repeating != undefined &&
+			(!repeating.hasOwnProperty("start") ||
+				!repeating.hasOwnProperty("end") ||
+				!repeating.hasOwnProperty("period"))
+		)
+			throw Error("Invalid repeating data");
+
 		const flight = {
 			callsign: operator.toUpperCase() + "-" + flightNumber.toString(),
 			expected_departure_time,
 			observed_departure_time,
+			repeating,
 		};
 		const res = flights.set(flight.callsign, flight);
 		incrementFlightNumber();
@@ -172,6 +182,7 @@ export const useFlightSchedule = () => {
 		remaining_fuel_mins,
 		expected_arrival_time,
 		observed_arrival_time,
+		repeating,
 	) => {
 		if (
 			typeof operator != "string" ||
@@ -185,12 +196,22 @@ export const useFlightSchedule = () => {
 			// todo: generate observed arrival time
 			observed_arrival_time = 0;
 		}
+
+		if (
+			repeating != undefined &&
+			(!repeating.hasOwnProperty("start") ||
+				!repeating.hasOwnProperty("end") ||
+				!repeating.hasOwnProperty("period"))
+		)
+			throw Error("Invalid repeating data");
+
 		const flight = {
 			callsign: operator.toUpperCase() + "-" + flightNumber.toString(),
 			expected_arrival_time,
 			observed_arrival_time,
 			emergency_status,
 			remaining_fuel_mins,
+			repeating,
 		};
 		const res = flights.set(flight.callsign, flight);
 		incrementFlightNumber();
@@ -206,8 +227,7 @@ export const useFlightSchedule = () => {
 	return {
 		/**
 		 * A map from callsign (can be used as a key) to the schedule data
-		 * @type {Map<String,{type: FlightType.ARRIVAL, callsign: String, expected_arrival_time:Number, observed_arrival_time: Number, emergency_status: EmergencyStatus, remaining_fuel_mins: Number}
-		 * | { type: FlightType.DEPARTURE, callsign: String, expected_departure_time:Number, observed_departure_time:Number}>}
+		 * @type {Map<String,{type: FlightType.ARRIVAL, callsign: String, expected_arrival_time:Number, observed_arrival_time: Number, emergency_status: EmergencyStatus, remaining_fuel_mins: Number, repeating?:{ start: Number, end: Number, period: Number}} | { type: FlightType.DEPARTURE, callsign: String, expected_departure_time:Number, observed_departure_time:Number, repeating?:{ start: Number, end: Number, period: Number}}>}
 		 * @see https://mantine.dev/hooks/use-map/ I would recommend using these docs to see how to display the flight schedule. Use the callsign as a key.
 		 */
 		flights,
@@ -217,6 +237,7 @@ export const useFlightSchedule = () => {
 		 * @param {String} operator The aircraft's operator e.g. EASYJET
 		 * @param {Number} expected_departure_time The expected departure time (mins from start of simulation) when this plane should depart
 		 * @param {Number} observed_departure_time [OPTIONAL] The observed departure time (mins from the start of the simulation) when this plane should depart. If not provided, will be generated using normal dist from expected.
+		 * @param {{ start: Number, end: Number, period: Number} | undefined} repeating [OPTIONAL] If the flight is repeating, provide the start and end of the repetition interval as well as the period (how frequently) this flight should repeat
 		 */
 		addDepartureFlight,
 
@@ -227,13 +248,16 @@ export const useFlightSchedule = () => {
 		 * @param {Number} remaining_fuel_mins The number of minutes remaining before this flight has no fuel
 		 * @param {Number} expected_arrival_time The expected arrival time (mins from start of simulation) when this plane should arrive
 		 * @param {Number} observed_arrival_time [OPTIONAL] The observed arrival time (mins from the start of the simulation) when this plane should arrive. If not provided, will be generated using normal dist from expected.
+		 * @param {{ start: Number, end: Number, period: Number} | undefined} repeating [OPTIONAL] If the flight is repeating, provide the start and end of the repetition interval as well as the period (how frequently) this flight should repeat
 		 */
 		addArrivalFlight,
 		/**
-		 * @param {String} callsign
+		 * @param {String} callsign The callsign of the flight to remove
 		 */
 		removeFlight,
 	};
 };
 
-export const useHazardSchedule = () => {};
+export const useHazardSchedule = () => {
+	const hazards = useMap();
+};
