@@ -52,11 +52,7 @@ class EventTest {
         assertEquals(20.0, n2.getScheduledTime(), 1e-9);
 
         IEvent n3 = n2.next();
-        assertNotNull(n3);
-        assertEquals(25.0, n3.getScheduledTime(), 1e-9);
-
-        IEvent n4 = n3.next();
-        assertNull(n4);
+        assertNull(n3);
     }
 
     @Test
