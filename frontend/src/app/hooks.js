@@ -326,7 +326,7 @@ export const useHazardSchedule = () => {
 		)
 			throw new Error("Emergency event must target a valid arrival callsign");
 		if (typeof time !== "number") throw new Error("Emergency time is invalid");
-		if (!isValueInEnum(emergencyType, EmergencyStatusWithoutNone)) {
+		if (!isValueInEnum(EmergencyStatusWithoutNone, emergencyType)) {
 			throw new Error("Invalid emergency status");
 		}
 
@@ -377,7 +377,7 @@ export const useHazardSchedule = () => {
 		 */
 		addRunwayClosureHazard,
 		/**
-		 * Adds an emergency event hazard to the schedule
+		 * Adds an emergency event hazard to the schedule. Note that this sort of hazard is not schedulable for repeating flights and sanitisation should be included to ensure this
 		 * @param {String} arrivalCallsign The callsign of the aircraft to add the emergency event to (sanitisation is not included)
 		 * @param {EmergencyStatusWithoutNone} emergencyType The type of emergency which the aircraft will experience
 		 * @param {Number} time The time (in minutes after the simulation starts) after which the emergency event will be applied if the plane hasn't already landed (sanitisation is not included)
