@@ -26,6 +26,24 @@ const DEFAULT_MAX_WAIT_MINUTES_BEFORE_TAKEOFF = 10;
 const DEFAULT_FUEL_MINUTES_THRESHOLD_BEFORE_DIVERTED = 10;
 const DEFAULT_MINUTES_TAKEN_FOR_TAKEOFF = 5;
 const DEFAULT_MINUTES_TAKEN_FOR_LANDING = 5;
+const STD_DEV_OBSERVATIONS_MINS = 5;
+
+/**
+ * @param {Number} mean The mean to generate a sample about
+ * @param {Number} stdDev The standard deviation to generate a sample wiht
+ * @returns {Number} A normally distributed sample
+ */
+const normalSample = (mean, stdDev) => {
+	// See reference: https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+	let u = 0;
+	let v = 0;
+
+	while (u === 0) u = Math.random();
+	while (v === 0) v = Math.random();
+
+	const gaussian = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+	return Math.round(mean + gaussian * stdDev);
+};
 
 // References used:
 // https://react.dev/reference/react/useReducer#adding-a-reducer-to-a-component
@@ -159,7 +177,10 @@ export const useFlightSchedule = () => {
 			throw Error("Invalid input parameters");
 		if (!isNaturalNumber(observed_departure_time)) {
 			// todo: generate observed departure time using normal distribution
-			observed_departure_time = 0;
+			observed_departure_time = normalSample(
+				expected_departure_time,
+				STD_DEV_OBSERVATIONS_MINS,
+			);
 		}
 
 		if (
@@ -199,7 +220,10 @@ export const useFlightSchedule = () => {
 
 		if (!isNaturalNumber(observed_arrival_time)) {
 			// todo: generate observed arrival time
-			observed_arrival_time = 0;
+			observed_arrival_time = normalSample(
+				expected_arrival_time,
+				STD_DEV_OBSERVATIONS_MINS,
+			);
 		}
 
 		if (
