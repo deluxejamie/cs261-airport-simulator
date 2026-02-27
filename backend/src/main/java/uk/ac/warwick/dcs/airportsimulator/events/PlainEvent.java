@@ -3,19 +3,18 @@ package uk.ac.warwick.dcs.airportsimulator.events;
 
 /**
  * Event class
- *
- * Allows an action to be run every interval unit of time until the endTime 
+ * Allows an action to be run every interval unit of time until the endTime
  * is reached.
  */
-public class Event {
-
+public class PlainEvent implements IEvent
+{
     /**
-     * Constructs a one time event 
+     * Constructs a one time event
      *
      * @param scheduledTime the time this event should run
-     * @param action        the action this event should execute 
+     * @param action        the action this event should execute
      */
-    Event(int scheduledTime, Runnable action)
+    PlainEvent(int scheduledTime, Runnable action)
     {
         this(scheduledTime, 0, 0, action);
     }
@@ -28,8 +27,7 @@ public class Event {
      * @param endTime       the end time for this recurring event
      * @param action        the action this event should execute
      */
-    Event(int scheduledTime, int interval, int endTime, Runnable action)
-    {
+    PlainEvent(int scheduledTime, int interval, int endTime, Runnable action) {
         this.scheduledTime = scheduledTime;
         this.interval = interval;
         this.endTime = endTime;
@@ -41,16 +39,16 @@ public class Event {
      *
      * @return if event is recurring
      */
-    public boolean isRecurring()
-    {
+    @Override
+    public boolean isRecurring() {
         return this.interval > 0;
     }
 
     /**
      * Executes the event
      */
-    public void execute()
-    {
+    @Override
+    public void execute() {
         action.run();
     }
 
@@ -59,8 +57,8 @@ public class Event {
      *
      * @return the next scheduled time
      */
-    public int getScheduledTime()
-    {
+    @Override
+    public int getScheduledTime() {
         return scheduledTime;
     }
 
@@ -70,19 +68,20 @@ public class Event {
      *
      * @return the next event (or null)
      */
-    public Event next()
-    {
+    @Override
+    public IEvent next() {
         final int nextTime = scheduledTime + interval;
-        if (nextTime > endTime) return null;
-        return new Event(nextTime, interval, endTime, action);
+        if (nextTime >= endTime) return null;
+        return new PlainEvent(nextTime, interval, endTime, action);
     }
+
 
     /* Event scheduled time */
     final int scheduledTime;
 
     /* Event interval */
     final int interval;
-    
+
     /* Event end time */
     final int endTime;
 

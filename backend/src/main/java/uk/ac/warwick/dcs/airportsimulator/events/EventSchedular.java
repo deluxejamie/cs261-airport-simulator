@@ -14,7 +14,7 @@ public class EventSchedular {
      */
     public EventSchedular()
     {
-        this.events = new PriorityQueue<Event>(
+        this.events = new PriorityQueue<IEvent>(
             (a,b) -> Double.compare(a.getScheduledTime(), b.getScheduledTime())
         );
     }
@@ -24,7 +24,7 @@ public class EventSchedular {
      *
      * @param e Event to add
      */
-    public void addEvent(Event e)
+    public void addEvent(IEvent e)
     {
         events.add(e);
     }
@@ -39,14 +39,14 @@ public class EventSchedular {
     {
         while (!events.isEmpty() && events.peek().getScheduledTime() <= simTime)
         {
-            final Event e = events.remove();
+            final IEvent e = events.remove();
             e.execute();
 
-            final Event next = e.next();
+            final IEvent next = e.next();
             if (next != null) events.add(next);
         }
     }
 
     /* Stores events in the correct ordering */
-    private final PriorityQueue<Event> events;
+    private final PriorityQueue<IEvent> events;
 }
