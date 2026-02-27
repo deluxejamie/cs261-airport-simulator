@@ -101,7 +101,7 @@ export const useAdvancedConfig = () => {
 		if (!isNaturalNumber(val)) {
 			throw Error("Improper argument provided");
 		}
-		setConfig({ setFuelThresholdBeforeRedirected: val });
+		setConfig({ fuelThresholdBeforeRedirected: val });
 	};
 
 	const setTimeTakenForTakeoff = (val) => {
@@ -146,7 +146,12 @@ export const useAdvancedConfig = () => {
 export const useFlightSchedule = () => {
 	const flights = useMap();
 	const [flightNumber, { increment: incrementFlightNumber }] = useCounter(0);
-	const addDepartureFlight = (operator, expected_departure_time, repeating) => {
+	const addDepartureFlight = (
+		operator,
+		expected_departure_time,
+		observed_departure_time,
+		repeating,
+	) => {
 		if (
 			typeof operator != "string" ||
 			!isNaturalNumber(expected_departure_time)
@@ -236,7 +241,7 @@ export const useFlightSchedule = () => {
 		 * Add a new departure flight to the schedule
 		 * @param {String} operator The aircraft's operator e.g. EASYJET
 		 * @param {Number} expected_departure_time The expected departure time (mins from start of simulation) when this plane should depart
-		 * @param {Number} observed_departure_time [OPTIONAL] The observed departure time (mins from the start of the simulation) when this plane should depart. If not provided, will be generated using normal dist from expected.
+		 * @param {Number | undefined} observed_departure_time [OPTIONAL] The observed departure time (mins from the start of the simulation) when this plane should depart. If not provided, will be generated using normal dist from expected.
 		 * @param {{ start: Number, end: Number, period: Number} | undefined} repeating [OPTIONAL] If the flight is repeating, provide the start and end of the repetition interval as well as the period (how frequently) this flight should repeat
 		 */
 		addDepartureFlight,
@@ -247,7 +252,7 @@ export const useFlightSchedule = () => {
 		 * @param {valueof EmergencyStatus} emergency_status The emergency status of this flight
 		 * @param {Number} remaining_fuel_mins The number of minutes remaining before this flight has no fuel
 		 * @param {Number} expected_arrival_time The expected arrival time (mins from start of simulation) when this plane should arrive
-		 * @param {Number} observed_arrival_time [OPTIONAL] The observed arrival time (mins from the start of the simulation) when this plane should arrive. If not provided, will be generated using normal dist from expected.
+		 * @param {Number | undefined} observed_arrival_time [OPTIONAL] The observed arrival time (mins from the start of the simulation) when this plane should arrive. If not provided, will be generated using normal dist from expected.
 		 * @param {{ start: Number, end: Number, period: Number} | undefined} repeating [OPTIONAL] If the flight is repeating, provide the start and end of the repetition interval as well as the period (how frequently) this flight should repeat
 		 */
 		addArrivalFlight,
