@@ -22,7 +22,7 @@ class AircraftTest {
 
         // Act
         Aircraft a = new Aircraft(
-                callSign, operator, origin, destination,
+                callSign, origin, destination,
                 scheduledTime, altitude, groundSpeed,
                 initialFuel, emergencyStatus, timeAddedToSim
         );
@@ -30,7 +30,6 @@ class AircraftTest {
         // Assert (all getters)
         assertAll(
                 () -> assertEquals(callSign, a.getCallSign()),
-                () -> assertEquals(operator, a.getOperator()),
                 () -> assertEquals(origin, a.getOrigin()),
                 () -> assertEquals(destination, a.getDestination()),
                 () -> assertEquals(scheduledTime, a.getScheduledTime(), 1e-9),
@@ -44,7 +43,7 @@ class AircraftTest {
     @Test
     void getFuelRemaining_shouldReturnInitialFuelAtTimeAdded() {
         Aircraft a = new Aircraft(
-                "CS1", "OP", "AAA", "BBB",
+                "CS1",  "AAA", "BBB",
                 0, 0, 0,
                 100, EmergencyStatus.NONE, 10
         );
@@ -57,7 +56,7 @@ class AircraftTest {
     void getFuelRemaining_shouldDecreaseLinearlyWithTime() {
         // initialFuel=100, burn=2 per unit time, added at t=10
         Aircraft a = new Aircraft(
-                "CS2", "OP", "AAA", "BBB",
+                "CS2", "AAA", "BBB",
                 0, 0, 0,
                 100,  EmergencyStatus.NONE, 10
         );
@@ -73,7 +72,7 @@ class AircraftTest {
     void isFuelCritical_shouldBeFalseWhenFuelIsExactly10() {
         // fuel critical condition is: getFuelRemaining(simTime) < 10
         Aircraft a = new Aircraft(
-                "CS3", "OP", "AAA", "BBB",
+                "CS3",  "AAA", "BBB",
                 0, 0, 0,
                 20, EmergencyStatus.NONE, 0
         );
@@ -86,7 +85,7 @@ class AircraftTest {
     @Test
     void isFuelCritical_shouldBeTrueWhenFuelDropsBelow10() {
         Aircraft a = new Aircraft(
-                "CS4", "OP", "AAA", "BBB",
+                "CS4",  "AAA", "BBB",
                 0, 0, 0,
                 20, EmergencyStatus.NONE, 0
         );

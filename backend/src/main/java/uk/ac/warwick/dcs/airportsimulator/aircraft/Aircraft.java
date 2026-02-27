@@ -9,7 +9,6 @@ public class Aircraft {
      * Constructs a new Aircraft with specified information
      *
      * @param callSign        the aircraft's callSign
-     * @param operator        the aircraft's operator
      * @param origin          the aircraft's origin
      * @param destination     the aircraft's destination
      * @param scheduledTime   the aircraft's scheduledTime
@@ -19,9 +18,8 @@ public class Aircraft {
      * @param emergencyStatus the aircraft's emergencyStatus
      * @param timeAddedToSim  the time the aircraft was added to the sim 
      */
-    Aircraft(String callSign, String operator, String origin, String destination, int scheduledTime, int altitude, int groundSpeed, int initialFuel, EmergencyStatus emergencyStatus, int timeAddedToSim) {
+    Aircraft(String callSign, String origin, String destination, int scheduledTime, int altitude, int groundSpeed, int initialFuel, EmergencyStatus emergencyStatus, int timeAddedToSim) {
         this.callSign = callSign;
-        this.operator = operator;
         this.origin = origin;
         this.destination = destination;
         this.scheduledTime = scheduledTime;
@@ -67,14 +65,6 @@ public class Aircraft {
      */
     public String getCallSign() {
         return callSign;
-    }
-
-    /**
-     * Gets the aircaft's operator
-     * @return the aircraft's operator
-     */
-    public String getOperator() {
-        return operator;
     }
 
     /**
@@ -130,9 +120,6 @@ public class Aircraft {
 
     /* The aircraft's callSign */
     private final String callSign;
-
-    /* The aircraft's operator */
-    private final String operator;
 
     /* The aircraft's origin */
     private final String origin;
