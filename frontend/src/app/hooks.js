@@ -181,7 +181,7 @@ export const useFlightSchedule = () => {
 
 		if (
 			repeating != undefined &&
-			!objectHasProperties("repeating", "end", "period")
+			!objectHasProperties(repeating, "end", "period")
 		)
 			throw Error("Invalid repeating data");
 
@@ -215,7 +215,7 @@ export const useFlightSchedule = () => {
 		if (typeof seed != "number") seed = generateAircraftSeed();
 		if (
 			repeating != undefined &&
-			!objectHasProperties("repeating", "end", "period")
+			!objectHasProperties(repeating, "end", "period")
 		)
 			throw Error("Invalid repeating data");
 
@@ -334,7 +334,7 @@ export const useHazardSchedule = () => {
 			id: hazardCounter,
 			type: HazardType.EMERGENCY_EVENT,
 			target_arrival_callsign: arrivalCallsign,
-			time: N,
+			time,
 		};
 
 		const res = hazards.set(hazardCounter, hazard);
