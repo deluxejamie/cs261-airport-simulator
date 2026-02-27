@@ -13,19 +13,18 @@ class AircraftTest {
         String operator = "British Airways";
         String origin = "LHR";
         String destination = "EDI";
-        double scheduledTime = 100.0;
+        int scheduledTime = 100;
         int altitude = 30000;
         int groundSpeed = 450;
-        double initialFuel = 120.0;
-        double fuelBurnRate = 2.0;
+        int initialFuel = 120;
         EmergencyStatus emergencyStatus = EmergencyStatus.NONE;
-        double timeAddedToSim = 50.0;
+        int timeAddedToSim = 50;
 
         // Act
         Aircraft a = new Aircraft(
                 callSign, operator, origin, destination,
                 scheduledTime, altitude, groundSpeed,
-                initialFuel, fuelBurnRate, emergencyStatus, timeAddedToSim
+                initialFuel, emergencyStatus, timeAddedToSim
         );
 
         // Assert (all getters)
@@ -38,7 +37,7 @@ class AircraftTest {
                 () -> assertEquals(altitude, a.getAltitude()),
                 () -> assertEquals(groundSpeed, a.getGroundSpeed()),
                 () -> assertEquals(emergencyStatus, a.getEmergencyStatus()),
-                () -> assertEquals(timeAddedToSim, a.getTimeAddedToSim(), 1e-9)
+                () -> assertEquals(initialFuel, a.getInitialFuel(), 1e-9)
         );
     }
 
@@ -46,12 +45,12 @@ class AircraftTest {
     void getFuelRemaining_shouldReturnInitialFuelAtTimeAdded() {
         Aircraft a = new Aircraft(
                 "CS1", "OP", "AAA", "BBB",
-                0.0, 0, 0,
-                100.0, 5.0, EmergencyStatus.NONE, 10.0
+                0, 0, 0,
+                100, EmergencyStatus.NONE, 10
         );
 
         // simTime == timeAddedToSim => fuelRemaining == initialFuel
-        assertEquals(100.0, a.getFuelRemaining(10.0), 1e-9);
+        assertEquals(100.0, a.getFuelRemaining(10), 1e-9);
     }
 
     @Test
@@ -59,15 +58,15 @@ class AircraftTest {
         // initialFuel=100, burn=2 per unit time, added at t=10
         Aircraft a = new Aircraft(
                 "CS2", "OP", "AAA", "BBB",
-                0.0, 0, 0,
-                100.0, 2.0, EmergencyStatus.NONE, 10.0
+                0, 0, 0,
+                100,  EmergencyStatus.NONE, 10
         );
 
-        // at t=15 => 100 - 2*(15-10) = 90
-        assertEquals(90.0, a.getFuelRemaining(15.0), 1e-9);
+        // at t=15 => 100 - 1*(15-10) = 95
+        assertEquals(95.0, a.getFuelRemaining(15));
 
-        // at t=25 => 100 - 2*(25-10) = 70
-        assertEquals(70.0, a.getFuelRemaining(25.0), 1e-9);
+        // at t=25 => 100 - 1*(25-10) = 85
+        assertEquals(85.0, a.getFuelRemaining(25));
     }
 
     @Test
@@ -75,25 +74,25 @@ class AircraftTest {
         // fuel critical condition is: getFuelRemaining(simTime) < 10
         Aircraft a = new Aircraft(
                 "CS3", "OP", "AAA", "BBB",
-                0.0, 0, 0,
-                20.0, 1.0, EmergencyStatus.NONE, 0.0
+                0, 0, 0,
+                20, EmergencyStatus.NONE, 0
         );
 
         // at t=10 => 20 - 1*(10-0)=10 => NOT critical (strictly < 10)
-        assertFalse(a.isFuelCritical(10.0));
-        assertEquals(10.0, a.getFuelRemaining(10.0), 1e-9);
+        assertFalse(a.isFuelCritical(10));
+        assertEquals(10.0, a.getFuelRemaining(10), 1e-9);
     }
 
     @Test
     void isFuelCritical_shouldBeTrueWhenFuelDropsBelow10() {
         Aircraft a = new Aircraft(
                 "CS4", "OP", "AAA", "BBB",
-                0.0, 0, 0,
-                20.0, 1.0, EmergencyStatus.NONE, 0.0
+                0, 0, 0,
+                20, EmergencyStatus.NONE, 0
         );
 
         // at t=10.1 => fuel = 9.9 => critical
-        assertTrue(a.isFuelCritical(10.1));
-        assertTrue(a.getFuelRemaining(10.1) < 10.0);
+        assertTrue(a.isFuelCritical(11));
+        assertTrue(a.getFuelRemaining(11) < 10.0);
     }
 }

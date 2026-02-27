@@ -15,12 +15,11 @@ public class Aircraft {
      * @param scheduledTime   the aircraft's scheduledTime
      * @param altitude        the aircraft's altitude
      * @param groundSpeed     the aircraft's groundSpeed
-     * @param initialFuel     the aircraft's initialFuel
-     * @param fuelBurnRate    the aircraft's fuelBurnRate
+     * @param initialFuel     the aircraft's initialFuel (in minutes)
      * @param emergencyStatus the aircraft's emergencyStatus
      * @param timeAddedToSim  the time the aircraft was added to the sim 
      */
-    Aircraft(String callSign, String operator, String origin, String destination, double scheduledTime, int altitude, int groundSpeed, double initialFuel, double fuelBurnRate, EmergencyStatus emergencyStatus, double simTime) {
+    Aircraft(String callSign, String operator, String origin, String destination, int scheduledTime, int altitude, int groundSpeed, int initialFuel, EmergencyStatus emergencyStatus, int timeAddedToSim) {
         this.callSign = callSign;
         this.operator = operator;
         this.origin = origin;
@@ -29,9 +28,8 @@ public class Aircraft {
         this.altitude = altitude;
         this.groundSpeed = groundSpeed;
         this.initialFuel = initialFuel;
-        this.fuelBurnRate = fuelBurnRate;
         this.emergencyStatus = emergencyStatus;
-        this.timeAddedToSim = simTime;
+        this.timeFuelRunsOut = initialFuel + timeAddedToSim;
     }
 
     /**
@@ -40,8 +38,8 @@ public class Aircraft {
      * @param simTime the current time in the sim
      * @return the fuel remaining
      */
-    public double getFuelRemaining(double simTime) {
-        return initialFuel - (fuelBurnRate * (simTime - timeAddedToSim));
+    public int getFuelRemaining(int simTime) {
+        return timeFuelRunsOut - simTime;
     }
 
     /**
@@ -50,8 +48,17 @@ public class Aircraft {
      * @param simTime the current time in the sim
      * @return if the fuel is critical
      */
-    public boolean isFuelCritical(double simTime) {
+    public boolean isFuelCritical(int simTime) {
         return getFuelRemaining(simTime) < 10;
+    }
+
+    /**
+     * Gets the aircraft's initial fuel when
+     * entering the simulation
+     * @return the initial fuel of the aircraft
+     */
+    public int getInitialFuel() {
+        return initialFuel;
     }
 
     /**
@@ -90,7 +97,7 @@ public class Aircraft {
      * Gets the aircaft's scheduled time
      * @return the aircraft's scheduled time
      */
-    public double getScheduledTime() {
+    public int getScheduledTime() {
         return scheduledTime;
     }
 
@@ -118,19 +125,8 @@ public class Aircraft {
         return emergencyStatus;
     }
 
-    /**
-     * Gets the time the aircraft awas added to the sim
-     * @return the time the aircraft was added to the sim
-     */
-    public double getTimeAddedToSim() {
-        return timeAddedToSim;
-    }
-
-    /* The aircraft's initialFuel */
-    private final double initialFuel;
-
-    /* The aircraft's fuelBurnRate */
-    private final double fuelBurnRate;
+    /* The aircraft's initialFuel (in minutes) */
+    private final int initialFuel;
 
     /* The aircraft's callSign */
     private final String callSign;
@@ -145,7 +141,7 @@ public class Aircraft {
     private final String destination;
 
     /* The aircraft's scheduledTime */
-    private final double scheduledTime;
+    private final int scheduledTime;
 
     /* The aircraft's altitude */
     private final int altitude;
@@ -156,6 +152,6 @@ public class Aircraft {
     /* The aircraft's emergencyStatus */
     private final EmergencyStatus emergencyStatus;
 
-    /* The time the aircraft was added to the sim */
-    private final double timeAddedToSim;
+    /* The time the aircraft has no fuel remaining */
+    private final int timeFuelRunsOut;
 }
