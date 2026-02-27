@@ -10,20 +10,20 @@ class EventTest {
 
     @Test
     void isRecurring_shouldBeFalseWhenIntervalIsZero() {
-        Event e = new Event(10.0, () -> {});
+        Event e = new Event(10, () -> {});
         assertFalse(e.isRecurring());
     }
 
     @Test
     void isRecurring_shouldBeTrueWhenIntervalGreaterThanZero() {
-        Event e = new Event(10.0, 5.0, 50.0, () -> {});
+        Event e = new Event(10, 5, 50, () -> {});
         assertTrue(e.isRecurring());
     }
 
     @Test
     void execute_shouldRunAction() {
         AtomicInteger counter = new AtomicInteger(0);
-        Event e = new Event(0.0, counter::incrementAndGet);
+        Event e = new Event(0, counter::incrementAndGet);
 
         e.execute();
 
@@ -32,14 +32,14 @@ class EventTest {
 
     @Test
     void next_shouldReturnNullForNonRecurringEvent() {
-        Event e = new Event(10.0, () -> {});
+        Event e = new Event(10, () -> {});
         assertNull(e.next());
     }
 
     @Test
     void next_shouldCreateNextEventUntilEndTime() {
         AtomicInteger counter = new AtomicInteger(0);
-        Event e = new Event(10.0, 5.0, 25.0, counter::incrementAndGet);
+        Event e = new Event(10, 5, 25, counter::incrementAndGet);
 
         Event n1 = e.next();
         assertNotNull(n1);

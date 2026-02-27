@@ -15,20 +15,20 @@ public class Event {
      * @param scheduledTime the time this event should run
      * @param action        the action this event should execute 
      */
-    Event(double scheduledTime, Runnable action)
+    Event(int scheduledTime, Runnable action)
     {
         this(scheduledTime, 0, 0, action);
     }
 
     /**
-     * Constructs a recuring event
+     * Constructs a recurring event
      *
      * @param scheduledTime the time this event should run
      * @param interval      the interval for this event
-     * @param endTime       the end time for this recuring event
+     * @param endTime       the end time for this recurring event
      * @param action        the action this event should execute
      */
-    Event(double scheduledTime, double interval, double endTime, Runnable action)
+    Event(int scheduledTime, int interval, int endTime, Runnable action)
     {
         this.scheduledTime = scheduledTime;
         this.interval = interval;
@@ -37,9 +37,9 @@ public class Event {
     }
 
     /**
-     * Returns if the event is a recuring event or not
+     * Returns if the event is a recurring event or not
      *
-     * @return if event is recuring
+     * @return if event is recurring
      */
     public boolean isRecurring()
     {
@@ -59,7 +59,7 @@ public class Event {
      *
      * @return the next scheduled time
      */
-    public double getScheduledTime()
+    public int getScheduledTime()
     {
         return scheduledTime;
     }
@@ -72,19 +72,19 @@ public class Event {
      */
     public Event next()
     {
-        final double nextTime = scheduledTime + interval;
+        final int nextTime = scheduledTime + interval;
         if (nextTime > endTime) return null;
         return new Event(nextTime, interval, endTime, action);
     }
 
     /* Event scheduled time */
-    final double scheduledTime;
+    final int scheduledTime;
 
     /* Event interval */
-    final double interval;
+    final int interval;
     
     /* Event end time */
-    final double endTime;
+    final int endTime;
 
     /* Event action */
     final Runnable action;

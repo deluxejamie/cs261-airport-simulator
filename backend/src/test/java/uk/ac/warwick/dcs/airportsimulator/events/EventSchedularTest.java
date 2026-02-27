@@ -14,17 +14,17 @@ class EventSchedularTest {
 
         AtomicInteger counter = new AtomicInteger(0);
 
-        s.addEvent(new Event(10.0, counter::incrementAndGet));
+        s.addEvent(new Event(10, counter::incrementAndGet));
 
-        s.addEvent(new Event(5.0, counter::incrementAndGet));
+        s.addEvent(new Event(5, counter::incrementAndGet));
 
-        s.step(4.9);
+        s.step(4);
         assertEquals(0, counter.get());
 
-        s.step(5.0);
+        s.step(5);
         assertEquals(1, counter.get());
 
-        s.step(10.0);
+        s.step(10);
         assertEquals(2, counter.get());
     }
 
@@ -34,18 +34,18 @@ class EventSchedularTest {
 
         AtomicInteger counter = new AtomicInteger(0);
 
-        s.addEvent(new Event(0.0, 5.0, 15.0, counter::incrementAndGet));
+        s.addEvent(new Event(0, 5, 15, counter::incrementAndGet));
 
-        s.step(0.0);
+        s.step(0);
         assertEquals(1, counter.get());
 
-        s.step(5.0);
+        s.step(5);
         assertEquals(2, counter.get());
 
-        s.step(15.0);
+        s.step(15);
         assertEquals(4, counter.get());
 
-        s.step(20.0);
+        s.step(20);
         assertEquals(4, counter.get());
     }
 }

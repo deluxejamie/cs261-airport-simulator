@@ -10,7 +10,7 @@ import java.util.PriorityQueue;
 public class EventSchedular {
 
     /**
-     * Constructs a empty EventSchedular
+     * Constructs an empty EventSchedular
      */
     public EventSchedular()
     {
@@ -35,7 +35,7 @@ public class EventSchedular {
      *
      * @param simTime the current simTime
      */
-    public void step(double simTime)
+    public void step(int simTime)
     {
         while (!events.isEmpty() && events.peek().getScheduledTime() <= simTime)
         {
@@ -48,5 +48,5 @@ public class EventSchedular {
     }
 
     /* Stores events in the correct ordering */
-    private PriorityQueue<Event> events;
+    private final PriorityQueue<Event> events;
 }
