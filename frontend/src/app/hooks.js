@@ -78,7 +78,7 @@ export const useRunways = () => {
 	};
 
 	const resetRunways = () => {
-		return setState([]);
+		return valuesSet([]);
 	};
 
 	return {
