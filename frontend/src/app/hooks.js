@@ -53,9 +53,10 @@ const DEFAULT_MINUTES_TAKEN_FOR_LANDING = 5;
 // https://mantine.dev/hooks
 
 export const useRunways = () => {
-	const [values, { append: valuesAppend, filter: valuesFilter }] = useListState(
-		[],
-	);
+	const [
+		values,
+		{ append: valuesAppend, filter: valuesFilter, setState: valuesSet },
+	] = useListState([]);
 	const [counter, { increment: incrementCounter }] = useCounter(0);
 
 	const addRunway = (mode) => {
@@ -74,6 +75,10 @@ export const useRunways = () => {
 		if (res.length == sizebefore)
 			throw Error("Attempted to remove a runway which does not exist");
 		return res;
+	};
+
+	const resetRunways = () => {
+		return setState([]);
 	};
 
 	return {
@@ -96,6 +101,10 @@ export const useRunways = () => {
 		 * @param {Number} id The id of the runway to remove
 		 */
 		removeRunway,
+		/**
+		 * Removes all of the runways from the hook
+		 */
+		resetRunways,
 	};
 };
 
@@ -139,6 +148,16 @@ export const useAdvancedConfig = () => {
 		}
 		setConfig({ timeTakenForLanding: val });
 	};
+
+	const resetAdvancedConfig = () => {
+		return setConfig({
+			maxDelayBeforeCancelled: DEFAULT_MAX_WAIT_MINUTES_BEFORE_TAKEOFF,
+			fuelThresholdBeforeRedirected:
+				DEFAULT_FUEL_MINUTES_THRESHOLD_BEFORE_DIVERTED,
+			timeTakenForTakeoff: DEFAULT_MINUTES_TAKEN_FOR_TAKEOFF,
+			timeTakenForLanding: DEFAULT_MINUTES_TAKEN_FOR_LANDING,
+		});
+	};
 	return {
 		/**
 		 * @type {{maxDelayBeforeCancelled: Number, fuelThresholdBeforeRedirected: Number, timeTakenForTakeoff: Number, timeTakenForLanding: Number}}
@@ -160,6 +179,10 @@ export const useAdvancedConfig = () => {
 		 * @param {Number} val The time taken for a flight to land in minutes
 		 */
 		setTimeTakenForLanding,
+		/**
+		 * Resets the advanced config to the default state
+		 */
+		resetAdvancedConfig,
 	};
 };
 
@@ -240,6 +263,10 @@ export const useFlightSchedule = () => {
 		return found;
 	};
 
+	const resetFlightSchedule = () => {
+		return flights.clear();
+	};
+
 	return {
 		/**
 		 * A map from callsign (can be used as a key) to the schedule data
@@ -271,6 +298,11 @@ export const useFlightSchedule = () => {
 		 * @param {String} callsign The callsign of the flight to remove
 		 */
 		removeFlight,
+
+		/**
+		 * Resets the flight schedule to the default state
+		 */
+		resetFlightSchedule,
 	};
 };
 
@@ -361,6 +393,9 @@ export const useHazardSchedule = () => {
 		return;
 	};
 
+	const resetHazardSchedule = () => {
+		return hazards.clear();
+	};
 	return {
 		/**
 		 * A map from hazard id (can be used as a key) to the hazard schedule data
@@ -394,6 +429,11 @@ export const useHazardSchedule = () => {
 		 * @param {String} callsign The callsign of the aircraft to remove from the hazard schedule
 		 */
 		removeHazardsForAircraft,
+
+		/**
+		 * Resets the hazard schedule to the default state
+		 */
+		resetHazardSchedule,
 	};
 };
 
@@ -410,17 +450,24 @@ export const ConfigProvider = ({ children }) => {
 		addEmergencyEventHazard,
 		removeHazard,
 		removeHazardsForAircraft,
+		resetHazardSchedule,
 	} = useHazardSchedule();
-	const { flights, addDepartureFlight, addArrivalFlight, removeFlight } =
-		useFlightSchedule();
+	const {
+		flights,
+		addDepartureFlight,
+		addArrivalFlight,
+		removeFlight,
+		resetFlightSchedule,
+	} = useFlightSchedule();
 	const {
 		advancedConfig,
 		setMaxDelayBeforeCancelled,
 		setFuelThresholdBeforeRedirected,
 		setTimeTakenForLanding,
 		setTimeTakenForTakeoff,
+		resetAdvancedConfig,
 	} = useAdvancedConfig();
-	const { runways, addRunway, removeRunway } = useRunways();
+	const { runways, addRunway, removeRunway, resetRunways } = useRunways();
 
 	// References used: https://www.w3schools.com/react/react_usecontext.asp
 	return (
@@ -431,18 +478,22 @@ export const ConfigProvider = ({ children }) => {
 				addEmergencyEventHazard,
 				removeHazard,
 				removeHazardsForAircraft,
+				resetHazardSchedule,
 				flights,
 				addDepartureFlight,
 				addArrivalFlight,
 				removeFlight,
+				resetFlightSchedule,
 				advancedConfig,
 				setMaxDelayBeforeCancelled,
 				setFuelThresholdBeforeRedirected,
 				setTimeTakenForLanding,
 				setTimeTakenForTakeoff,
+				resetAdvancedConfig,
 				runways,
 				addRunway,
 				removeRunway,
+				resetRunways,
 			}}
 		>
 			{children}
