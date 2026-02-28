@@ -2,6 +2,7 @@ package uk.ac.warwick.dcs.airportsimulator.runway;
 
 import org.junit.jupiter.api.Test;
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
+import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +16,12 @@ class RunwayTest {
         double bearing = 90.0;
         RunwayMode mode = RunwayMode.LANDING;
         RunwayStatus status = RunwayStatus.AVAILABLE;
-        Aircraft occupied = new Aircraft();
+        Aircraft occupied = new Aircraft(
+                "CS3",  "AAA", "BBB",
+                0, 0, 0,
+                20, EmergencyStatus.NONE, 0
+        );
+
 
         // Act
         Runway runway = new Runway(runwayNumber, length, bearing, mode, status, occupied);
@@ -54,8 +60,18 @@ class RunwayTest {
         Runway runway = new Runway(3, 2500.0, 270.0,
                 RunwayMode.TAKE_OFF, RunwayStatus.AVAILABLE, null);
 
-        Aircraft a1 = new Aircraft();
-        Aircraft a2 = new Aircraft();
+        Aircraft a1 = new Aircraft(
+                "CS3",  "AAA", "BBB",
+                0, 0, 0,
+                20, EmergencyStatus.NONE, 0
+        );
+
+        Aircraft a2 = new Aircraft(
+                "CS2", "AAA", "BBB",
+                0, 0, 0,
+                100,  EmergencyStatus.NONE, 10
+        );
+
 
         runway.setOccupied(a1);
         assertSame(a1, runway.getOccupied());
@@ -74,7 +90,13 @@ class RunwayTest {
 
         runway.setMode(RunwayMode.MIXED_MODE);
         runway.setStatus(RunwayStatus.RUNWAY_INSPECTION);
-        runway.setOccupied(new Aircraft());
+        runway.setOccupied(
+                new Aircraft(
+                        "CS4",  "AAA", "BBB",
+                        0, 0, 0,
+                        20, EmergencyStatus.NONE, 0
+                )
+        );
 
         assertAll(
                 () -> assertEquals(RunwayMode.MIXED_MODE, runway.getMode()),
