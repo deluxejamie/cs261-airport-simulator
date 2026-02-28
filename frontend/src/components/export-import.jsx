@@ -1,9 +1,16 @@
 "use client";
 import { Button, FileButton, Flex } from "@mantine/core";
-import { IconDownload } from "@tabler/icons-react";
+import { IconDownload, IconExclamationCircleFilled } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext, useRef } from "react";
 import { ConfigContext } from "@/app/hooks";
+import { showNotification } from "@mantine/notifications";
+
+const notificationErrorOptions = {
+	autoClose: 3000,
+	color: "#ff0000",
+	icon: <IconExclamationCircleFilled size={18} />,
+};
 
 export default function ExportImportButtons() {
 	const {
@@ -39,13 +46,27 @@ export default function ExportImportButtons() {
 						// See reference: https://developer.mozilla.org/en-US/docs/Web/API/FileReader
 						const fileReader = new FileReader();
 						fileReader.onload = () => {
-							const data = fileReader.result;
-							// parse data using methods
+							try {
+								const data = JSON.parse(fileReader.result);
+								// parse data using methods
+							} catch (e) {
+								showNotification({
+									...notificationErrorOptions,
+									message:
+										"The provided configuration file was invalid. Please upload a valid configuration file or contact your system administrator.",
+								});
+							}
+
+							importLoadStop();
 						};
 						fileReader.readAsText(file);
 					} catch (e) {
-						// todo: display friendly err message
 						console.log(e);
+						showNotification({
+							...notificationErrorOptions,
+							message:
+								"Unable to parse configuration file. Please select a valid file or contact your system administrator.",
+						});
 						importLoadStop();
 					}
 					resetRef.current?.();
