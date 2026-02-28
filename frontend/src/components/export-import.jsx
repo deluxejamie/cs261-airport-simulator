@@ -1,68 +1,25 @@
 "use client";
-import { Button, FileButton, Flex } from "@mantine/core";
+import { Button, Flex } from "@mantine/core";
 import { IconDownload } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import { useContext, useRef } from "react";
-import { ConfigContext } from "@/app/hooks";
 
-export default function ExportImportButtons() {
-	const {
-		runways,
-		advancedConfig,
-		flights,
-		hazards,
-		addRunway,
-		setMaxDelayedBeforeCancelled,
-		setFuelThresholdBeforeRedirected,
-		setTimeTakenForTakeoff,
-		setTimeTakenForLanding,
-		addArrivalFlight,
-		addDepartureFlight,
-		addRunwayClosureHazard,
-		addEmergencyEventHazard,
-	} = useContext(ConfigContext);
+export default function ExportImportButtons({
+	runways,
+	advancedConfig,
+	flights,
+	hazards,
+}) {
+	const [exportLoading, { open, close }] = useDisclosure();
 
-	const [importLoading, { open: importLoadStart, close: importLoadStop }] =
-		useDisclosure();
-	const [exportLoading, { open: exportLoadStart, close: exportLoadStop }] =
-		useDisclosure();
-
-	const resetRef = useRef(null);
 	return (
 		<Flex gap="sm" direction="row">
-			<FileButton
-				accept="application/json"
-				resetRef={resetRef}
-				onChange={(file) => {
-					importLoadStart();
-					try {
-						// See reference: https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-						const fileReader = new FileReader();
-						fileReader.onload = () => {
-							const data = fileReader.result;
-							// parse data using methods
-						};
-						fileReader.readAsText(file);
-					} catch (e) {
-						// todo: display friendly err message
-						console.log(e);
-						importLoadStop();
-					}
-					resetRef.current?.();
-				}}
-			>
-				{(props) => (
-					<Button {...props} loading={importLoading}>
-						Import
-					</Button>
-				)}
-			</FileButton>
+			<Button variant="filled">Import</Button>
 			<Button
 				variant="light"
 				leftSection={<IconDownload size={16} />}
 				loading={exportLoading}
 				onClick={() => {
-					exportLoadStart();
+					open();
 					const jsonConfig = generateConfigJSON(
 						runways,
 						advancedConfig,
@@ -79,7 +36,7 @@ export default function ExportImportButtons() {
 					document.body.appendChild(tempLink);
 					tempLink.click();
 					document.body.removeChild(tempLink);
-					exportLoadStop();
+					close();
 				}}
 			>
 				Export

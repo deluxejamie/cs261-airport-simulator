@@ -1,10 +1,25 @@
 "use client";
-import React, { useContext, useEffect } from "react";
-import { ConfigContext, RunwayModes } from "./hooks";
+import React from "react";
+import {
+	useRunways,
+	RunwayModes,
+	useAdvancedConfig,
+	useFlightSchedule,
+	useHazardSchedule,
+} from "./hooks";
 import ExportImportButtons from "@/components/export-import";
 
 export default function Home() {
-	const { runways, flights, hazards, advancedConfig } =
-		useContext(ConfigContext);
-	return <ExportImportButtons />;
+	const { runways, addRunway, removeRunway } = useRunways();
+	const { advancedConfig } = useAdvancedConfig();
+	const { flights } = useFlightSchedule();
+	const { hazards } = useHazardSchedule();
+	return (
+		<ExportImportButtons
+			runways={runways}
+			advancedConfig={advancedConfig}
+			flights={flights}
+			hazards={hazards}
+		/>
+	);
 }

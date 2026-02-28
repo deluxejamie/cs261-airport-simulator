@@ -5,7 +5,6 @@ import {
 	MantineProvider,
 	mantineHtmlProps,
 } from "@mantine/core";
-import { ConfigProvider } from "./hooks";
 
 export const metadata = {
 	title: "Airport Simulator",
@@ -19,9 +18,7 @@ export default function RootLayout({ children }) {
 				<ColorSchemeScript />
 			</head>
 			<body>
-				<MantineProvider>
-					<ConfigProvider>{children}</ConfigProvider>
-				</MantineProvider>
+				<MantineProvider>{children}</MantineProvider>
 			</body>
 		</html>
 	);

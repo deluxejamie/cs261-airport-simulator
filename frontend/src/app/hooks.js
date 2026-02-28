@@ -1,6 +1,5 @@
 "use client";
 import { useListState, useCounter, useSetState, useMap } from "@mantine/hooks";
-import { createContext } from "react";
 
 export const RunwayModes = {
 	MIXED_MODE: "mixed_mode",
@@ -395,57 +394,4 @@ export const useHazardSchedule = () => {
 		 */
 		removeHazardsForAircraft,
 	};
-};
-
-export const ConfigContext = createContext();
-
-/**
- * A context provider for the client-sided configuration hooks
- * @returns A react component providing context through the ConfigContext context
- */
-export const ConfigProvider = ({ children }) => {
-	const {
-		hazards,
-		addRunwayClosureHazard,
-		addEmergencyEventHazard,
-		removeHazard,
-		removeHazardsForAircraft,
-	} = useHazardSchedule();
-	const { flights, addDepartureFlight, addArrivalFlight, removeFlight } =
-		useFlightSchedule();
-	const {
-		advancedConfig,
-		setMaxDelayBeforeCancelled,
-		setFuelThresholdBeforeRedirected,
-		setTimeTakenForLanding,
-		setTimeTakenForTakeoff,
-	} = useAdvancedConfig();
-	const { runways, addRunway, removeRunway } = useRunways();
-
-	// References used: https://www.w3schools.com/react/react_usecontext.asp
-	return (
-		<ConfigContext.Provider
-			value={{
-				hazards,
-				addRunwayClosureHazard,
-				addEmergencyEventHazard,
-				removeHazard,
-				removeHazardsForAircraft,
-				flights,
-				addDepartureFlight,
-				addArrivalFlight,
-				removeFlight,
-				advancedConfig,
-				setMaxDelayBeforeCancelled,
-				setFuelThresholdBeforeRedirected,
-				setTimeTakenForLanding,
-				setTimeTakenForTakeoff,
-				runways,
-				addRunway,
-				removeRunway,
-			}}
-		>
-			{children}
-		</ConfigContext.Provider>
-	);
 };
