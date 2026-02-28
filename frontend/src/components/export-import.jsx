@@ -27,6 +27,9 @@ export default function ExportImportButtons({
 						hazards,
 						[null, 2], // this means that the json file is easier to read (has spacing for humans)
 					);
+
+					// Follows a common approach of rendering a button temporarily to download the file
+					// https://www.geeksforgeeks.org/reactjs/how-to-implement-file-download-in-nextjs-using-an-api-route/
 					const tempLink = document.createElement("a");
 					tempLink.href = window.URL.createObjectURL(new Blob([jsonConfig]));
 					tempLink.setAttribute("download", "flight_configuration.json");
