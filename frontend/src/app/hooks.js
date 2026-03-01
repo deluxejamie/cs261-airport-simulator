@@ -305,7 +305,6 @@ export const useFlightSchedule = () => {
 		if (!newFlights?.isArray?.())
 			throw Error("Flight schedule is not an array");
 		let maxCounter = 0;
-		const callsigns = new Set();
 
 		try {
 			for (const flight of newFlights) {
@@ -325,13 +324,8 @@ export const useFlightSchedule = () => {
 						("Flight repeating data is invalid for flight: ", flight),
 					);
 
-				if (
-					typeof flight.callsign != "string" ||
-					callsigns.has(flight.callsign)
-				)
+				if (typeof flight.callsign != "string" || flights.has(flight.callsign))
 					throw Error(("Flight callsign is invalid for flight: ", flight));
-
-				callsigns.add(flight.callsign);
 
 				switch (flight.type) {
 					case FlightType.ARRIVAL: {
@@ -409,7 +403,10 @@ export const useFlightSchedule = () => {
 
 export const useHazardSchedule = () => {
 	const hazards = useMap();
-	const [hazardCounter, { increment: incrementHazardCounter }] = useCounter(0);
+	const [
+		hazardCounter,
+		{ increment: incrementHazardCounter, set: setHazardCounter },
+	] = useCounter(0);
 
 	const addRunwayClosureHazard = (
 		startTimeMinutes,
@@ -497,6 +494,70 @@ export const useHazardSchedule = () => {
 	const resetHazardSchedule = () => {
 		return hazards.clear();
 	};
+
+	const importHazardSchedule = (newHazards, flightSchedule, runways) => {
+		resetHazardSchedule();
+		if (!newHazards?.isArray?.())
+			throw Error("Hazard schedule is not an array");
+		let maxCounter = 0;
+
+		try {
+			for (const hazard of newHazards) {
+				if (
+					!objectHasProperties(hazard, "type", "id") ||
+					!isValueInEnum(HazardType, hazard.type) ||
+					!isNaturalNumber(hazard.id)
+				)
+					throw Error(("Hazard data is malformed for hazard: ", hazard));
+
+				if (callsigns.has(hazard.id))
+					throw Error(("Hazard id is repeated in hazard: ", hazard));
+
+				switch (hazard.type) {
+					case HazardType.EMERGENCY_EVENT: {
+						if (!flightSchedule.has(hazard.target_arrival_callsign))
+							throw Error(("Hazard applied to nonexistent flight: ", hazard));
+
+						if (!isNaturalNumber(hazard.time))
+							throw Error(("Invalid or missing hazard time: ", hazard));
+						break;
+					}
+					case HazardType.RUNWAY_CLOSURE: {
+						if (!runways.find((r) => r.id == hazard.affected_runway))
+							throw Error(
+								("Runway closure applied to nonexistent runway id", hazard),
+							);
+
+						if (
+							!isNaturalNumber(hazard.start_time_mins) ||
+							!isNaturalNumber(hazard.duration_mins) ||
+							!isValueInEnum(RunwayClosureMode, hazard.closure_mode)
+						)
+							throw Error(
+								("Runway closure event is missing or has invalid required properties",
+								hazard),
+							);
+
+						if (
+							hazard.repeating != undefined &&
+							!objectHasProperties(hazard.repeating, "end", "period")
+						)
+							throw Error(
+								("Hazard repeating data is invalid for hazard: ", hazard),
+							);
+						break;
+					}
+				}
+				maxCounter = Math.max(maxCounter, hazard.id);
+				hazards.set(hazard.id, hazard);
+			}
+		} catch (e) {
+			resetHazardSchedule();
+			throw e;
+		}
+
+		setHazardCounter(maxCounter + 1);
+	};
 	return {
 		/**
 		 * A map from hazard id (can be used as a key) to the hazard schedule data
@@ -535,6 +596,8 @@ export const useHazardSchedule = () => {
 		 * Resets the hazard schedule to the default state
 		 */
 		resetHazardSchedule,
+
+		importHazardSchedule,
 	};
 };
 

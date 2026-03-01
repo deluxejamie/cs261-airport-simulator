@@ -43,8 +43,7 @@ export default function ExportImportButtons() {
 		resetAdvancedConfig,
 		importFlightSchedule,
 		resetFlightSchedule,
-		addRunwayClosureHazard,
-		addEmergencyEventHazard,
+		importHazardSchedule,
 		resetHazardSchedule,
 	} = useContext(ConfigContext);
 
@@ -109,6 +108,7 @@ export default function ExportImportButtons() {
 								// import hazard schedule
 								if (!data.hazards.isArray?.())
 									throw Error("Hazards is not an array");
+								importHazardSchedule(data.hazards, flights, runways);
 
 								showNotification({
 									...notificationSuccessOptions,
