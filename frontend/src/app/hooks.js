@@ -82,7 +82,7 @@ export const useRunways = () => {
 		return valuesSet([]);
 	};
 
-	const setRunways = (runways) => {
+	const importRunways = (runways) => {
 		if (!runways?.isArray?.()) throw Error("Invalid runways data");
 		let maxCounter = 0;
 		for (const runway of runways) {
@@ -125,9 +125,10 @@ export const useRunways = () => {
 		resetRunways,
 
 		/**
-		 * Only used for importing config, necessary so that the ids are consistent across imports
+		 * Used to import runways from a configuration file. Should not be used for initial configuration. Overrides the existing runways
+		 * @param {Array} runways An array of formatted runways (formatted to the internal structure of a runway)
 		 */
-		setRunways,
+		importRunways,
 	};
 };
 
@@ -394,8 +395,8 @@ export const useFlightSchedule = () => {
 		resetFlightSchedule,
 
 		/**
-		 * Imports a flight schedule
-		 * @param {Array} newFlights an array of flights
+		 * Used to import the flight schedule from a configuration file. Should not be used for initial configuration. Overrides the existing flight schedule
+		 * @param {Array} newFlights An array of formatted flights (formatted to the internal structure of a flight schedule)
 		 */
 		importFlightSchedule,
 	};
@@ -597,6 +598,10 @@ export const useHazardSchedule = () => {
 		 */
 		resetHazardSchedule,
 
+		/**
+		 * Used to import the hazard schedule from a configuration file. Should not be used for initial configuration. Overrides the existing hazard schedule
+		 * @param {Array} newHazards An array of formatted hazards (formatted to the internal structure of a hazard schedule)
+		 */
 		importHazardSchedule,
 	};
 };
@@ -615,6 +620,7 @@ export const ConfigProvider = ({ children }) => {
 		removeHazard,
 		removeHazardsForAircraft,
 		resetHazardSchedule,
+		importHazardSchedule,
 	} = useHazardSchedule();
 	const {
 		flights,
@@ -622,6 +628,7 @@ export const ConfigProvider = ({ children }) => {
 		addArrivalFlight,
 		removeFlight,
 		resetFlightSchedule,
+		importFlightSchedule,
 	} = useFlightSchedule();
 	const {
 		advancedConfig,
@@ -631,7 +638,8 @@ export const ConfigProvider = ({ children }) => {
 		setTimeTakenForTakeoff,
 		resetAdvancedConfig,
 	} = useAdvancedConfig();
-	const { runways, addRunway, removeRunway, resetRunways } = useRunways();
+	const { runways, addRunway, removeRunway, resetRunways, importRunways } =
+		useRunways();
 
 	// References used: https://www.w3schools.com/react/react_usecontext.asp
 	return (
@@ -643,11 +651,13 @@ export const ConfigProvider = ({ children }) => {
 				removeHazard,
 				removeHazardsForAircraft,
 				resetHazardSchedule,
+				importHazardSchedule,
 				flights,
 				addDepartureFlight,
 				addArrivalFlight,
 				removeFlight,
 				resetFlightSchedule,
+				importFlightSchedule,
 				advancedConfig,
 				setMaxDelayBeforeCancelled,
 				setFuelThresholdBeforeRedirected,
@@ -658,6 +668,7 @@ export const ConfigProvider = ({ children }) => {
 				addRunway,
 				removeRunway,
 				resetRunways,
+				importRunways,
 			}}
 		>
 			{children}

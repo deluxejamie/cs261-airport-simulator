@@ -33,8 +33,7 @@ export default function ExportImportButtons() {
 		advancedConfig,
 		flights,
 		hazards,
-		addRunway,
-		setRunways,
+		importRunways,
 		resetRunways,
 		setMaxDelayBeforeCancelled,
 		setFuelThresholdBeforeRedirected,
@@ -97,7 +96,7 @@ export default function ExportImportButtons() {
 								// import runway config
 								if (!data.runways.isArray?.())
 									throw Error("Runways is not an array");
-								setRunways(data.runways);
+								importRunways(data.runways);
 
 								// import flight schedule
 								if (!data.flights.isArray?.())
