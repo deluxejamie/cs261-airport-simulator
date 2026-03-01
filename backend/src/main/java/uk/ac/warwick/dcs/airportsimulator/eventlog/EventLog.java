@@ -12,7 +12,7 @@ public class EventLog {
     /**
      * Constructs an empty EventLog
      */
-    EventLog()
+    public EventLog()
     {
         this.logs = new ArrayList<>();
     }
