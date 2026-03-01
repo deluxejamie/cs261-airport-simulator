@@ -1,15 +1,30 @@
 "use client";
 import { Button, FileButton, Flex } from "@mantine/core";
-import { IconDownload, IconExclamationCircleFilled } from "@tabler/icons-react";
+import {
+	IconDownload,
+	IconExclamationCircleFilled,
+	IconSettingsFilled,
+} from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext, useRef } from "react";
-import { ConfigContext } from "@/app/hooks";
+import {
+	ConfigContext,
+	FlightType,
+	isValueInEnum,
+	objectHasProperties,
+} from "@/app/hooks";
 import { showNotification } from "@mantine/notifications";
 
 const notificationErrorOptions = {
 	autoClose: 3000,
 	color: "#ff0000",
 	icon: <IconExclamationCircleFilled size={18} />,
+};
+
+const notificationSuccessOptions = {
+	autoClose: 3000,
+	color: "#3283a8",
+	icon: <IconSettingsFilled size={18} />,
 };
 
 export default function ExportImportButtons() {
@@ -19,14 +34,18 @@ export default function ExportImportButtons() {
 		flights,
 		hazards,
 		addRunway,
-		setMaxDelayedBeforeCancelled,
+		setRunways,
+		resetRunways,
+		setMaxDelayBeforeCancelled,
 		setFuelThresholdBeforeRedirected,
 		setTimeTakenForTakeoff,
 		setTimeTakenForLanding,
-		addArrivalFlight,
-		addDepartureFlight,
+		resetAdvancedConfig,
+		importFlightSchedule,
+		resetFlightSchedule,
 		addRunwayClosureHazard,
 		addEmergencyEventHazard,
+		resetHazardSchedule,
 	} = useContext(ConfigContext);
 
 	const [importLoading, { open: importLoadStart, close: importLoadStop }] =
@@ -48,8 +67,60 @@ export default function ExportImportButtons() {
 						fileReader.onload = () => {
 							try {
 								const data = JSON.parse(fileReader.result);
-								// parse data using methods
+
+								// reset all existing config
+								resetRunways();
+								resetFlightSchedule();
+								resetHazardSchedule();
+								resetAdvancedConfig();
+
+								if (
+									!objectHasProperties(
+										data,
+										"advancedConfig",
+										"runways",
+										"flights",
+										"hazards",
+									)
+								)
+									throw Error("Missing required configuration file attributes");
+
+								// import advanced config
+								setMaxDelayBeforeCancelled(
+									data.advancedConfig.maxDelayBeforeCancelled,
+								);
+								setFuelThresholdBeforeRedirected(
+									data.advancedConfig.fuelThresholdBeforeRedirected,
+								);
+								setTimeTakenForLanding(data.advancedConfig.timeTakenForLanding);
+								setTimeTakenForTakeoff(data.advancedConfig.timeTakenForTakeoff);
+
+								// import runway config
+								if (!data.runways.isArray?.())
+									throw Error("Runways is not an array");
+								setRunways(data.runways);
+
+								// import flight schedule
+								if (!data.flights.isArray?.())
+									throw Error("Flights is not an array");
+
+								importFlightSchedule(data.flights);
+
+								// import hazard schedule
+								if (!data.hazards.isArray?.())
+									throw Error("Hazards is not an array");
+
+								showNotification({
+									...notificationSuccessOptions,
+									message: "The configuration has been imported successfully.",
+								});
 							} catch (e) {
+								// remove the partially valid configuration, reset to default state
+								resetRunways();
+								resetFlightSchedule();
+								resetHazardSchedule();
+								resetAdvancedConfig();
+								console.log(e);
 								showNotification({
 									...notificationErrorOptions,
 									message:

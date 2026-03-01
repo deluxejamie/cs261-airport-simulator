@@ -37,8 +37,8 @@ export const HazardType = {
 
 const isPositiveInteger = (s) => Number.isInteger(s) && s > 0;
 const isNaturalNumber = (s) => Number.isInteger(s) && s >= 0;
-const isValueInEnum = (e, v) => Object.values(e).includes(v);
-const objectHasProperties = (o, ...props) =>
+export const isValueInEnum = (e, v) => Object.values(e).includes(v);
+export const objectHasProperties = (o, ...props) =>
 	typeof o == "object" && props.every((prop) => o.hasOwnProperty(prop));
 const generateAircraftSeed = () => Math.floor(Math.random() * 100000);
 
@@ -57,7 +57,8 @@ export const useRunways = () => {
 		values,
 		{ append: valuesAppend, filter: valuesFilter, setState: valuesSet },
 	] = useListState([]);
-	const [counter, { increment: incrementCounter }] = useCounter(0);
+	const [counter, { increment: incrementCounter, set: setCounter }] =
+		useCounter(0);
 
 	const addRunway = (mode) => {
 		if (!isValueInEnum(RunwayModes, mode)) throw Error("Invalid runway mode");
@@ -79,6 +80,23 @@ export const useRunways = () => {
 
 	const resetRunways = () => {
 		return valuesSet([]);
+	};
+
+	const setRunways = (runways) => {
+		if (!runways?.isArray?.()) throw Error("Invalid runways data");
+		let maxCounter = 0;
+		for (const runway of runways) {
+			if (
+				!objectHasProperties(runway, "id", "mode") ||
+				!isValueInEnum(RunwayModes, runway.mode) ||
+				!isNaturalNumber(runway.id)
+			)
+				throw Error("Invalid runways data");
+			maxCounter = Math.max(maxCounter, runway.id);
+		}
+
+		setState(runways);
+		setCounter(maxCounter + 1);
 	};
 
 	return {
@@ -105,6 +123,11 @@ export const useRunways = () => {
 		 * Removes all of the runways from the hook
 		 */
 		resetRunways,
+
+		/**
+		 * Only used for importing config, necessary so that the ids are consistent across imports
+		 */
+		setRunways,
 	};
 };
 
@@ -188,7 +211,10 @@ export const useAdvancedConfig = () => {
 
 export const useFlightSchedule = () => {
 	const flights = useMap();
-	const [flightNumber, { increment: incrementFlightNumber }] = useCounter(0);
+	const [
+		flightNumber,
+		{ increment: incrementFlightNumber, set: setFlightNumber },
+	] = useCounter(0);
 	const addDepartureFlight = (
 		operator,
 		expected_departure_time,
@@ -214,6 +240,8 @@ export const useFlightSchedule = () => {
 			expected_departure_time,
 			seed,
 			repeating,
+			id: flightNumber,
+			type: FlightType.DEPARTURE,
 		};
 		const res = flights.set(flight.callsign, flight);
 		incrementFlightNumber();
@@ -237,6 +265,7 @@ export const useFlightSchedule = () => {
 			throw Error("Invalid input parameters");
 
 		if (typeof seed != "number") seed = generateAircraftSeed();
+
 		if (
 			repeating != undefined &&
 			!objectHasProperties(repeating, "end", "period")
@@ -249,6 +278,9 @@ export const useFlightSchedule = () => {
 			emergency_status,
 			remaining_fuel_mins,
 			seed,
+			id: flightNumber,
+			type: FlightType.ARRIVAL,
+			repeating,
 		};
 
 		const res = flights.set(flight.callsign, flight);
@@ -264,7 +296,70 @@ export const useFlightSchedule = () => {
 	};
 
 	const resetFlightSchedule = () => {
-		return flights.clear();
+		flights.clear();
+		setFlightNumber(0);
+	};
+
+	const importFlightSchedule = (newFlights) => {
+		resetFlightSchedule();
+		if (!newFlights?.isArray?.())
+			throw Error("Flight schedule is not an array");
+		let maxCounter = 0;
+		const callsigns = new Set();
+
+		try {
+			for (const flight of newFlights) {
+				if (
+					!objectHasProperties(flight, "type", "mode") ||
+					!isValueInEnum(FlightType, flight.type) ||
+					!isNaturalNumber(flight.id) ||
+					typeof flight.seed !== "number"
+				)
+					throw Error(("Flight data is malformed for flight: ", flight));
+
+				if (
+					flight.repeating != undefined &&
+					!objectHasProperties(flight.repeating, "end", "period")
+				)
+					throw Error(
+						("Flight repeating data is invalid for flight: ", flight),
+					);
+
+				if (
+					typeof flight.callsign != "string" ||
+					callsigns.has(flight.callsign)
+				)
+					throw Error(("Flight callsign is invalid for flight: ", flight));
+
+				callsigns.add(flight.callsign);
+
+				switch (flight.type) {
+					case FlightType.ARRIVAL: {
+						if (
+							!isNaturalNumber(flight.expected_arrival_time) ||
+							!isValueInEnum(EmergencyStatus, flight.emergency_status) ||
+							!isNaturalNumber(flight.remaining_fuel_mins)
+						)
+							throw Error(("Invalid arrival flight data for flight: ", flight));
+						break;
+					}
+					case FlightType.DEPARTURE: {
+						if (!isNaturalNumber(flight.expected_departure_time))
+							throw Error(
+								("Invalid departure flight data for flight: ", flight),
+							);
+						break;
+					}
+				}
+				maxCounter = Math.max(maxCounter, flight.id);
+				flights.set(flight.callsign, flight);
+			}
+		} catch (e) {
+			resetFlightSchedule();
+			throw e;
+		}
+
+		setFlightNumber(maxCounter + 1);
 	};
 
 	return {
@@ -303,6 +398,12 @@ export const useFlightSchedule = () => {
 		 * Resets the flight schedule to the default state
 		 */
 		resetFlightSchedule,
+
+		/**
+		 * Imports a flight schedule
+		 * @param {Array} newFlights an array of flights
+		 */
+		importFlightSchedule,
 	};
 };
 
