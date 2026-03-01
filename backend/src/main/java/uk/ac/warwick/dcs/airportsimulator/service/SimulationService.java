@@ -8,6 +8,11 @@ import uk.ac.warwick.dcs.airportsimulator.simulator.SimulationResult;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for creating simulations and retrieving persisted simulation state,
+ * including initial configuration, status, results, and event logs.
+ */
+
 @Service
 public class SimulationService {
 
@@ -68,5 +73,10 @@ public class SimulationService {
     /** Get the final result metrics for a completed simulation. */
     public Optional<SimulationResultEntity> getResult(String uuid) {
         return resultRepo.findById(uuid);
+    }
+
+    /** Get the initial configuration JSON that was submitted for this simulation. */
+    public Optional<String> getInitialConfiguration(String uuid) {
+        return simRepo.findById(uuid).map(SimulationEntity::getConfig);
     }
 }
