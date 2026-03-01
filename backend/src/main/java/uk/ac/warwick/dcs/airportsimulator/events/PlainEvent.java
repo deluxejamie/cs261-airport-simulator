@@ -14,7 +14,7 @@ public class PlainEvent implements IEvent
      * @param scheduledTime the time this event should run
      * @param action        the action this event should execute
      */
-    PlainEvent(int scheduledTime, Runnable action)
+    public PlainEvent(int scheduledTime, Runnable action)
     {
         this(scheduledTime, 0, 0, action);
     }
@@ -27,7 +27,7 @@ public class PlainEvent implements IEvent
      * @param endTime       the end time for this recurring event
      * @param action        the action this event should execute
      */
-    PlainEvent(int scheduledTime, int interval, int endTime, Runnable action) {
+    public PlainEvent(int scheduledTime, int interval, int endTime, Runnable action) {
         this.scheduledTime = scheduledTime;
         this.interval = interval;
         this.endTime = endTime;

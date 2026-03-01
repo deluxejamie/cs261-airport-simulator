@@ -11,7 +11,7 @@ public class NormDistEvent implements IEvent {
      * @param seed                 the seed for rng generator
      * @param action               the action this event should execute
      */
-    NormDistEvent(int correctScheduledTime, long seed, Runnable action)
+    public NormDistEvent(int correctScheduledTime, long seed, Runnable action)
     {
         this(correctScheduledTime, 0, 0, seed, action);
     }
@@ -25,7 +25,7 @@ public class NormDistEvent implements IEvent {
      * @param seed                 the seed for rng generator
      * @param action        the action this event should execute
      */
-    NormDistEvent(int correctScheduledTime, int interval, int endTime, long seed, Runnable action) {
+    public NormDistEvent(int correctScheduledTime, int interval, int endTime, long seed, Runnable action) {
         this(correctScheduledTime, interval, endTime, action, new Random(seed) );
     }
 
