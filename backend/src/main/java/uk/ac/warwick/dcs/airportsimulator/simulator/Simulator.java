@@ -1,6 +1,6 @@
 package uk.ac.warwick.dcs.airportsimulator.simulator;
 
-import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
+// import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
 import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.util.Objects;
