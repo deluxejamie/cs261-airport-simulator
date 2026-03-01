@@ -205,6 +205,18 @@ public class DataBaseTest
     }
 
 
+    /**
+     * Test getting initial config
+     */
+    @Test
+    public void testGettingInitialConfig()
+    {
+        final String uuid = UUID.randomUUID().toString();
+        final String config = randomString();
+        simulationService.createSimulation(uuid, config);
+
+        assertEquals(config, simulationService.getInitialConfiguration(uuid).orElseThrow());
+    }
 
     /**
      * Creates initial sim without configJson
