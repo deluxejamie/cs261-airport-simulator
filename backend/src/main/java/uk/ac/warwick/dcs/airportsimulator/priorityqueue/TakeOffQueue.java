@@ -1,10 +1,9 @@
-package uk.ac.warwick.dcs.airportsimulator.simulator;
+package uk.ac.warwick.dcs.airportsimulator.priorityqueue;
 
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-
 /**
  * FIFO queue for aircraft waiting to take off.
  */

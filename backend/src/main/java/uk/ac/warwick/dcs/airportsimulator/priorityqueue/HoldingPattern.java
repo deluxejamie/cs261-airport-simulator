@@ -1,4 +1,4 @@
-package uk.ac.warwick.dcs.airportsimulator.simulator;
+package uk.ac.warwick.dcs.airportsimulator.priorityqueue;
 
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
