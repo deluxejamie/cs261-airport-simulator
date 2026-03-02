@@ -1,5 +1,6 @@
 package uk.ac.warwick.dcs.airportsimulator.simulation;
 
+import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLog;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLogEntry;
 import uk.ac.warwick.dcs.airportsimulator.events.EventSchedular;
@@ -61,4 +62,25 @@ public class Simulation {
     public HoldingPattern getHoldingPattern() { return holdingPattern; }
     public TakeOffQueue getTakeOffQueue() { return takeOffQueue; }
     public List<Runway> getRunways() { return List.copyOf(runways); }
+
+    public void addArrivingAircraft(Aircraft aircraft) {
+        Objects.requireNonNull(aircraft, "aircraft");
+        holdingPattern.addAircraft(aircraft);
+    }
+
+    public void addDepartingAircraft(Aircraft aircraft) {
+        Objects.requireNonNull(aircraft, "aircraft");
+        takeOffQueue.addAircraft(aircraft);
+    }
+
+    public void addRunway(Runway runway) {
+        Objects.requireNonNull(runway, "runway");
+
+        for (Runway r : runways) {
+            if (r.getRunwayNumber()==runway.getRunwayNumber()) {
+                throw new IllegalArgumentException("Runway with number "+runway.getRunwayNumber()+" already exists");
+            }
+        }
+        runways.add(runway);
+    }
 }

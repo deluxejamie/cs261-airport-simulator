@@ -47,6 +47,9 @@ public class EventSchedular {
         }
     }
 
+    public boolean isEmpty() {
+        return events.isEmpty();
+    }
     /* Stores events in the correct ordering */
     private final PriorityQueue<IEvent> events;
 }
