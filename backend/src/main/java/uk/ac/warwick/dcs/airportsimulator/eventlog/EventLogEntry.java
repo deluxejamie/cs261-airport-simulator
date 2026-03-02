@@ -15,7 +15,7 @@ public class EventLogEntry {
      * @param timestamp the time of the event log entry
      * @param attr      any extra attributes about the log entry
      */
-    EventLogEntry(EventType type, double timestamp, HashMap<String, Object> attr)
+    public EventLogEntry(EventType type, double timestamp, HashMap<String, Object> attr)
     {
         this.type = type;
         this.timestamp = timestamp;
