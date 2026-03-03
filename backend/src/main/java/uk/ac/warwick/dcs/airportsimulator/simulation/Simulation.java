@@ -6,6 +6,7 @@ import uk.ac.warwick.dcs.airportsimulator.events.EventSchedular;
 import uk.ac.warwick.dcs.airportsimulator.priorityqueue.HoldingPattern;
 import uk.ac.warwick.dcs.airportsimulator.priorityqueue.TakeOffQueue;
 import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
+import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +25,12 @@ public class Simulation {
 
     public Simulation(List<Runway> runways) {
         this.runways = new ArrayList<>(Objects.requireNonNull(runways, "runways"));
-        this.holdingPattern = new HoldingPattern(0); // 0 => unlimited
+        this.holdingPattern = new HoldingPattern(0);
         this.takeOffQueue = new TakeOffQueue();
         this.simTime = 0;
 
         this.eventSchedular = new EventSchedular();
-        this.eventLog = new EventLog(); // requires public ctor
+        this.eventLog = new EventLog();
     }
 
     public boolean isFinished() {
@@ -43,7 +44,7 @@ public class Simulation {
             }
         }
 
-        boolean noPendingEvents = eventSchedular.isEmpty(); // add helper in EventSchedular
+        boolean noPendingEvents = eventSchedular.isEmpty();
         return queuesEmpty && !anyOccupied && noPendingEvents;
     }
 
@@ -51,7 +52,25 @@ public class Simulation {
         return eventLog.getEvents(offset, count);
     }
 
-    // getters for Simulator
+    public SimulationResult run() {
+        SimulationResult result = new SimulationResult();
+
+        // run any events scheduled at t=0
+        eventSchedular.step(simTime);
+
+        int safetyCap = 1_000_000;
+        while (!isFinished() && safetyCap-- > 0) {
+            simTime += 1;
+            eventSchedular.step(simTime);
+
+            // Future work goes here.
+        }
+
+        result.finalizeAverages();
+        return result;
+    }
+
+    // getters for other components (optional)
     public int getSimTime() { return simTime; }
     public void setSimTime(int simTime) { this.simTime = simTime; }
 
