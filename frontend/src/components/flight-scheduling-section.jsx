@@ -50,9 +50,9 @@ export default function FlightSchedulingSection() {
 			} else {
 				addArrivalFlight(
 					operator,
-					expectedTimeMinutes,
-					arrivalFuelMinutes,
 					arrivalEmergencyStatus,
+					arrivalFuelMinutes,
+					expectedTimeMinutes,
 				);
 			}
 			clearInputs();
@@ -95,9 +95,9 @@ export default function FlightSchedulingSection() {
 
 					<NumberInput
 						label={
-							flightType === FlightType.DEPARTURE ?
-								"Expected departure time (mins from simulation start)"
-							:	"Expected arrival time (mins from simulation start)"
+							flightType === FlightType.DEPARTURE
+								? "Expected departure time (mins from simulation start)"
+								: "Expected arrival time (mins from simulation start)"
 						}
 						min={0}
 						value={expectedTimeMinutes}
@@ -105,7 +105,7 @@ export default function FlightSchedulingSection() {
 					/>
 				</Group>
 
-				{flightType === FlightType.ARRIVAL ?
+				{flightType === FlightType.ARRIVAL ? (
 					<Group grow align="end">
 						<NumberInput
 							label="Fuel at arrival into aircraft space (minutes)"
@@ -120,22 +120,30 @@ export default function FlightSchedulingSection() {
 							onChange={(value) =>
 								setArrivalEmergencyStatus(value || EmergencyStatus.NONE)
 							}
-							data={Object.values(EmergencyStatus).map((value) => ({
-								value,
-								label: formatEmergencyLabel(value),
-							}))}
+							data={[
+								{
+									label: "None",
+									value: EmergencyStatus.NONE,
+								},
+								{
+									label: "Mechanical Failure",
+									value: EmergencyStatus.MECHANICAL_FAIL,
+								},
+								{
+									label: "Passenger Health",
+									value: EmergencyStatus.PASSENGER_HEALTH,
+								},
+							]}
 						/>
 					</Group>
-				:	null}
+				) : null}
 
 				<Text size="sm" c="dimmed">
 					Callsign is generated automatically using operator + incrementing
 					counter (example: EASYJET-1, BRITISH_AIRWAYS-2).
 				</Text>
 
-				{errorMessage ?
-					<Alert color="red">{errorMessage}</Alert>
-				:	null}
+				{errorMessage ? <Alert color="red">{errorMessage}</Alert> : null}
 
 				<Group justify="flex-end">
 					<Button onClick={handleAddFlight}>Add scheduled flight</Button>
@@ -145,10 +153,8 @@ export default function FlightSchedulingSection() {
 					<Table.Thead>
 						<Table.Tr>
 							<Table.Th>Callsign</Table.Th>
-							<Table.Th>Operator</Table.Th>
 							<Table.Th>Type</Table.Th>
 							<Table.Th>Expected time</Table.Th>
-							<Table.Th>Observed time (std dev 5)</Table.Th>
 							<Table.Th>Fuel at arrival</Table.Th>
 							<Table.Th>Emergency status</Table.Th>
 							<Table.Th />
@@ -158,21 +164,21 @@ export default function FlightSchedulingSection() {
 						{[...flights.values()].map((flight) => (
 							<Table.Tr key={flight.callsign}>
 								<Table.Td>{flight.callsign}</Table.Td>
-								<Table.Td>{flight.operator}</Table.Td>
-								<Table.Td>{flight.type}</Table.Td>
+								<Table.Td>{flight.type.toUpperCase()}</Table.Td>
 								<Table.Td>
 									{flight.expected_departure_time ??
 										flight.expected_arrival_time}
 								</Table.Td>
+
 								<Table.Td>
-									{flight.observed_departure_time ??
-										flight.observed_arrival_time}
+									{flight.remaining_fuel_mins
+										? `${flight.remaining_fuel_mins} mins`
+										: "-"}
 								</Table.Td>
-								<Table.Td>{flight.remaining_fuel_mins ?? "-"}</Table.Td>
 								<Table.Td>
-									{flight.emergency_status ?
-										formatEmergencyLabel(flight.emergency_status)
-									:	"-"}
+									{flight.emergency_status
+										? formatEmergencyLabel(flight.emergency_status)
+										: "-"}
 								</Table.Td>
 								<Table.Td>
 									<Button
@@ -185,7 +191,7 @@ export default function FlightSchedulingSection() {
 								</Table.Td>
 							</Table.Tr>
 						))}
-						{flights.length === 0 ?
+						{flights.length === 0 ? (
 							<Table.Tr>
 								<Table.Td colSpan={8}>
 									<Text c="dimmed" ta="center">
@@ -193,7 +199,7 @@ export default function FlightSchedulingSection() {
 									</Text>
 								</Table.Td>
 							</Table.Tr>
-						:	null}
+						) : null}
 					</Table.Tbody>
 				</Table>
 			</Stack>
