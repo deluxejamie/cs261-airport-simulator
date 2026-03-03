@@ -36,9 +36,7 @@ export default function AdvancedConfigSection() {
 			<Stack>
 				<Accordion defaultValue="advanced" variant="separated">
 					<Accordion.Item value="advanced">
-						<Accordion.Control>
-							Advanced configuration (collapsible)
-						</Accordion.Control>
+						<Accordion.Control>Advanced configuration</Accordion.Control>
 						<Accordion.Panel>
 							<Stack>
 								<NumberInput
@@ -86,16 +84,15 @@ export default function AdvancedConfigSection() {
 								/>
 
 								<Text size="sm" c="dimmed">
-									Defaults are preloaded and editable.
+									Modify advanced configuration parameters to provide more
+									realistic results at different airports
 								</Text>
 							</Stack>
 						</Accordion.Panel>
 					</Accordion.Item>
 				</Accordion>
 
-				{errorMessage ?
-					<Alert color="red">{errorMessage}</Alert>
-				:	null}
+				{errorMessage ? <Alert color="red">{errorMessage}</Alert> : null}
 			</Stack>
 		</Card>
 	);

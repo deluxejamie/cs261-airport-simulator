@@ -72,10 +72,6 @@ export default function SimulationConfigForm() {
 					</Badge>
 
 					<AdvancedConfigSection />
-
-					<Text size="sm" c="dimmed">
-						Advanced config values loaded: {Object.keys(advancedConfig).length}
-					</Text>
 				</Stack>
 			</Card>
 		</Stack>
