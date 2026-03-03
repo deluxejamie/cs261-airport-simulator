@@ -19,7 +19,7 @@ public class Runway {
      * @param status  the runway's status
      * @param occupied whether the runway is occupied
      */
-    Runway(int runwayNumber, double length, double bearing, RunwayMode mode, RunwayStatus status, Aircraft occupied)
+    public Runway(int runwayNumber, double length, double bearing, RunwayMode mode, RunwayStatus status, Aircraft occupied)
     {
         this.runwayNumber = runwayNumber;
         this.length = length;
