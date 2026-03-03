@@ -1,4 +1,6 @@
+import SimulationOutcomeView from "@/components/simulation-outcome-view";
+
 export default async function Simulation({ params }) {
-	const simulationId = params.sim_id;
-	return <></>;
+	const { sim_id: simulationId } = await params;
+	return <SimulationOutcomeView uuid={simulationId} />;
 }
