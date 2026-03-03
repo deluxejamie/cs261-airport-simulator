@@ -224,18 +224,19 @@ export const useFlightSchedule = () => {
 	const [
 		flightNumber,
 		{ increment: incrementFlightNumber, set: setFlightNumber },
-	] = useCounter(0);
+	] = useCounter(1);
 	const addDepartureFlight = (
 		operator,
 		expected_departure_time,
 		repeating,
 		seed = generateAircraftSeed(),
 	) => {
-		if (
-			typeof operator != "string" ||
-			!isNaturalNumber(expected_departure_time)
-		)
-			throw Error("Invalid input parameters");
+		if (typeof operator != "string" || operator.length < 2)
+			throw Error("The operator must be at least two characters long");
+		if (!isNaturalNumber(expected_departure_time))
+			throw Error(
+				"The expected departure time must be a whole number which is greater than or equal to zero",
+			);
 
 		if (typeof seed != "number") seed = generateAircraftSeed();
 
@@ -307,14 +308,14 @@ export const useFlightSchedule = () => {
 
 	const resetFlightSchedule = () => {
 		flights.clear();
-		setFlightNumber(0);
+		setFlightNumber(1);
 	};
 
 	const importFlightSchedule = (newFlights) => {
 		resetFlightSchedule();
 		if (!newFlights?.isArray?.())
 			throw Error("Flight schedule is not an array");
-		let maxCounter = 0;
+		let maxCounter = 1;
 
 		try {
 			for (const flight of newFlights) {
@@ -416,7 +417,7 @@ export const useHazardSchedule = () => {
 	const [
 		hazardCounter,
 		{ increment: incrementHazardCounter, set: setHazardCounter },
-	] = useCounter(0);
+	] = useCounter(1);
 
 	const addRunwayClosureHazard = (
 		startTimeMinutes,
@@ -509,7 +510,7 @@ export const useHazardSchedule = () => {
 		resetHazardSchedule();
 		if (!newHazards?.isArray?.())
 			throw Error("Hazard schedule is not an array");
-		let maxCounter = 0;
+		let maxCounter = 1;
 
 		try {
 			for (const hazard of newHazards) {
