@@ -144,7 +144,9 @@ export const useAdvancedConfig = () => {
 	const setMaxDelayBeforeCancelled = (val) => {
 		// This also checks whether val is of number type
 		if (!isNaturalNumber(val)) {
-			throw Error("Improper argument provided");
+			throw Error(
+				"The maximum delay must be a whole number which is greater than or equal to zero",
+			);
 		}
 		setConfig({ maxDelayBeforeCancelled: val });
 	};
@@ -152,7 +154,9 @@ export const useAdvancedConfig = () => {
 	const setFuelThresholdBeforeRedirected = (val) => {
 		// This also checks whether val is of number type
 		if (!isNaturalNumber(val)) {
-			throw Error("Improper argument provided");
+			throw Error(
+				"The minimum fuel minute redirection threshold must be a whole number which is greater than or equal to zero",
+			);
 		}
 		setConfig({ fuelThresholdBeforeRedirected: val });
 	};
@@ -160,7 +164,9 @@ export const useAdvancedConfig = () => {
 	const setTimeTakenForTakeoff = (val) => {
 		// This also checks whether val is of number type
 		if (!isPositiveInteger(val)) {
-			throw Error("Improper argument provided");
+			throw Error(
+				"The number of minutes taken for a plane to take off must be a whole number which is greater than zero",
+			);
 		}
 		setConfig({ timeTakenForTakeoff: val });
 	};
@@ -168,8 +174,11 @@ export const useAdvancedConfig = () => {
 	const setTimeTakenForLanding = (val) => {
 		// This also checks whether val is of number type
 		if (!isPositiveInteger(val)) {
-			throw Error("Improper argument provided");
+			throw Error(
+				"The number of minutes taken for a plane to land must be a whole number which is greater than zero",
+			);
 		}
+
 		setConfig({ timeTakenForLanding: val });
 	};
 
