@@ -1,5 +1,14 @@
 package uk.ac.warwick.dcs.airportsimulator.simulation;
 
+import uk.ac.warwick.dcs.airportsimulator.events.IEvent;
+import uk.ac.warwick.dcs.airportsimulator.events.PlainEvent;
+import uk.ac.warwick.dcs.airportsimulator.eventlog.EventType;
+import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
+import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
+import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
+
+import java.util.HashMap;
+
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLog;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLogEntry;
@@ -63,24 +72,109 @@ public class Simulation {
     public TakeOffQueue getTakeOffQueue() { return takeOffQueue; }
     public List<Runway> getRunways() { return List.copyOf(runways); }
 
-    public void addArrivingAircraft(Aircraft aircraft) {
-        Objects.requireNonNull(aircraft, "aircraft");
-        holdingPattern.addAircraft(aircraft);
-    }
+    public void addAircraft(Aircraft a, int scheduled, int interval, int end, AircraftOp op) {
+        Objects.requireNonNull(a, "aircraft");
+        Objects.requireNonNull(op, "op");
 
-    public void addDepartingAircraft(Aircraft aircraft) {
-        Objects.requireNonNull(aircraft, "aircraft");
-        takeOffQueue.addAircraft(aircraft);
-    }
+        Runnable action = () -> {
+            HashMap<String, Object> attr = new HashMap<>();
+            attr.put("callSign", a.getCallSign());
+            attr.put("op", op.toString());
 
-    public void addRunway(Runway runway) {
-        Objects.requireNonNull(runway, "runway");
-
-        for (Runway r : runways) {
-            if (r.getRunwayNumber()==runway.getRunwayNumber()) {
-                throw new IllegalArgumentException("Runway with number "+runway.getRunwayNumber()+" already exists");
+            if (op == AircraftOp.ARRIVAL) {
+                holdingPattern.addAircraft(a);
+                logEvent(EventType.HOLDING_EVENT, simTime, attr);
+            } else {
+                takeOffQueue.addAircraft(a);
+                logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
             }
+        };
+
+        IEvent event;
+
+        if (interval > 0) {
+            event = new PlainEvent(scheduled, interval, end, action);
+        } else {
+            event = new PlainEvent(scheduled, action);
         }
-        runways.add(runway);
+
+        eventSchedular.addEvent(event);
+    }
+
+    public void addRunwayOperationChange(int runwayNumber, int scheduled, int interval, int end, RunwayMode mode) {
+        Objects.requireNonNull(mode, "mode");
+
+        Runnable action = () -> {
+            Runway r = getRunwayByNumber(runwayNumber);
+            r.setMode(mode);
+
+            HashMap<String, Object> attr = new HashMap<>();
+            attr.put("runwayNumber", runwayNumber);
+            attr.put("mode", mode.toString());
+            logEvent(EventType.RUNWAY_MODE_EVENT, simTime, attr);
+        };
+
+        IEvent event;
+        if (interval > 0) {
+            event = new PlainEvent(scheduled, interval, end, action);
+        } else {
+            event = new PlainEvent(scheduled, action);
+        }
+        eventSchedular.addEvent(event);
+    }
+
+    public void addAircraftEmergency(Aircraft a, int scheduled, int interval, int end, EmergencyStatus emergencyStatus) {
+        Objects.requireNonNull(a, "aircraft");
+        Objects.requireNonNull(emergencyStatus, "emergencyStatus");
+
+        Runnable action = () -> {
+            HashMap<String, Object> attr = new HashMap<>();
+            attr.put("callSign", a.getCallSign());
+            attr.put("emergencyStatus", emergencyStatus.toString());
+
+            logEvent(EventType.EMERGENCY_EVENT, simTime, attr);
+        };
+
+        IEvent event;
+        if (interval > 0) {
+            event = new PlainEvent(scheduled, interval, end, action);
+        } else {
+            event = new PlainEvent(scheduled, action);
+        }
+
+        eventSchedular.addEvent(event);
+    }
+
+    public void addRunwayStatusChange(int runwayNumber, int scheduled, int interval, int end, RunwayStatus status) {
+        Objects.requireNonNull(status, "status");
+
+        Runnable action = () -> {
+            Runway r = getRunwayByNumber(runwayNumber);
+            r.setStatus(status);
+
+            HashMap<String, Object> attr = new HashMap<>();
+            attr.put("runwayNumber", runwayNumber);
+            attr.put("status", status.toString());
+            logEvent(EventType.RUNWAY_STATUS_EVENT, simTime, attr);
+        };
+
+        IEvent event;
+        if (interval > 0) {
+            event = new PlainEvent(scheduled, interval, end, action);
+        } else {
+            event = new PlainEvent(scheduled, action);
+        }
+        eventSchedular.addEvent(event);
+    }
+
+    private Runway getRunwayByNumber(int runwayNumber) {
+        for (Runway r : runways) {
+            if (r.getRunwayNumber() == runwayNumber) return r;
+        }
+        throw new IllegalArgumentException("Invalid runway number: "+runwayNumber);
+    }
+
+    private void logEvent(EventType type, int timestamp, HashMap<String, Object> attr) {
+        eventLog.addEntry(new EventLogEntry(type, timestamp, attr));
     }
 }
