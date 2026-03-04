@@ -165,7 +165,35 @@ export default function FlightSchedulingSection() {
 						/>
 					</Group>
 				) : null}
+				<Checkbox
+					label="Repeating flight?"
+					checked={isRepeating}
+					onChange={(event) =>
+						setIsRepeating(event.currentTarget.checked)
+					}
+				/>
 
+				{isRepeating && (
+					<Group grow align="end">
+						<NumberInput
+							label="Repeat every (minutes)"
+							min={1}
+							value={repeatPeriod}
+							onChange={(value) =>
+								setRepeatPeriod(Number(value ?? 1))
+							}
+						/>
+
+						<NumberInput
+							label="Repeat until time (minutes)"
+							min={expectedTimeMinutes}
+							value={repeatEnd}
+							onChange={(value) =>
+								setRepeatEnd(Number(value ?? expectedTimeMinutes))
+							}
+						/>
+					</Group>
+				)}
 				<Text size="sm" c="dimmed">
 					Callsign is generated automatically using operator + incrementing
 					counter (example: EASYJET-1, BRITISH_AIRWAYS-2).
