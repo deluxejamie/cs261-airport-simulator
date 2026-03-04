@@ -73,7 +73,7 @@ export const useRunways = () => {
 	const removeRunway = (id) => {
 		const sizebefore = values.length;
 		const res = valuesFilter((r) => r.id !== id);
-		if (res.length == sizebefore)
+		if (values.length == sizebefore)
 			throw Error("Attempted to remove a runway which does not exist");
 		return res;
 	};
