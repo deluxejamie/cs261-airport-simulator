@@ -13,6 +13,7 @@ import {
 	Text,
 	TextInput,
 	Title,
+	Checkbox,
 } from "@mantine/core";
 import { ConfigContext, EmergencyStatus, FlightType } from "../app/hooks";
 
@@ -35,6 +36,9 @@ export default function FlightSchedulingSection() {
 		EmergencyStatus.NONE,
 	);
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isRepeating, setIsRepeating] = useState(false);
+	const [repeatPeriod, setRepeatPeriod] = useState(10);
+	const [repeatEnd, setRepeatEnd] = useState(60);
 
 	const clearInputs = () => {
 		setOperator("");
