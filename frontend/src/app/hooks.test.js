@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react";
-import { useRunways, RunwayModes, useAdvancedConfig } from "./hooks";
+import { useRunways, RunwayModes, useAdvancedConfig, useFlightSchedule, FlightType, EmergencyStatus, useHazardSchedule, HazardType, RunwayClosureMode, EmergencyStatusWithoutNone } from "./hooks";
 
 describe("useRunways hook", () => {
   it("should start empty", () => {
@@ -131,6 +131,8 @@ describe("useRunways hook", () => {
   });
 });
 
+
+  // Tests for useAdvancedConfig
 describe("useAdvancedConfig hook", () => {
 	it("should have default values on initialization", () => {
 	  const { result } = renderHook(() => useAdvancedConfig());
@@ -219,3 +221,135 @@ describe("useAdvancedConfig hook", () => {
 	  });
 	});
   });
+
+  // Tests for useFlightSchedule
+  describe("useFlightSchedule hook", () => {
+	it("should initialize with empty flights map", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+	  expect(result.current.flights.size).toBe(0);
+	});
+  
+	it("should add a departure flight correctly", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  act(() => {
+		result.current.addDepartureFlight("EASYJET", 10, undefined, 12345);
+	  });
+  
+	  const flight = Array.from(result.current.flights.values())[0];
+	  expect(flight.callsign).toMatch(/^EASYJET-\d+$/);
+	  expect(flight.type).toBe(FlightType.DEPARTURE);
+	  expect(flight.expected_departure_time).toBe(10);
+	  expect(flight.seed).toBe(12345);
+	});
+  
+	it("should add an arrival flight correctly", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  act(() => {
+		result.current.addArrivalFlight(
+		  "RYANAIR",
+		  EmergencyStatus.NONE,
+		  15,
+		  12,
+		  undefined,
+		  54321
+		);
+	  });
+  
+	  const flight = Array.from(result.current.flights.values())[0];
+	  expect(flight.callsign).toMatch(/^RYANAIR-\d+$/);
+	  expect(flight.type).toBe(FlightType.ARRIVAL);
+	  expect(flight.expected_arrival_time).toBe(12);
+	  expect(flight.remaining_fuel_mins).toBe(15);
+	  expect(flight.emergency_status).toBe(EmergencyStatus.NONE);
+	  expect(flight.seed).toBe(54321);
+	});
+  
+	it("should increment flight IDs correctly", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  act(() => {
+		result.current.addDepartureFlight("EASYJET", 10);
+		result.current.addDepartureFlight("RYANAIR", 15);
+	  });
+  
+	  const flights = Array.from(result.current.flights.values());
+	  expect(flights[1].id).toBe(flights[0].id + 1);
+	});
+  
+	it("should remove a flight by callsign", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  let callsign;
+	  act(() => {
+		callsign = result.current.addDepartureFlight("EASYJET", 10).callsign;
+	  });
+  
+	  act(() => {
+		result.current.removeFlight(callsign);
+	  });
+  
+	  expect(result.current.flights.size).toBe(0);
+	});
+  
+	it("should throw when removing non-existent flight", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+	  expect(() => result.current.removeFlight("INVALID-123")).toThrow(
+		"Unable to remove flight, was not found within schedule"
+	  );
+	});
+  
+	it("should reset flight schedule", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  act(() => {
+		result.current.addDepartureFlight("EASYJET", 10);
+		result.current.addArrivalFlight("RYANAIR", EmergencyStatus.NONE, 15, 12);
+		result.current.resetFlightSchedule();
+	  });
+  
+	  expect(result.current.flights.size).toBe(0);
+	});
+  
+	it("should import a valid flight schedule", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  const newFlights = [
+		{
+		  callsign: "EASYJET-1",
+		  type: FlightType.DEPARTURE,
+		  expected_departure_time: 10,
+		  id: 1,
+		  seed: 123,
+		},
+		{
+		  callsign: "RYANAIR-2",
+		  type: FlightType.ARRIVAL,
+		  expected_arrival_time: 15,
+		  emergency_status: EmergencyStatus.NONE,
+		  remaining_fuel_mins: 20,
+		  id: 2,
+		  seed: 456,
+		},
+	  ];
+  
+	  act(() => {
+		result.current.importFlightSchedule(newFlights);
+	  });
+  
+	  expect(result.current.flights.size).toBe(2);
+	  expect(result.current.flights.get("EASYJET-1").id).toBe(1);
+	  expect(result.current.flights.get("RYANAIR-2").id).toBe(2);
+	});
+  
+	it("should throw when importing invalid flight schedule", () => {
+	  const { result } = renderHook(() => useFlightSchedule());
+  
+	  expect(() =>
+		act(() => result.current.importFlightSchedule([{ invalid: true }]))
+	  ).toThrow();
+	});
+  });
+
+    // Tests for useHazardSchedule
