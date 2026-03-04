@@ -267,8 +267,9 @@ export const useFlightSchedule = () => {
 		repeating,
 		seed = generateAircraftSeed(),
 	) => {
+		if (typeof operator != "string" || operator.length < 2)
+			throw Error("The operator must be at least two characters long");
 		if (
-			typeof operator != "string" ||
 			!isValueInEnum(EmergencyStatus, emergency_status) ||
 			!isNaturalNumber(remaining_fuel_mins) ||
 			!isNaturalNumber(expected_arrival_time)
