@@ -50,18 +50,39 @@ export default function FlightSchedulingSection() {
 
 	const handleAddFlight = () => {
 		setErrorMessage("");
-
+	
 		try {
+			let repeating;
+	
+			if (isRepeating) {
+				if (repeatPeriod <= 0) {
+					throw new Error("Repeat period must be greater than 0.");
+				}
+	
+				if (repeatEnd < expectedTimeMinutes) {
+					throw new Error(
+						"Repeat end time must be greater than or equal to expected time.",
+					);
+				}
+	
+				repeating = {
+					end: repeatEnd,
+					period: repeatPeriod,
+				};
+			}
+	
 			if (flightType === FlightType.DEPARTURE) {
-				addDepartureFlight(operator, expectedTimeMinutes);
+				addDepartureFlight(operator, expectedTimeMinutes, repeating);
 			} else {
 				addArrivalFlight(
 					operator,
 					arrivalEmergencyStatus,
 					arrivalFuelMinutes,
 					expectedTimeMinutes,
+					repeating,
 				);
 			}
+	
 			clearInputs();
 		} catch (error) {
 			setErrorMessage(error.message);
