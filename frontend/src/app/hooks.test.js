@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useRunways } from "./hooks";
 
 // See reference: https://testing-library.com/docs/react-testing-library/api/#renderhook
