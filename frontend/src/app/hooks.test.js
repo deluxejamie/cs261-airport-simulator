@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react";
-import { useRunways } from "./hooks";
+import { useRunways, RunwayModes } from "./hooks";
 
 // See reference: https://testing-library.com/docs/react-testing-library/api/#renderhook
 describe("runway custom hook", () => {
