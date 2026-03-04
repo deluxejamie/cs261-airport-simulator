@@ -7,12 +7,7 @@ import {
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext, useRef } from "react";
-import {
-	ConfigContext,
-	FlightType,
-	isValueInEnum,
-	objectHasProperties,
-} from "@/app/hooks";
+import { ConfigContext, objectHasProperties } from "@/app/hooks";
 import { showNotification } from "@mantine/notifications";
 
 const notificationErrorOptions = {
@@ -144,7 +139,7 @@ export default function ExportImportButtons() {
 			>
 				{(props) => (
 					<Button {...props} loading={importLoading}>
-						Import
+						Import Config
 					</Button>
 				)}
 			</FileButton>
@@ -173,7 +168,7 @@ export default function ExportImportButtons() {
 					exportLoadStop();
 				}}
 			>
-				Export
+				Export Config
 			</Button>
 		</Flex>
 	);
