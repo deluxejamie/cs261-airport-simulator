@@ -83,7 +83,7 @@ export const useRunways = () => {
 	};
 
 	const importRunways = (runways) => {
-		if (!runways?.isArray?.()) throw Error("Invalid runways data");
+		if (!(runways instanceof Array)) throw Error("Invalid runways data");
 		let maxCounter = 0;
 		for (const runway of runways) {
 			if (
@@ -95,7 +95,7 @@ export const useRunways = () => {
 			maxCounter = Math.max(maxCounter, runway.id);
 		}
 
-		setState(runways);
+		valuesSet(runways);
 		setCounter(maxCounter + 1);
 	};
 
@@ -314,30 +314,32 @@ export const useFlightSchedule = () => {
 
 	const importFlightSchedule = (newFlights) => {
 		resetFlightSchedule();
-		if (!newFlights?.isArray?.())
+		if (!(newFlights instanceof Array))
 			throw Error("Flight schedule is not an array");
 		let maxCounter = 1;
 
 		try {
-			for (const flight of newFlights) {
+			for (const [index, flight] of newFlights.entries()) {
 				if (
 					!objectHasProperties(flight, "type", "mode") ||
 					!isValueInEnum(FlightType, flight.type) ||
 					!isNaturalNumber(flight.id) ||
 					typeof flight.seed !== "number"
 				)
-					throw Error(("Flight data is malformed for flight: ", flight));
+					throw Error("Flight data is malformed for flight at index: " + index);
 
 				if (
 					flight.repeating != undefined &&
 					!objectHasProperties(flight.repeating, "end", "period")
 				)
 					throw Error(
-						("Flight repeating data is invalid for flight: ", flight),
+						"Flight repeating data is invalid for flight at index: " + index,
 					);
 
 				if (typeof flight.callsign != "string" || flights.has(flight.callsign))
-					throw Error(("Flight callsign is invalid for flight: ", flight));
+					throw Error(
+						"Flight callsign is invalid for flight at index: " + index,
+					);
 
 				switch (flight.type) {
 					case FlightType.ARRIVAL: {
@@ -346,13 +348,15 @@ export const useFlightSchedule = () => {
 							!isValueInEnum(EmergencyStatus, flight.emergency_status) ||
 							!isNaturalNumber(flight.remaining_fuel_mins)
 						)
-							throw Error(("Invalid arrival flight data for flight: ", flight));
+							throw Error(
+								"Invalid arrival flight data for flight at index: " + index,
+							);
 						break;
 					}
 					case FlightType.DEPARTURE: {
 						if (!isNaturalNumber(flight.expected_departure_time))
 							throw Error(
-								("Invalid departure flight data for flight: ", flight),
+								"Invalid departure flight data for flight at index: " + index,
 							);
 						break;
 					}
@@ -509,35 +513,40 @@ export const useHazardSchedule = () => {
 
 	const importHazardSchedule = (newHazards, flightSchedule, runways) => {
 		resetHazardSchedule();
-		if (!newHazards?.isArray?.())
+		if (!(newHazards instanceof Array))
 			throw Error("Hazard schedule is not an array");
 		let maxCounter = 1;
 
 		try {
-			for (const hazard of newHazards) {
+			for (const [index, hazard] of newHazards.entries()) {
 				if (
 					!objectHasProperties(hazard, "type", "id") ||
 					!isValueInEnum(HazardType, hazard.type) ||
 					!isNaturalNumber(hazard.id)
 				)
-					throw Error(("Hazard data is malformed for hazard: ", hazard));
+					throw Error("Hazard data is malformed for hazard at index:" + index);
 
 				if (callsigns.has(hazard.id))
-					throw Error(("Hazard id is repeated in hazard: ", hazard));
+					throw Error("Hazard id is repeated in hazard at index:" + index);
 
 				switch (hazard.type) {
 					case HazardType.EMERGENCY_EVENT: {
 						if (!flightSchedule.has(hazard.target_arrival_callsign))
-							throw Error(("Hazard applied to nonexistent flight: ", hazard));
+							throw Error(
+								"Hazard at index " + index + " applied to nonexistent flight: ",
+							);
 
 						if (!isNaturalNumber(hazard.time))
-							throw Error(("Invalid or missing hazard time: ", hazard));
+							throw Error(
+								"Invalid or missing hazard time for hazard at index:" + index,
+							);
 						break;
 					}
 					case HazardType.RUNWAY_CLOSURE: {
 						if (!runways.find((r) => r.id == hazard.affected_runway))
 							throw Error(
-								("Runway closure applied to nonexistent runway id", hazard),
+								"Runway closure applied to nonexistent runway id for hazard at index:" +
+									index,
 							);
 
 						if (
@@ -546,8 +555,8 @@ export const useHazardSchedule = () => {
 							!isValueInEnum(RunwayClosureMode, hazard.closure_mode)
 						)
 							throw Error(
-								("Runway closure event is missing or has invalid required properties",
-								hazard),
+								"Runway closure event is missing or has invalid required properties for hazard at index:" +
+									index,
 							);
 
 						if (
@@ -555,7 +564,7 @@ export const useHazardSchedule = () => {
 							!objectHasProperties(hazard.repeating, "end", "period")
 						)
 							throw Error(
-								("Hazard repeating data is invalid for hazard: ", hazard),
+								"Hazard repeating data is invalid for hazard at index:" + index,
 							);
 						break;
 					}

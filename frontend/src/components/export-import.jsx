@@ -60,6 +60,7 @@ export default function ExportImportButtons() {
 						fileReader.onload = () => {
 							try {
 								const data = JSON.parse(fileReader.result);
+								console.log(data);
 
 								// reset all existing config
 								resetRunways();
@@ -89,18 +90,18 @@ export default function ExportImportButtons() {
 								setTimeTakenForTakeoff(data.advancedConfig.timeTakenForTakeoff);
 
 								// import runway config
-								if (!data.runways.isArray?.())
+								if (!(data.runways instanceof Array))
 									throw Error("Runways is not an array");
 								importRunways(data.runways);
 
 								// import flight schedule
-								if (!data.flights.isArray?.())
+								if (!(data.flights instanceof Array))
 									throw Error("Flights is not an array");
 
 								importFlightSchedule(data.flights);
 
 								// import hazard schedule
-								if (!data.hazards.isArray?.())
+								if (!(data.hazards instanceof Array))
 									throw Error("Hazards is not an array");
 								importHazardSchedule(data.hazards, flights, runways);
 
