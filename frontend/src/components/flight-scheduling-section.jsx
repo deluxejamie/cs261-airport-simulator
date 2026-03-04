@@ -43,6 +43,9 @@ export default function FlightSchedulingSection() {
 	const clearInputs = () => {
 		setOperator("");
 		setExpectedTimeMinutes(0);
+		setIsRepeating(false);
+		setRepeatPeriod(10);
+		setRepeatEnd(60);
 	};
 
 	const handleAddFlight = () => {
