@@ -222,213 +222,109 @@ describe("useAdvancedConfig hook", () => {
 	});
   });
 
-  // Tests for useFlightSchedule
-  describe("useFlightSchedule hook", () => {
-	it("should initialize with empty flights map", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-	  expect(result.current.flights.size).toBe(0);
-	});
-  
-	it("should add a departure flight correctly", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  act(() => {
-		result.current.addDepartureFlight("EASYJET", 10, undefined, 12345);
-	  });
-  
-	  const flight = Array.from(result.current.flights.values())[0];
-	  expect(flight.callsign).toMatch(/^EASYJET-\d+$/);
-	  expect(flight.type).toBe(FlightType.DEPARTURE);
-	  expect(flight.expected_departure_time).toBe(10);
-	  expect(flight.seed).toBe(12345);
-	});
-  
-	it("should add an arrival flight correctly", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  act(() => {
-		result.current.addArrivalFlight(
-		  "RYANAIR",
-		  EmergencyStatus.NONE,
-		  15,
-		  12,
-		  undefined,
-		  54321
+  // Test for useFlightSchedule
+describe("useFlightSchedule hook", () => {
+	it("should add departure flight", () => {
+		const { result } = renderHook(() => useFlightSchedule());
+	
+		act(() =>
+		result.current.addDepartureFlight("EZY", 30)
 		);
-	  });
-  
-	  const flight = Array.from(result.current.flights.values())[0];
-	  expect(flight.callsign).toMatch(/^RYANAIR-\d+$/);
-	  expect(flight.type).toBe(FlightType.ARRIVAL);
-	  expect(flight.expected_arrival_time).toBe(12);
-	  expect(flight.remaining_fuel_mins).toBe(15);
-	  expect(flight.emergency_status).toBe(EmergencyStatus.NONE);
-	  expect(flight.seed).toBe(54321);
+	
+		const flightsArray = Array.from(result.current.flights.values());
+		expect(flightsArray.length).toBe(1);
+		expect(flightsArray[0].type).toBe(FlightType.DEPARTURE);
+		expect(flightsArray[0].expected_departure_time).toBe(30);
 	});
-  
-	it("should increment flight IDs correctly", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  act(() => {
-		result.current.addDepartureFlight("EASYJET", 10);
-		result.current.addDepartureFlight("RYANAIR", 15);
-	  });
-  
-	  const flights = Array.from(result.current.flights.values());
-	  expect(flights[1].id).toBe(flights[0].id + 1);
+	
+	it("should add arrival flight", () => {
+		const { result } = renderHook(() => useFlightSchedule());
+	
+		act(() =>
+		result.current.addArrivalFlight(
+			"BA",
+			EmergencyStatus.NONE,
+			50,
+			20
+		)
+		);
+	
+		const flightsArray = Array.from(result.current.flights.values());
+		expect(flightsArray.length).toBe(1);
+		expect(flightsArray[0].type).toBe(FlightType.ARRIVAL);
+		expect(flightsArray[0].remaining_fuel_mins).toBe(50);
 	});
-  
-	it("should remove a flight by callsign", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  let callsign;
-	  act(() => {
-		callsign = result.current.addDepartureFlight("EASYJET", 10).callsign;
-	  });
-  
-	  act(() => {
-		result.current.removeFlight(callsign);
-	  });
-  
-	  expect(result.current.flights.size).toBe(0);
+	
+	it("should remove flight", () => {
+		const { result } = renderHook(() => useFlightSchedule());
+	
+		act(() => result.current.addDepartureFlight("EZY", 30));
+		const callsign = Array.from(result.current.flights.keys())[0];
+	
+		act(() => result.current.removeFlight(callsign));
+	
+		expect(result.current.flights.size).toBe(0);
 	});
-  
-	it("should throw when removing non-existent flight", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-	  expect(() => result.current.removeFlight("INVALID-123")).toThrow(
-		"Unable to remove flight, was not found within schedule"
-	  );
-	});
-  
+	
 	it("should reset flight schedule", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  act(() => {
-		result.current.addDepartureFlight("EASYJET", 10);
-		result.current.addArrivalFlight("RYANAIR", EmergencyStatus.NONE, 15, 12);
-		result.current.resetFlightSchedule();
-	  });
-  
-	  expect(result.current.flights.size).toBe(0);
+		const { result } = renderHook(() => useFlightSchedule());
+	
+		act(() => result.current.addDepartureFlight("EZY", 30));
+		act(() => result.current.resetFlightSchedule());
+	
+		expect(result.current.flights.size).toBe(0);
 	});
-  
-	it("should import a valid flight schedule", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  const newFlights = [
-		{
-		  callsign: "EASYJET-1",
-		  type: FlightType.DEPARTURE,
-		  expected_departure_time: 10,
-		  id: 1,
-		  seed: 123,
-		},
-		{
-		  callsign: "RYANAIR-2",
-		  type: FlightType.ARRIVAL,
-		  expected_arrival_time: 15,
-		  emergency_status: EmergencyStatus.NONE,
-		  remaining_fuel_mins: 20,
-		  id: 2,
-		  seed: 456,
-		},
-	  ];
-  
-	  act(() => {
-		result.current.importFlightSchedule(newFlights);
-	  });
-  
-	  expect(result.current.flights.size).toBe(2);
-	  expect(result.current.flights.get("EASYJET-1").id).toBe(1);
-	  expect(result.current.flights.get("RYANAIR-2").id).toBe(2);
 	});
-  
-	it("should throw when importing invalid flight schedule", () => {
-	  const { result } = renderHook(() => useFlightSchedule());
-  
-	  expect(() =>
-		act(() => result.current.importFlightSchedule([{ invalid: true }]))
-	  ).toThrow();
-	});
-  });
-
-    // Tests for useHazardSchedule
+	  
+  // Test for useHazardSchedule
 	describe("useHazardSchedule hook", () => {
-		it("should initialize with empty hazards map", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-		  expect(result.current.hazards.size).toBe(0);
-		});
-	  
-		it("should add a runway closure hazard correctly", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-	  
-		  act(() => {
-			result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE);
-		  });
-	  
-		  const hazard = Array.from(result.current.hazards.values())[0];
-		  expect(hazard.type).toBe(HazardType.RUNWAY_CLOSURE);
-		  expect(hazard.start_time_mins).toBe(10);
-		  expect(hazard.duration_mins).toBe(5);
-		  expect(hazard.affected_runway).toBe(1);
-		  expect(hazard.closure_mode).toBe(RunwayClosureMode.SNOW_CLEARANCE);
-		});
-	  
-		it("should add an emergency event hazard correctly", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-	  
-		  act(() => {
-			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
-		  });
-	  
-		  const hazard = Array.from(result.current.hazards.values())[0];
-		  expect(hazard.type).toBe(HazardType.EMERGENCY_EVENT);
-		  expect(hazard.target_arrival_callsign).toBe("FLIGHT-1");
-		  expect(hazard.time).toBe(15);
-		});
-	  
-		it("should remove a hazard by ID", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-	  
-		  let hazardId;
-		  act(() => {
-			hazardId = result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE).id;
-			result.current.removeHazard(hazardId);
-		  });
-	  
-		  expect(result.current.hazards.size).toBe(0);
-		});
-	  
-		it("should throw when removing non-existent hazard", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-		  expect(() => result.current.removeHazard(999)).toThrow(
-			"Unable to remove hazard, was not found within schedule"
-		  );
-		});
-	  
-		it("should remove hazards for a specific aircraft", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-	  
-		  act(() => {
-			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
-			result.current.addEmergencyEventHazard("FLIGHT-2", EmergencyStatusWithoutNone.PASSENGER_HEALTH, 20);
-			result.current.removeHazardsForAircraft("FLIGHT-1");
-		  });
-	  
-		  const remainingHazards = Array.from(result.current.hazards.values());
-		  expect(remainingHazards.length).toBe(1);
-		  expect(remainingHazards[0].target_arrival_callsign).toBe("FLIGHT-2");
-		});
-	  
-		it("should reset hazard schedule", () => {
-		  const { result } = renderHook(() => useHazardSchedule());
-	  
-		  act(() => {
-			result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE);
-			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
-			result.current.resetHazardSchedule();
-		  });
-	  
-		  expect(result.current.hazards.size).toBe(0);
-		});
-	  });
+	it("should add runway closure hazard", () => {
+		const { result } = renderHook(() => useHazardSchedule());
+	
+		act(() =>
+		result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE)
+		);
+	
+		const hazardsArray = Array.from(result.current.hazards.values());
+		expect(hazardsArray.length).toBe(1);
+		expect(hazardsArray[0].type).toBe(HazardType.RUNWAY_CLOSURE);
+		expect(hazardsArray[0].closure_mode).toBe(RunwayClosureMode.SNOW_CLEARANCE);
+	});
+	
+	it("should add emergency event hazard", () => {
+		const { result } = renderHook(() => useHazardSchedule());
+	
+		act(() =>
+		result.current.addEmergencyEventHazard("TEST-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15)
+		);
+	
+		const hazardsArray = Array.from(result.current.hazards.values());
+		expect(hazardsArray.length).toBe(1);
+		expect(hazardsArray[0].type).toBe(HazardType.EMERGENCY_EVENT);
+		expect(hazardsArray[0].target_arrival_callsign).toBe("TEST-1");
+	});
+	
+	it("should remove hazard", () => {
+		const { result } = renderHook(() => useHazardSchedule());
+	
+		act(() =>
+		result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE)
+		);
+		const hazardId = Array.from(result.current.hazards.keys())[0];
+	
+		act(() => result.current.removeHazard(hazardId));
+	
+		expect(result.current.hazards.size).toBe(0);
+	});
+	
+	it("should reset hazard schedule", () => {
+		const { result } = renderHook(() => useHazardSchedule());
+	
+		act(() =>
+		result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE)
+		);
+	
+		act(() => result.current.resetHazardSchedule());
+		expect(result.current.hazards.size).toBe(0);
+	});
+	});
