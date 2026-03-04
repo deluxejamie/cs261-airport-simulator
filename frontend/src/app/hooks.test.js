@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react";
-import { useRunways, RunwayModes } from "./hooks";
+import { useRunways, RunwayModes, useAdvancedConfig } from "./hooks";
 
 describe("useRunways hook", () => {
   it("should start empty", () => {
@@ -130,3 +130,92 @@ describe("useRunways hook", () => {
     expect(result.current.runways).toEqual([]);
   });
 });
+
+describe("useAdvancedConfig hook", () => {
+	it("should have default values on initialization", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  expect(result.current.advancedConfig).toEqual({
+		maxDelayBeforeCancelled: 10,
+		fuelThresholdBeforeRedirected: 10,
+		timeTakenForTakeoff: 5,
+		timeTakenForLanding: 5,
+	  });
+	});
+  
+	it("should set maxDelayBeforeCancelled correctly", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  act(() => {
+		result.current.setMaxDelayBeforeCancelled(15);
+	  });
+	  expect(result.current.advancedConfig.maxDelayBeforeCancelled).toBe(15);
+	});
+  
+	it("should throw error for invalid maxDelayBeforeCancelled", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  expect(() => act(() => result.current.setMaxDelayBeforeCancelled(-1))).toThrow();
+	  expect(() => act(() => result.current.setMaxDelayBeforeCancelled(3.5))).toThrow();
+	  expect(() => act(() => result.current.setMaxDelayBeforeCancelled("abc"))).toThrow();
+	});
+  
+	it("should set fuelThresholdBeforeRedirected correctly", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  act(() => {
+		result.current.setFuelThresholdBeforeRedirected(20);
+	  });
+	  expect(result.current.advancedConfig.fuelThresholdBeforeRedirected).toBe(20);
+	});
+  
+	it("should throw error for invalid fuelThresholdBeforeRedirected", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  expect(() => act(() => result.current.setFuelThresholdBeforeRedirected(-5))).toThrow();
+	  expect(() => act(() => result.current.setFuelThresholdBeforeRedirected(4.7))).toThrow();
+	  expect(() => act(() => result.current.setFuelThresholdBeforeRedirected("xyz"))).toThrow();
+	});
+  
+	it("should set timeTakenForTakeoff correctly", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  act(() => {
+		result.current.setTimeTakenForTakeoff(8);
+	  });
+	  expect(result.current.advancedConfig.timeTakenForTakeoff).toBe(8);
+	});
+  
+	it("should throw error for invalid timeTakenForTakeoff", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  expect(() => act(() => result.current.setTimeTakenForTakeoff(0))).toThrow();
+	  expect(() => act(() => result.current.setTimeTakenForTakeoff(-2))).toThrow();
+	  expect(() => act(() => result.current.setTimeTakenForTakeoff(3.2))).toThrow();
+	});
+  
+	it("should set timeTakenForLanding correctly", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  act(() => {
+		result.current.setTimeTakenForLanding(7);
+	  });
+	  expect(result.current.advancedConfig.timeTakenForLanding).toBe(7);
+	});
+  
+	it("should throw error for invalid timeTakenForLanding", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  expect(() => act(() => result.current.setTimeTakenForLanding(0))).toThrow();
+	  expect(() => act(() => result.current.setTimeTakenForLanding(-1))).toThrow();
+	  expect(() => act(() => result.current.setTimeTakenForLanding(2.5))).toThrow();
+	});
+  
+	it("should reset to default values", () => {
+	  const { result } = renderHook(() => useAdvancedConfig());
+	  act(() => {
+		result.current.setMaxDelayBeforeCancelled(20);
+		result.current.setFuelThresholdBeforeRedirected(15);
+		result.current.setTimeTakenForTakeoff(6);
+		result.current.setTimeTakenForLanding(7);
+		result.current.resetAdvancedConfig();
+	  });
+	  expect(result.current.advancedConfig).toEqual({
+		maxDelayBeforeCancelled: 10,
+		fuelThresholdBeforeRedirected: 10,
+		timeTakenForTakeoff: 5,
+		timeTakenForLanding: 5,
+	  });
+	});
+  });
