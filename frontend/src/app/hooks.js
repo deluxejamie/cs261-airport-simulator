@@ -321,10 +321,9 @@ export const useFlightSchedule = () => {
 		try {
 			for (const [index, flight] of newFlights.entries()) {
 				if (
-					!objectHasProperties(flight, "type", "mode") ||
 					!isValueInEnum(FlightType, flight.type) ||
 					!isNaturalNumber(flight.id) ||
-					typeof flight.seed !== "number"
+					!isNaturalNumber(flight.seed)
 				)
 					throw Error("Flight data is malformed for flight at index: " + index);
 
