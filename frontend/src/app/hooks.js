@@ -75,7 +75,7 @@ export const useRunways = () => {
 		if (index === -1)
 		  throw Error("Attempted to remove a runway which does not exist");
 	  
-		valuesFilter((r) => r.id !== id); // state updates internally
+		valuesFilter((r) => r.id !== id); //state will update internally
 	};
 
 	const resetRunways = () => {
