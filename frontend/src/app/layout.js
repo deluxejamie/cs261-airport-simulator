@@ -7,8 +7,6 @@ import {
 	mantineHtmlProps,
 } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { ConfigProvider } from "./hooks";
-
 export const metadata = {
 	title: "Airport Simulator",
 	description: "CS261 Group 4 Coursework for Dorset Software",
@@ -23,7 +21,7 @@ export default function RootLayout({ children }) {
 			<body>
 				<MantineProvider>
 					<Notifications />
-					<ConfigProvider>{children}</ConfigProvider>
+					{children}
 				</MantineProvider>
 			</body>
 		</html>

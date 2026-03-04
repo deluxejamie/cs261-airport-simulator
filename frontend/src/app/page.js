@@ -1,7 +1,12 @@
 "use client";
 
 import SimulationConfigForm from "@/components/simulation-config-form";
+import { ConfigProvider } from "./hooks";
 
 export default function Home() {
-	return <SimulationConfigForm />;
+	return (
+		<ConfigProvider>
+			<SimulationConfigForm />
+		</ConfigProvider>
+	);
 }
