@@ -71,12 +71,12 @@ export const useRunways = () => {
 	};
 
 	const removeRunway = (id) => {
-		const sizebefore = values.length;
-		const res = valuesFilter((r) => r.id !== id);
-		if (res.length == sizebefore)
-			throw Error("Attempted to remove a runway which does not exist");
-		return res;
-	};
+		const index = values.findIndex((r) => r.id === id);
+		if (index === -1)
+		  throw Error("Attempted to remove a runway which does not exist");
+	  
+		valuesFilter((r) => r.id !== id); // state updates internally
+	  };
 
 	const resetRunways = () => {
 		return valuesSet([]);
