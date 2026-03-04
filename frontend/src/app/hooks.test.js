@@ -353,3 +353,82 @@ describe("useAdvancedConfig hook", () => {
   });
 
     // Tests for useHazardSchedule
+	describe("useHazardSchedule hook", () => {
+		it("should initialize with empty hazards map", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+		  expect(result.current.hazards.size).toBe(0);
+		});
+	  
+		it("should add a runway closure hazard correctly", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+	  
+		  act(() => {
+			result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE);
+		  });
+	  
+		  const hazard = Array.from(result.current.hazards.values())[0];
+		  expect(hazard.type).toBe(HazardType.RUNWAY_CLOSURE);
+		  expect(hazard.start_time_mins).toBe(10);
+		  expect(hazard.duration_mins).toBe(5);
+		  expect(hazard.affected_runway).toBe(1);
+		  expect(hazard.closure_mode).toBe(RunwayClosureMode.SNOW_CLEARANCE);
+		});
+	  
+		it("should add an emergency event hazard correctly", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+	  
+		  act(() => {
+			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
+		  });
+	  
+		  const hazard = Array.from(result.current.hazards.values())[0];
+		  expect(hazard.type).toBe(HazardType.EMERGENCY_EVENT);
+		  expect(hazard.target_arrival_callsign).toBe("FLIGHT-1");
+		  expect(hazard.time).toBe(15);
+		});
+	  
+		it("should remove a hazard by ID", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+	  
+		  let hazardId;
+		  act(() => {
+			hazardId = result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE).id;
+			result.current.removeHazard(hazardId);
+		  });
+	  
+		  expect(result.current.hazards.size).toBe(0);
+		});
+	  
+		it("should throw when removing non-existent hazard", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+		  expect(() => result.current.removeHazard(999)).toThrow(
+			"Unable to remove hazard, was not found within schedule"
+		  );
+		});
+	  
+		it("should remove hazards for a specific aircraft", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+	  
+		  act(() => {
+			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
+			result.current.addEmergencyEventHazard("FLIGHT-2", EmergencyStatusWithoutNone.PASSENGER_HEALTH, 20);
+			result.current.removeHazardsForAircraft("FLIGHT-1");
+		  });
+	  
+		  const remainingHazards = Array.from(result.current.hazards.values());
+		  expect(remainingHazards.length).toBe(1);
+		  expect(remainingHazards[0].target_arrival_callsign).toBe("FLIGHT-2");
+		});
+	  
+		it("should reset hazard schedule", () => {
+		  const { result } = renderHook(() => useHazardSchedule());
+	  
+		  act(() => {
+			result.current.addRunwayClosureHazard(10, 5, 1, RunwayClosureMode.SNOW_CLEARANCE);
+			result.current.addEmergencyEventHazard("FLIGHT-1", EmergencyStatusWithoutNone.MECHANICAL_FAIL, 15);
+			result.current.resetHazardSchedule();
+		  });
+	  
+		  expect(result.current.hazards.size).toBe(0);
+		});
+	  });
