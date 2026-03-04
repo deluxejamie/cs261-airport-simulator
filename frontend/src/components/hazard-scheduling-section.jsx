@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import {
 	Alert,
 	Button,
@@ -13,7 +13,12 @@ import {
 	Text,
 	Title,
 } from "@mantine/core";
-import { ConfigContext, HazardType, RunwayClosureMode } from "../app/hooks";
+import {
+	ConfigContext,
+	HazardType,
+	RunwayClosureMode,
+	FlightType,
+} from "../app/hooks";
 
 const formatLabel = (value) =>
 	value
@@ -22,15 +27,14 @@ const formatLabel = (value) =>
 		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join(" ");
 
-export default function HazardSchedulingSection({
-	onHazardsChange,
-	arrivalCallsigns,
-}) {
+export default function HazardSchedulingSection() {
 	const {
+		flights,
 		hazards,
 		addRunwayClosureHazard,
 		addEmergencyEventHazard,
 		removeHazard,
+		runways,
 	} = useContext(ConfigContext);
 
 	const [hazardType, setHazardType] = useState(HazardType.RUNWAY_CLOSURE);
@@ -45,9 +49,13 @@ export default function HazardSchedulingSection({
 	const [targetArrivalCallsign, setTargetArrivalCallsign] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 
-	useEffect(() => {
-		onHazardsChange?.(hazards);
-	}, [hazards, onHazardsChange]);
+	const arrivalCallsigns = useMemo(
+		() =>
+			[...flights.values()]
+				.filter((flight) => flight.type === FlightType.ARRIVAL)
+				.map((flight) => flight.callsign),
+		[flights],
+	);
 
 	const selectedArrivalCallsign =
 		targetArrivalCallsign || arrivalCallsigns[0] || "";
@@ -102,7 +110,7 @@ export default function HazardSchedulingSection({
 					]}
 				/>
 
-				{hazardType === HazardType.RUNWAY_CLOSURE ?
+				{hazardType === HazardType.RUNWAY_CLOSURE ? (
 					<Group grow align="end">
 						<NumberInput
 							label="Start time (mins from simulation start)"
@@ -118,10 +126,14 @@ export default function HazardSchedulingSection({
 							onChange={(value) => setDurationMinutes(Number(value ?? 1))}
 						/>
 
-						<NumberInput
+						<Select
 							label="Affected runway"
-							min={1}
 							value={affectedRunway}
+							data={Object.values(runways).map((r) => ({
+								value: r.id,
+								label: `Runway ${r.id}`,
+							}))}
+							disabled={runways.length === 0}
 							onChange={(value) => setAffectedRunway(Number(value ?? 1))}
 						/>
 
@@ -137,7 +149,8 @@ export default function HazardSchedulingSection({
 							}))}
 						/>
 					</Group>
-				:	<Select
+				) : (
+					<Select
 						label="Intended arrival callsign"
 						value={selectedArrivalCallsign}
 						onChange={(value) => setTargetArrivalCallsign(value || "")}
@@ -148,24 +161,36 @@ export default function HazardSchedulingSection({
 						}))}
 						disabled={arrivalCallsigns.length === 0}
 					/>
-				}
+				)}
 
-				{(
-					hazardType === HazardType.EMERGENCY_EVENT &&
-					arrivalCallsigns.length === 0
-				) ?
-					<Text size="sm" c="yellow.8">
-						No arrival callsigns available yet. Add an arrival in the scheduling
-						section first.
-					</Text>
-				:	null}
-
-				{errorMessage ?
-					<Alert color="red">{errorMessage}</Alert>
-				:	null}
+				{errorMessage ? <Alert color="red">{errorMessage}</Alert> : null}
 
 				<Group justify="flex-end">
-					<Button onClick={handleAddHazard}>Add hazard</Button>
+					{runways.length === 0 && hazardType == HazardType.RUNWAY_CLOSURE ? (
+						<Text size="sm" c="yellow.8">
+							You need to add a runway before scheduling a runway closure
+							hazard.
+						</Text>
+					) : null}
+
+					{arrivalCallsigns.length === 0 &&
+					hazardType === HazardType.EMERGENCY_EVENT ? (
+						<Text size="sm" c="yellow.8">
+							No arrival callsigns available yet. Add an arrival in the
+							scheduling section first.
+						</Text>
+					) : null}
+					<Button
+						onClick={handleAddHazard}
+						disabled={
+							(runways.length === 0 &&
+								hazardType === HazardType.RUNWAY_CLOSURE) ||
+							(arrivalCallsigns.length === 0 &&
+								hazardType === HazardType.EMERGENCY_EVENT)
+						}
+					>
+						Add hazard
+					</Button>
 				</Group>
 
 				<Table striped withTableBorder>
@@ -204,7 +229,7 @@ export default function HazardSchedulingSection({
 								</Table.Td>
 							</Table.Tr>
 						))}
-						{hazards.length === 0 ?
+						{hazards.length === 0 ? (
 							<Table.Tr>
 								<Table.Td colSpan={8}>
 									<Text c="dimmed" ta="center">
@@ -212,7 +237,7 @@ export default function HazardSchedulingSection({
 									</Text>
 								</Table.Td>
 							</Table.Tr>
-						:	null}
+						) : null}
 					</Table.Tbody>
 				</Table>
 			</Stack>

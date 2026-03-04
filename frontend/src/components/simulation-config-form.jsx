@@ -16,22 +16,10 @@ export default function SimulationConfigForm() {
 	const [flights, setFlights] = useState([]);
 	const [hazards, setHazards] = useState([]);
 
-	const { advancedConfig } = useContext(ConfigContext);
-	const arrivalCallsigns = useMemo(
-		() =>
-			flights
-				.filter((flight) => flight.type === FlightType.ARRIVAL)
-				.map((flight) => flight.callsign),
-		[flights],
-	);
-
 	return (
 		<Stack maw={980} mx="auto" p="xl" gap="lg">
 			<div>
-				<Title order={1}>Airport Simulator</Title>
-				<Text c="dimmed">
-					Configuration view · Ticket 1 + Ticket 2 + Ticket 3
-				</Text>
+				<Title order={1}>Dorset Software Airport Simulator</Title>
 			</div>
 
 			<Card withBorder radius="md" p="lg">
@@ -40,11 +28,7 @@ export default function SimulationConfigForm() {
 						Arrival & departure scheduling
 					</Badge>
 
-					<FlightSchedulingSection onFlightsChange={setFlights} />
-
-					<Text size="sm" c="dimmed">
-						Scheduled flights in state: {flights.length}
-					</Text>
+					<FlightSchedulingSection />
 				</Stack>
 			</Card>
 
@@ -54,14 +38,7 @@ export default function SimulationConfigForm() {
 						Hazards scheduling
 					</Badge>
 
-					<HazardSchedulingSection
-						onHazardsChange={setHazards}
-						arrivalCallsigns={arrivalCallsigns}
-					/>
-
-					<Text size="sm" c="dimmed">
-						Scheduled hazards in state: {hazards.length}
-					</Text>
+					<HazardSchedulingSection />
 				</Stack>
 			</Card>
 
