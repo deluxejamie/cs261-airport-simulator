@@ -86,4 +86,10 @@ public final class HoldingPattern {
         }
         return null;
     }
+    public boolean containsAircraft(Aircraft a) {
+        for (Entry e : queue) {
+            if (e.aircraft == a) return true;
+        }
+        return false;
+    }
 }

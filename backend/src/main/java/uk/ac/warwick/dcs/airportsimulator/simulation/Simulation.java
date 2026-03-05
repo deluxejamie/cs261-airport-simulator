@@ -2,12 +2,15 @@ package uk.ac.warwick.dcs.airportsimulator.simulation;
 
 import uk.ac.warwick.dcs.airportsimulator.events.IEvent;
 import uk.ac.warwick.dcs.airportsimulator.events.PlainEvent;
+import uk.ac.warwick.dcs.airportsimulator.events.NormDistEvent;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventType;
 import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLog;
@@ -26,6 +29,7 @@ public class Simulation {
     private final List<Runway> runways;
     private final HoldingPattern holdingPattern;
     private final TakeOffQueue takeOffQueue;
+    private final Set<Aircraft> arrivalsEnteredSim = new HashSet<>();
 
     private int simTime;
 
@@ -110,6 +114,7 @@ public class Simulation {
 
             if (op == AircraftOp.ARRIVAL) {
                 holdingPattern.addAircraft(a);
+                arrivalsEnteredSim.add(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
             } else {
                 takeOffQueue.addAircraft(a);
@@ -117,14 +122,13 @@ public class Simulation {
             }
         };
 
+        long seed = a.getCallSign().hashCode();
         IEvent event;
-
         if (interval > 0) {
-            event = new PlainEvent(scheduled, interval, end, action);
+            event = new NormDistEvent(scheduled, interval, end, seed, action);
         } else {
-            event = new PlainEvent(scheduled, action);
+            event = new NormDistEvent(scheduled, seed, action);
         }
-
         eventSchedular.addEvent(event);
     }
 
@@ -155,6 +159,13 @@ public class Simulation {
         Objects.requireNonNull(emergencyStatus, "emergencyStatus");
 
         Runnable action = () -> {
+            boolean entered = arrivalsEnteredSim.contains(a);
+            boolean inHolding = holdingPattern.containsAircraft(a);
+            if (entered && !inHolding) {
+                return;
+            }
+            // otherwise do the following
+            a.setEmergencyStatus(emergencyStatus);
             HashMap<String, Object> attr = new HashMap<>();
             attr.put("callSign", a.getCallSign());
             attr.put("emergencyStatus", emergencyStatus.toString());

@@ -115,6 +115,10 @@ public class Aircraft {
         return emergencyStatus;
     }
 
+    public void setEmergencyStatus(EmergencyStatus emergencyStatus) {
+        this.emergencyStatus = emergencyStatus;
+    }
+
     /* The aircraft's initialFuel (in minutes) */
     private final int initialFuel;
 
@@ -137,7 +141,7 @@ public class Aircraft {
     private final int groundSpeed;
 
     /* The aircraft's emergencyStatus */
-    private final EmergencyStatus emergencyStatus;
+    private EmergencyStatus emergencyStatus;
 
     /* The time the aircraft has no fuel remaining */
     private final int timeFuelRunsOut;
