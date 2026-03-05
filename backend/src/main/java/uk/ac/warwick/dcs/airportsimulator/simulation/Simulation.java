@@ -106,7 +106,7 @@ public class Simulation {
             final Aircraft takeoff = takeOffQueue.peekNextAircraft();
             if (takeoff != null && takeoff.getScheduledTime() >= simTime)
             {
-                holdingPattern.getNextAircraft();
+                takeOffQueue.getNextAircraft();
             }
         }
 
