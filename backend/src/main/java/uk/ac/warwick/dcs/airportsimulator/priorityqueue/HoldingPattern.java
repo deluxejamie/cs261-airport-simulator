@@ -27,7 +27,7 @@ public final class HoldingPattern {
     }
 
     private final PriorityQueue<Entry> queue;
-    private final AtomicLong seq = new AtomicLong(0);
+    private long seq = 0;
 
     /** Max aircraft allowed in holding pattern. <=0 means unlimited. */
     private final int capacity;
@@ -62,7 +62,7 @@ public final class HoldingPattern {
 
     public boolean addAircraft(Aircraft a) {
         if (isFull()) return false;
-        queue.add(new Entry(a, seq.getAndIncrement()));
+        queue.add(new Entry(a, seq++));
         return true;
     }
 
