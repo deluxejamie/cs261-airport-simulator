@@ -1,10 +1,16 @@
 package uk.ac.warwick.dcs.airportsimulator.simulator;
 
 import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
-import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.util.Objects;
 
+/**
+ * Runs a Simulation until it finishes.
+ *
+ * Note:
+ * Simulation currently provides stepTestTillScrumMerged(dt) as a temporary stepping
+ * mechanism while other scrum tickets are pending.
+ */
 public final class Simulator {
 
     private final Simulation simulation;
@@ -13,16 +19,17 @@ public final class Simulator {
         this.simulation = Objects.requireNonNull(simulation, "simulation");
     }
 
+    /**
+     * Execute the simulation until completion and return a SimulationResult.
+     */
     public SimulationResult run() {
         SimulationResult result = new SimulationResult();
 
-        // run any events scheduled at t=0
-        simulation.getEventSchedular().step(simulation.getSimTime());
+        int safetyCap = 1_000_000; // prevent accidental infinite loops during early stage
 
-        int safetyCap = 1_000_000;
         while (!simulation.isFinished() && safetyCap-- > 0) {
-            simulation.setSimTime(simulation.getSimTime() + 1);
-            simulation.getEventSchedular().step(simulation.getSimTime());
+            // Advance the simulation by 1 minute using the temporary stepping function.
+            simulation.stepTestTillScrumMerged(1);
         }
 
         result.finalizeAverages();
