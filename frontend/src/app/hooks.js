@@ -1,6 +1,6 @@
 "use client";
 import { useListState, useCounter, useSetState, useMap } from "@mantine/hooks";
-import { createContext } from "react";
+import { createContext, useRef } from "react";
 
 export const RunwayModes = {
 	MIXED_MODE: "mixed_mode",
@@ -57,24 +57,23 @@ export const useRunways = () => {
 		values,
 		{ append: valuesAppend, filter: valuesFilter, setState: valuesSet },
 	] = useListState([]);
-	const [counter, { increment: incrementCounter, set: setCounter }] =
-		useCounter(0);
+	const counter = useRef(1);
 
 	const addRunway = (mode) => {
 		if (!isValueInEnum(RunwayModes, mode)) throw Error("Invalid runway mode");
 
 		if (values.length == 10)
 			throw Error("There are already 10 runways being stored (max reached)");
-		const res = valuesAppend({ id: counter, mode });
-		incrementCounter();
+		const res = valuesAppend({ id: counter.current, mode });
+		counter.current += 1;
 		return res;
 	};
 
 	const removeRunway = (id) => {
 		const index = values.findIndex((r) => r.id === id);
 		if (index === -1)
-		  throw Error("Attempted to remove a runway which does not exist");
-	  
+			throw Error("Attempted to remove a runway which does not exist");
+
 		valuesFilter((r) => r.id !== id); //state will update internally
 	};
 
@@ -96,7 +95,7 @@ export const useRunways = () => {
 		}
 
 		valuesSet(runways);
-		setCounter(maxCounter + 1);
+		counter.current = maxCounter + 1;
 	};
 
 	return {
