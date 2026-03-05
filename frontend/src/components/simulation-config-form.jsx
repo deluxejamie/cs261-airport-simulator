@@ -1,97 +1,118 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Badge, Card, Stack, Text, Title } from "@mantine/core";
+import {
+	Badge,
+	Button,
+	Card,
+	Group,
+	Stack,
+	Title,
+	Tooltip,
+} from "@mantine/core";
+import RunwayConfigurationSection from "./runway-configuration-section";
 import FlightSchedulingSection from "./flight-scheduling-section";
 import HazardSchedulingSection from "./hazard-scheduling-section";
 import AdvancedConfigSection from "./advanced-config-section";
-import RunwayConfigurationSection from "./runway-configuration-section";
-import { FlightType } from "../app/hooks";
+import ExportImportButtons, {
+	generateConfigJSON,
+	notificationErrorOptions,
+} from "./export-import";
+import { useContext } from "react";
+import { ConfigContext } from "@/app/hooks";
+import { showNotification } from "@mantine/notifications";
+import { useRouter } from "next/navigation";
+import { createSimulation } from "@/lib/simulation-api";
 
 export default function SimulationConfigForm() {
-  const [flights, setFlights] = useState([]);
-  const [hazards, setHazards] = useState([]);
-  const [runways, setRunways] = useState([]);
-  const [advancedConfig, setAdvancedConfig] = useState({
-    maxDelayBeforeCancelled: 10,
-    fuelThresholdBeforeRedirected: 10,
-    timeTakenForTakeoff: 5,
-    timeTakenForLanding: 5,
-  });
+	const { runways, advancedConfig, flights, hazards } =
+		useContext(ConfigContext);
 
-  const arrivalCallsigns = useMemo(
-    () =>
-      flights
-        .filter((flight) => flight.type === FlightType.ARRIVAL)
-        .map((flight) => flight.callsign),
-    [flights],
-  );
+	const router = useRouter();
 
-  return (
-    <Stack maw={980} mx="auto" p="xl" gap="lg">
-      <div>
-        <Title order={1}>Airport Simulator</Title>
-        <Text c="dimmed">Configuration view · merged hooks version</Text>
-      </div>
+	return (
+		<Stack maw={980} mx="auto" p="xl" gap="lg">
+			<Group justify="space-between">
+				<Title order={1}>Dorset Software Airport Simulator</Title>
+				<ExportImportButtons />
+			</Group>
 
-      <Card withBorder radius="md" p="lg">
-        <Stack>
-          <Badge variant="light" w="fit-content">
-            Arrival & departure scheduling
-          </Badge>
+			<Card withBorder radius="md" p="lg">
+				<Stack>
+					<Badge variant="light" w="fit-content">
+						Basic runway configuration
+					</Badge>
 
-          <FlightSchedulingSection onFlightsChange={setFlights} />
+					<RunwayConfigurationSection />
+				</Stack>
+			</Card>
 
-          <Text size="sm" c="dimmed">
-            Scheduled flights in state: {flights.length}
-          </Text>
-        </Stack>
-      </Card>
+			<Card withBorder radius="md" p="lg">
+				<Stack>
+					<Badge variant="light" w="fit-content">
+						Arrival & departure scheduling
+					</Badge>
 
-      <Card withBorder radius="md" p="lg">
-        <Stack>
-          <Badge variant="light" w="fit-content">
-            Hazards scheduling
-          </Badge>
+					<FlightSchedulingSection />
+				</Stack>
+			</Card>
 
-          <HazardSchedulingSection
-            onHazardsChange={setHazards}
-            arrivalCallsigns={arrivalCallsigns}
-          />
+			<Card withBorder radius="md" p="lg">
+				<Stack>
+					<Badge variant="light" w="fit-content">
+						Hazards scheduling
+					</Badge>
 
-          <Text size="sm" c="dimmed">
-            Scheduled hazards in state: {hazards.length}
-          </Text>
-        </Stack>
-      </Card>
+					<HazardSchedulingSection />
+				</Stack>
+			</Card>
 
-      <Card withBorder radius="md" p="lg">
-        <Stack>
-          <Badge variant="light" w="fit-content">
-            Basic runway configuration
-          </Badge>
+			<Card withBorder radius="md" p="lg">
+				<Stack>
+					<Badge variant="light" w="fit-content">
+						Advanced configuration
+					</Badge>
+					<AdvancedConfigSection />
+				</Stack>
+			</Card>
+			<Tooltip
+				label="You must configure at least one runway and schedule at least one flight"
+				disabled={!(runways.length == 0 || flights.size == 0)}
+			>
+				<Button
+					gradient={{ from: "indigo", to: "cyan", deg: 90 }}
+					fullWidth
+					disabled={runways.length == 0 || flights.size == 0}
+					onClick={() => {
+						if (runways.length == 0 || flights.size == 0) {
+							showNotification({
+								...notificationErrorOptions,
+								message:
+									"Your simulation configuration is incomplete; you must include at least one runway",
+							});
+							return;
+						}
+						const configData = generateConfigJSON(
+							runways,
+							advancedConfig,
+							flights,
+							hazards,
+						);
 
-          <RunwayConfigurationSection onRunwaysChange={setRunways} />
-
-          <Text size="sm" c="dimmed">
-            Configured runways in state: {runways.length}
-          </Text>
-        </Stack>
-      </Card>
-
-      <Card withBorder radius="md" p="lg">
-        <Stack>
-          <Badge variant="light" w="fit-content">
-            Advanced configuration
-          </Badge>
-
-          <AdvancedConfigSection onAdvancedConfigChange={setAdvancedConfig} />
-
-          <Text size="sm" c="dimmed">
-            Advanced config values loaded: {Object.keys(advancedConfig).length}
-          </Text>
-        </Stack>
-      </Card>
-    </Stack>
-  );
+						const simId = createSimulation(configData);
+						if (simId == "request_failed") {
+							showNotification({
+								...notificationErrorOptions,
+								message:
+									"Failure to contact simulation server. Please check your intranet connectivity and try again",
+							});
+						} else {
+							router.push(`/simulation/${simId}`);
+						}
+					}}
+				>
+					Run Simulation
+				</Button>
+			</Tooltip>
+		</Stack>
+	);
 }

@@ -10,13 +10,13 @@ import { useContext, useRef } from "react";
 import { ConfigContext, objectHasProperties } from "@/app/hooks";
 import { showNotification } from "@mantine/notifications";
 
-const notificationErrorOptions = {
+export const notificationErrorOptions = {
 	autoClose: 3000,
 	color: "#ff0000",
 	icon: <IconExclamationCircleFilled size={18} />,
 };
 
-const notificationSuccessOptions = {
+export const notificationSuccessOptions = {
 	autoClose: 3000,
 	color: "#3283a8",
 	icon: <IconSettingsFilled size={18} />,
@@ -188,7 +188,7 @@ export const generateConfigJSON = (
 	advancedConfig,
 	flights,
 	hazards,
-	args,
+	args = [],
 ) => {
 	return JSON.stringify(
 		{
