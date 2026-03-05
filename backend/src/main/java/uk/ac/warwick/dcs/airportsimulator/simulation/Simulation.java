@@ -164,8 +164,14 @@ public class Simulation {
             if (entered && !inHolding) {
                 return;
             }
-            // otherwise do the following
+            if (inHolding) {
+                holdingPattern.removeAircraft(a);
+            }
             a.setEmergencyStatus(emergencyStatus);
+
+            if (inHolding) {
+                holdingPattern.addAircraft(a);
+            }
             HashMap<String, Object> attr = new HashMap<>();
             attr.put("callSign", a.getCallSign());
             attr.put("emergencyStatus", emergencyStatus.toString());

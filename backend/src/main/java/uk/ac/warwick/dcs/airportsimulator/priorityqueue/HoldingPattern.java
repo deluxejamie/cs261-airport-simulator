@@ -76,7 +76,6 @@ public final class HoldingPattern {
         return e == null ? null : e.aircraft;
     }
 
-    /** Optional helper for diversion checks in Simulation loop */
     public Aircraft pollIfFuelCritical(int simTime) {
         Entry e = queue.peek();
         if (e == null) return null;
@@ -91,5 +90,17 @@ public final class HoldingPattern {
             if (e.aircraft == a) return true;
         }
         return false;
+    }
+
+    public boolean removeAircraft(Aircraft a) {
+        Entry found = null;
+        for (Entry e : queue) {
+            if (e.aircraft == a) {
+                found = e;
+                break;
+            }
+        }
+        if (found == null) return false;
+        return queue.remove(found);
     }
 }
