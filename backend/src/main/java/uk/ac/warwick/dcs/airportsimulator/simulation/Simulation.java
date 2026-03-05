@@ -7,6 +7,7 @@ import uk.ac.warwick.dcs.airportsimulator.eventlog.EventType;
 import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
+import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,6 +111,24 @@ public class Simulation {
             }
         }
 
+    }
+
+    public SimulationResult run() {
+        SimulationResult result = new SimulationResult();
+
+        // Execute events scheduled at t=0
+        eventSchedular.step(simTime);
+
+        int safetyCap = 1_000_000;
+        while (!isFinished() && safetyCap-- > 0) {
+            simTime += 1;
+            eventSchedular.step(simTime);
+
+            // Later tickets add: runway assignment, cancellation/diversion, metrics updates, etc.
+        }
+
+        result.finalizeAverages();
+        return result;
     }
 
     /**
