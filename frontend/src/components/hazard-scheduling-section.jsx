@@ -130,7 +130,7 @@ export default function HazardSchedulingSection() {
 							label="Affected runway"
 							value={affectedRunway}
 							data={Object.values(runways).map((r) => ({
-								value: r.id,
+								value: r.id.toString(),
 								label: `Runway ${r.id}`,
 							}))}
 							disabled={runways.length === 0}
