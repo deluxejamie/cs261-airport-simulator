@@ -4,7 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uk.ac.warwick.dcs.airportsimulator.entity.*;
 import uk.ac.warwick.dcs.airportsimulator.repository.*;
-import uk.ac.warwick.dcs.airportsimulator.simulator.SimulationResult;
+import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 import java.util.List;
 import java.util.Optional;
 
