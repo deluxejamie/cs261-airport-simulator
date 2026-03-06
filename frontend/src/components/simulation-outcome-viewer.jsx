@@ -15,6 +15,7 @@ import {
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
+	getSimulationConfiguration,
 	getSimulationResult,
 	getSimulationStatus,
 } from "@/lib/simulation-api";
@@ -32,7 +33,7 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
  * @param {{ uuid: String}} param0 The uuid for the simulation
  * @returns A react component
  */
-const SimulationEventLogComponent = ({ uuid }) => {
+const SimulationEventLogComponent = ({ uuid: _uuid }) => {
 	// display the simulation event log (SCRUM-37)
 
 	return <></>;
@@ -43,7 +44,8 @@ const SimulationEventLogComponent = ({ uuid }) => {
  * @returns A react component
  */
 const SimulationStatsComponent = ({ uuid }) => {
-	// display the stats for the simulation (SCRUM-36)
-	// todo for yasvi
-	return <></>;
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
+	const [result, setResult] = useState(null);
+	const [exporting, setExporting] = useState(false);
 };
