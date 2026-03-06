@@ -2,7 +2,7 @@
 
 To run the server locally, firstly create a `.env` file within the frontend folder. Then add the following env variable:
 
-```
+```bash
 NEXT_PUBLIC_API_BASE_URL="http://localhost:8080" # Adjust if hosted elsewhere
 ```
 

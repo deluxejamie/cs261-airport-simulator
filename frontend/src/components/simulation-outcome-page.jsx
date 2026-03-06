@@ -1,24 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-	Alert,
-	Badge,
-	Button,
-	Card,
-	Group,
-	Loader,
-	Stack,
-	Table,
-	Text,
-	Title,
-} from "@mantine/core";
+import { useEffect, useState } from "react";
+import { Badge, Group, Stack, Text, Title } from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
 	getSimulationStatus,
 } from "@/lib/simulation-api";
 import SimulationOutcomeFoundPage from "./simulation-outcome-viewer";
+import { useRouter } from "next/navigation";
+import { showNotification } from "@mantine/notifications";
+import { notificationErrorOptions } from "./export-import";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
@@ -29,11 +21,28 @@ const BADGE_COLORS = {
 	complete: "green",
 };
 
+const UUID_LENGTH = 32; // uuids are 32 characters long (v4 uuid)
+
 // extremely standard sleep fn, sleeps ms milliseconds.
-const sleep = (ms) => new Promise(res, () => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function SimulationOutcomeView({ uuid }) {
 	const [status, setStatus] = useState("in_progress");
+	const router = useRouter();
+
+	useEffect(() => {
+		if (uuid.length != UUID_LENGTH) {
+			// uuids generated are all
+			showNotification({
+				...notificationErrorOptions,
+				autoClose: 5000,
+				message:
+					"Invalid simulation ID found. Redirecting to configuration portal.",
+			});
+
+			router.push("/");
+		}
+	}, [router, uuid]);
 
 	useEffect(() => {
 		let currentDelay = 1000; // delay in ms between each request
@@ -57,8 +66,6 @@ export default function SimulationOutcomeView({ uuid }) {
 			}
 		})();
 	}, [uuid]);
-
-	// todo: add effect which updates setStatus by polling the status endpoint with exponential backoff (use the constants above)
 
 	return (
 		<Stack maw={1000} mx="auto" p="xl" gap="lg">
