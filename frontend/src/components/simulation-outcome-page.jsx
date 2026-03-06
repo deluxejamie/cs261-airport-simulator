@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 import { notificationErrorOptions } from "./export-import";
 
+
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
 
@@ -43,12 +44,15 @@ export default function SimulationOutcomeView({ uuid }) {
 	// }, [router, uuid]);
 
 	useEffect(() => {
+		let cancelled = false;
 		let currentDelay = 1000; // delay in ms between each request
 		let failedAccessAttempts = 0;
 		let finished = false;
 		(async () => {
-			while (failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+			while (!cancelled && failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
 				const currentStatus = await getSimulationStatus(uuid);
+				if (cancelled) return;
+
 				if (currentStatus == "unavailable") failedAccessAttempts++;
 				else {
 					setStatus(currentStatus);
@@ -59,10 +63,13 @@ export default function SimulationOutcomeView({ uuid }) {
 					}
 				}
 			}
-			if (failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
+			if (!cancelled && failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
 				setStatus("unavailable");
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [uuid]);
 
 	return (
