@@ -23,15 +23,11 @@ export const POLL_EXPONENTIAL_RATE = 1.5;
 export const MAX_FAILED_ATTEMPTS = 2;
 
 export default function SimulationOutcomeFoundPage({ uuid }) {
-	const [status, setStatus] = useState("pending");
-	const [pollError, setPollError] = useState("");
 	const [result, setResult] = useState(null);
 	const [eventLog, setEventLog] = useState([]);
 	const [eventError, setEventError] = useState("");
 	const [logOffset, setLogOffset] = useState(0);
 	const [loadingEvents, setLoadingEvents] = useState(false);
-
-	const isCompleted = status === "completed";
 
 	useEffect(() => {
 		if (!isCompleted) return;
@@ -83,28 +79,7 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
 	);
 
 	return (
-		<Stack maw={1000} mx="auto" p="xl" gap="lg">
-			<Group justify="space-between">
-				<div>
-					<Title order={1}>Simulation Outcome</Title>
-					<Text c="dimmed">Simulation ID: {uuid}</Text>
-				</div>
-				<Badge color={isCompleted ? "green" : "yellow"}>{status}</Badge>
-			</Group>
-
-			{pollError ? <Alert color="red">{pollError}</Alert> : null}
-
-			{!isCompleted ? (
-				<Card withBorder p="lg">
-					<Group>
-						<Loader size="sm" />
-						<Text>
-							Simulation is running. Polling with exponential back-off…
-						</Text>
-					</Group>
-				</Card>
-			) : null}
-
+		<>
 			{isCompleted && result ? (
 				<Card withBorder p="lg">
 					<Title order={3} mb="sm">
@@ -150,6 +125,6 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
 					) : null}
 				</Card>
 			) : null}
-		</Stack>
+		</>
 	);
 }

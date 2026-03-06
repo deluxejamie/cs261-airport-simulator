@@ -50,8 +50,9 @@ export async function createSimulation(config) {
  * @returns {String} Either the status "in_progress", "complete", or "unavailable" if the api is unreachable
  */
 export async function getSimulationStatus(uuid) {
+	const safeID = encodeURIComponent(uuid);
 	try {
-		const res = await request(`/simulation/status/${uuid}`);
+		const res = await request(`/simulation/status/${safeID}`);
 		return res.status ?? "unavailable";
 	} catch (e) {
 		return "unavailable";
@@ -59,9 +60,11 @@ export async function getSimulationStatus(uuid) {
 }
 
 export async function getSimulationResult(uuid) {
-	return await request(`/simulation/result/${uuid}`);
+	const safeID = encodeURIComponent(uuid);
+	return await request(`/simulation/result/${safeID}`);
 }
 
 export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
-	return request(`/simulation/eventlog/${uuid}/${offset}/${count}`);
+	const safeID = encodeURIComponent(uuid);
+	return request(`/simulation/eventlog/${safeID}/${offset}/${count}`);
 }
