@@ -21,28 +21,26 @@ const BADGE_COLORS = {
 	complete: "green",
 };
 
-const UUID_LENGTH = 32; // uuids are 32 characters long (v4 uuid)
-
 // extremely standard sleep fn, sleeps ms milliseconds.
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function SimulationOutcomeView({ uuid }) {
 	const [status, setStatus] = useState("in_progress");
-	const router = useRouter();
+	// This is now handled on the server side (in the simulation/[sim_id]/page.js file)
+	// const router = useRouter();
+	// useEffect(() => {
+	// 	if (uuid.length != UUID_LENGTH) {
+	// 		// uuids generated are all
+	// 		showNotification({
+	// 			...notificationErrorOptions,
+	// 			autoClose: 5000,
+	// 			message:
+	// 				"Invalid simulation ID found. Redirecting to configuration portal.",
+	// 		});
 
-	useEffect(() => {
-		if (uuid.length != UUID_LENGTH) {
-			// uuids generated are all
-			showNotification({
-				...notificationErrorOptions,
-				autoClose: 5000,
-				message:
-					"Invalid simulation ID found. Redirecting to configuration portal.",
-			});
-
-			router.push("/");
-		}
-	}, [router, uuid]);
+	// 		router.push("/");
+	// 	}
+	// }, [router, uuid]);
 
 	useEffect(() => {
 		let currentDelay = 1000; // delay in ms between each request
