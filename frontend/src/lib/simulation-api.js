@@ -5,6 +5,12 @@
  */
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
+/**
+ * Utility function used to make requests to the backend server
+ * @param {String} path The path of the endpoint (for example /test)
+ * @param {{headers:object, ...requestInit}} options A headers object and options from the [fetch api](https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#options)
+ * @returns
+ */
 async function request(path, options = {}) {
 	try {
 		const response = await fetch(`${API_BASE}${path}`, {
@@ -12,6 +18,7 @@ async function request(path, options = {}) {
 				"Content-Type": "application/json",
 				...(options.headers || {}),
 			},
+			cache: "no-cache",
 			...options,
 		});
 		// all responses will include a json body, so the fn should throw an error if not successful
@@ -28,6 +35,7 @@ async function request(path, options = {}) {
 }
 
 /**
+ * Informs the backend to start a simulation using the provided configuration file.
  * @param {String} config A JSON representing the configuration for the simulation to submit
  * @returns {String} Either the simulation id of the created simulation, or the string "request_failed"
  */
@@ -46,6 +54,7 @@ export async function createSimulation(config) {
 }
 
 /**
+ * Gets the simulation status from an unsanitised source from the browser (unsanitised)
  * @param {String} uuid The uuid of the simulation to check the status of
  * @returns {String} Either the status "in_progress", "complete", or "unavailable" if the api is unreachable
  */
