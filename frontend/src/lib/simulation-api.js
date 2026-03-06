@@ -77,3 +77,8 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 	const safeID = encodeURIComponent(uuid);
 	return request(`/simulation/eventlog/${safeID}/${offset}/${count}`);
 }
+
+export async function getSimulationConfiguration(uuid) {
+	const safeID = encodeURIComponent(uuid);
+	return request(`/simulation/config/${safeID}`);
+}
