@@ -109,4 +109,38 @@ const SimulationStatsComponent = ({ uuid }) => {
 			setExporting(false);
 		}
 	}, [uuid]);
+	return (
+		<Card withBorder>
+			<Stack>
+				<Title order={2}>Simulation statistics</Title>
+				{loading ? (
+					<Loader size="sm" />
+				) : error ? (
+					<Alert color="red">{error}</Alert>
+				) : (
+					<>
+						<Table striped withTableBorder>
+							<Table.Tbody>
+								{rows.map(([label, value]) => (
+									<Table.Tr key={label}>
+										<Table.Td>{label}</Table.Td>
+										<Table.Td>{value}</Table.Td>
+									</Table.Tr>
+								))}
+							</Table.Tbody>
+						</Table>
+						<Button
+							fullWidth
+							variant="light"
+							leftSection={<IconDownload size={16} />}
+							loading={exporting}
+							onClick={downloadConfiguration}
+						>
+							Export configuration
+						</Button>
+					</>
+				)}
+			</Stack>
+		</Card>
+	);
 };
