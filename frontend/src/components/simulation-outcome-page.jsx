@@ -97,11 +97,17 @@ export default function SimulationOutcomeView({ uuid }) {
  * @returns A react component to be displayed when the simulation is currently running.
  */
 const LoadingComponent = () => {
-	// todo: implement loading component (SCRUM-35)
-	// should tell the user that the simulation is currently loading
-	// (the page will refresh from displaying this component automatically when it's ready)
-	// todo for yasvi
-	return <></>;
+	return (
+		<Card withBorder>
+			<Stack align="center" py="xl" gap="xs">
+				<Loader size="md" />
+				<Title order={3}>Simulation in progress</Title>
+				<Text c="dimmed" ta="center">
+					We are periodically checking for updates. This page will automatically refresh when results are ready.
+				</Text>
+			</Stack>
+		</Card>
+	);
 };
 
 /**
