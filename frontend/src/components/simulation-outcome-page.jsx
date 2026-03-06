@@ -23,9 +23,40 @@ import SimulationOutcomeFoundPage from "./simulation-outcome-viewer";
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
 
+const BADGE_COLORS = {
+	in_progress: "yellow",
+	unavailable: "red",
+	complete: "green",
+};
+
+// extremely standard sleep fn, sleeps ms milliseconds.
+const sleep = (ms) => new Promise(res, () => setTimeout(res, ms));
+
 export default function SimulationOutcomeView({ uuid }) {
-	const [status, setStatus] = useState("pending");
-	const isCompleted = status === "completed";
+	const [status, setStatus] = useState("in_progress");
+
+	useEffect(() => {
+		let currentDelay = 1000; // delay in ms between each request
+		let failedAccessAttempts = 0;
+		let finished = false;
+		(async () => {
+			while (failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+				const currentStatus = await getSimulationStatus(uuid);
+				if (currentStatus == "unavailable") failedAccessAttempts++;
+				else {
+					setStatus(currentStatus);
+					if (currentStatus == "complete") finished = true;
+					else {
+						await sleep(currentDelay);
+						currentDelay *= POLL_EXPONENTIAL_RATE;
+					}
+				}
+			}
+			if (failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
+				setStatus("unavailable");
+			}
+		})();
+	}, [uuid]);
 
 	// todo: add effect which updates setStatus by polling the status endpoint with exponential backoff (use the constants above)
 
@@ -36,10 +67,8 @@ export default function SimulationOutcomeView({ uuid }) {
 					<Title order={1}>Simulation Outcome</Title>
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
 				</div>
-				<Badge color={isCompleted ? "green" : "yellow"}>{status}</Badge>
+				<Badge color={BADGE_COLORS[status]}>{status}</Badge>
 			</Group>
-
-			{pollError ? <Alert color="red">{pollError}</Alert> : null}
 
 			{status == "in_progress" ? (
 				<LoadingComponent />

@@ -19,7 +19,7 @@ import {
 	getSimulationStatus,
 } from "@/lib/simulation-api";
 
-export const POLL_EXPONENTIAL_RATE = 1.5
+export const POLL_EXPONENTIAL_RATE = 1.5;
 export const MAX_FAILED_ATTEMPTS = 2;
 
 export default function SimulationOutcomeFoundPage({ uuid }) {
@@ -32,59 +32,6 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
 	const [loadingEvents, setLoadingEvents] = useState(false);
 
 	const isCompleted = status === "completed";
-
-	useEffect(() => {
-		let currentDelay = 1;
-    let failedAccessAttempts = 0;
-    let finished = false;
-    (async () => {
-      while (failedAccessAttempts < 2) {
-        try {
-          const currentStatus = await getSimulationStatus(uuid)
-          if (currentStatus == "unavailable") failedAccessAttempts++;
-          else {
-            if (currentStatus == "")
-          }
-        } catch(e) {
-
-        }
-        
-      }
-    })();
-		const async () => {
-      while(!cancelled)
-			for (const delay of POLL_DELAYS) {
-				try {
-					const response = await getSimulationStatus(uuid);
-					if (cancelled) return;
-
-					const nextStatus = response?.status || "pending";
-					setStatus(nextStatus);
-					setPollError("");
-
-					if (nextStatus === "completed") {
-						return;
-					}
-				} catch {
-					try {
-						await getSimulationStatus(uuid);
-					} catch {
-						setPollError(
-							"Simulation status is currently unavailable. Copy this URL and try again later.",
-						);
-						return;
-					}
-				}
-
-				await new Promise((resolve) => setTimeout(resolve, delay));
-			}
-		};
-
-		poll();
-		return () => {
-			cancelled = true;
-		};
-	}, [uuid]);
 
 	useEffect(() => {
 		if (!isCompleted) return;
