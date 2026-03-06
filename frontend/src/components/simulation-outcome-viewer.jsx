@@ -86,4 +86,27 @@ const SimulationStatsComponent = ({ uuid }) => {
 			],
 		];
 	}, [result]);
+
+	const downloadConfiguration = useCallback(async () => {
+		setExporting(true);
+		setError(null);
+		try {
+			const response = await getSimulationConfiguration(uuid);
+			const configString =
+				typeof response === "string"
+					? response
+					: response?.config ?? JSON.stringify(response, null, 2);
+
+			const tempLink = document.createElement("a");
+			tempLink.href = window.URL.createObjectURL(new Blob([configString]));
+			tempLink.setAttribute("download", `simulation_${uuid}_config.json`);
+			document.body.appendChild(tempLink);
+			tempLink.click();
+			document.body.removeChild(tempLink);
+		} catch (e) {
+			setError("Failed to download the simulation configuration.");
+		} finally {
+			setExporting(false);
+		}
+	}, [uuid]);
 };
