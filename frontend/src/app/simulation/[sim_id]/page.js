@@ -1,4 +1,4 @@
-import SimulationOutcomeView from "@/components/simulation-outcome-view";
+import SimulationOutcomeView from "@/components/simulation-outcome-page";
 
 export default async function Simulation({ params }) {
 	const { sim_id: simulationId } = await params;
