@@ -86,15 +86,23 @@ export default function SimulationOutcomeView({ uuid }) {
 	);
 }
 
-// todo: implement loading component (SCRUM-35)
-// should tell the user that the simulation is currently loading
-// (the page will refresh from displaying this component automatically when it's ready)
+/**
+ * @returns A react component to be displayed when the simulation is currently running.
+ */
 const LoadingComponent = () => {
+	// todo: implement loading component (SCRUM-35)
+	// should tell the user that the simulation is currently loading
+	// (the page will refresh from displaying this component automatically when it's ready)
+	// todo for yasvi
 	return <></>;
 };
 
-// todo: implement a simulation not found component (SCRUM-38)
-// should tell the user that the simulation has not been found in our system and redirect them to create one by sending them to index page
+/**
+ * @returns A react component to be displayed when a simulation is not found
+ */
 const SimulationNotFound = () => {
+	// todo: implement a simulation not found component (SCRUM-38)
+	// should tell the user that the simulation has not been found in our system and redirect them to create one by sending them to index page
+	// todo for yasvi
 	return <></>;
 };
