@@ -69,4 +69,21 @@ const SimulationStatsComponent = ({ uuid }) => {
 			isMounted = false;
 		};
 	}, [uuid]);
+
+	const rows = useMemo(() => {
+		if (!result) return [];
+		return [
+			["Max take-off queue", result.maxTakeOffQueue],
+			["Average take-off wait (mins)", formatDecimal(result.avgTakeOffWait)],
+			["Max holding queue", result.maxHoldQueue],
+			["Average hold time (mins)", formatDecimal(result.avgHoldTime)],
+			["Total cancellations", result.totalCancellations],
+			["Total diversions", result.totalDiversions],
+			["Average arrival delay (mins)", formatDecimal(result.avgArrivalDelay)],
+			[
+				"Average departure delay (mins)",
+				formatDecimal(result.avgDepartureDelay),
+			],
+		];
+	}, [result]);
 };
