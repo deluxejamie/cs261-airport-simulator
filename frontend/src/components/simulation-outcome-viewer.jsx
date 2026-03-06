@@ -48,4 +48,25 @@ const SimulationStatsComponent = ({ uuid }) => {
 	const [error, setError] = useState(null);
 	const [result, setResult] = useState(null);
 	const [exporting, setExporting] = useState(false);
+
+	useEffect(() => {
+		let isMounted = true;
+		(async () => {
+			setLoading(true);
+			setError(null);
+			try {
+				const fetchedResult = await getSimulationResult(uuid);
+				if (!isMounted) return;
+				setResult(fetchedResult);
+			} catch (e) {
+				if (!isMounted) return;
+				setError("Failed to load simulation statistics.");
+			} finally {
+				if (isMounted) setLoading(false);
+			}
+		})();
+		return () => {
+			isMounted = false;
+		};
+	}, [uuid]);
 };
