@@ -7,7 +7,7 @@ import uk.ac.warwick.dcs.airportsimulator.entity.EventLogEntryEntity;
 import uk.ac.warwick.dcs.airportsimulator.entity.SimulationEntity;
 import uk.ac.warwick.dcs.airportsimulator.entity.SimulationResultEntity;
 import uk.ac.warwick.dcs.airportsimulator.service.SimulationService;
-import uk.ac.warwick.dcs.airportsimulator.simulator.SimulationResult;
+import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
