@@ -28,7 +28,7 @@ public class SimulationRunTest {
     void testRunProcessesArrivalEvent() {
         Simulation sim = genBaseSim();
 
-        sim.addAircraft(genAircraft(), 1, 0, 0, 0, AircraftOp.ARRIVAL);
+        sim.addAircraft(genAircraft(), 1, 0, 0, 0L, AircraftOp.ARRIVAL);
         sim.run();
 
         assertFalse(sim.getEventLog(0, 100).isEmpty());
@@ -37,10 +37,8 @@ public class SimulationRunTest {
     @Test
     void testRunProcessesDepartureEvent() {
         Simulation sim = genBaseSim();
-
-        sim.addAircraft(genAircraft(), 1, 0, 0, 0, AircraftOp.DEPARTURE);
+        sim.addAircraft(genAircraft(), 1, 0, 0, 0L, AircraftOp.DEPARTURE);
         sim.run();
-
         assertFalse(sim.getEventLog(0, 100).isEmpty());
     }
 
