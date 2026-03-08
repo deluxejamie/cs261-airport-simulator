@@ -1,0 +1,129 @@
+{
+  "runways": [
+    {
+      "id": 1,
+      "mode": "mixed_mode"
+    },
+    {
+      "id": 2,
+      "mode": "takeoff"
+    },
+    {
+      "id": 3,
+      "mode": "landing"
+    },
+    {
+      "id": 4,
+      "mode": "mixed_mode"
+    }
+  ],
+  "advancedConfig": {
+    "maxDelayBeforeCancelled": 10,
+    "fuelThresholdBeforeRedirected": 10,
+    "timeTakenForTakeoff": 5,
+    "timeTakenForLanding": 5
+  },
+  "flights": [
+    {
+      "callsign": "EASYJET-1",
+      "expected_departure_time": 0,
+      "seed": 24880,
+      "repeating": {
+        "end": 60,
+        "period": 10
+      },
+      "id": 1,
+      "type": "departure"
+    },
+    {
+      "callsign": "RYANAIR-2",
+      "expected_departure_time": 50,
+      "seed": 90712,
+      "repeating": {
+        "end": 1000,
+        "period": 10
+      },
+      "id": 2,
+      "type": "departure"
+    },
+    {
+      "callsign": "BA-3",
+      "expected_arrival_time": 68,
+      "emergency_status": "none",
+      "remaining_fuel_mins": 20,
+      "seed": 10866,
+      "id": 3,
+      "type": "arrival"
+    },
+    {
+      "callsign": "NW-4",
+      "expected_arrival_time": 65,
+      "emergency_status": "mech_fail",
+      "remaining_fuel_mins": 16,
+      "seed": 1735,
+      "id": 4,
+      "type": "arrival"
+    },
+    {
+      "callsign": "EVA AIR-5",
+      "expected_arrival_time": 879,
+      "emergency_status": "passenger_health",
+      "remaining_fuel_mins": 78,
+      "seed": 54053,
+      "id": 5,
+      "type": "arrival"
+    },
+    {
+      "callsign": "CATHY-6",
+      "expected_arrival_time": 6575,
+      "emergency_status": "none",
+      "remaining_fuel_mins": 65,
+      "seed": 89027,
+      "id": 6,
+      "type": "arrival",
+      "repeating": {
+        "end": 13421,
+        "period": 23
+      }
+    },
+    {
+      "callsign": "VIRGIN-7",
+      "expected_arrival_time": 23,
+      "emergency_status": "passenger_health",
+      "remaining_fuel_mins": 54,
+      "seed": 18875,
+      "id": 7,
+      "type": "arrival",
+      "repeating": {
+        "end": 6757,
+        "period": 65
+      }
+    }
+  ],
+  "hazards": [
+    {
+      "id": 1,
+      "type": "runway_closure",
+      "start_time_mins": 34,
+      "duration_mins": 15,
+      "affected_runway": 1,
+      "closure_mode": "snow_clearance"
+    },
+    {
+      "id": 2,
+      "type": "runway_closure",
+      "start_time_mins": 56,
+      "duration_mins": 34,
+      "affected_runway": 3,
+      "closure_mode": "runway_inspection"
+    },
+    {
+      "id": 3,
+      "type": "runway_closure",
+      "start_time_mins": 34,
+      "duration_mins": 54,
+      "affected_runway": 4,
+      "closure_mode": "equipment_failure"
+    }
+  ]
+}
