@@ -43,6 +43,7 @@ export default function HazardSchedulingSection() {
 	const [startTimeMinutes, setStartTimeMinutes] = useState(0);
 	const [durationMinutes, setDurationMinutes] = useState(15);
 	const [affectedRunway, setAffectedRunway] = useState(1);
+	console.log(affectedRunway);
 	const [closureMode, setClosureMode] = useState(
 		RunwayClosureMode.SNOW_CLEARANCE,
 	);
@@ -125,7 +126,7 @@ export default function HazardSchedulingSection() {
 
 						<Select
 							label="Affected runway"
-							value={affectedRunway}
+							value={affectedRunway.toString()}
 							data={Object.values(runways).map((r) => ({
 								value: r.id.toString(),
 								label: `Runway ${r.id}`,
