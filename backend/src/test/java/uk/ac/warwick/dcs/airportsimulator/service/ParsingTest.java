@@ -9,10 +9,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.core.io.ClassPathResource;
-import uk.ac.warwick.dcs.airportsimulator.dto.AdvancedConfigDto;
-import uk.ac.warwick.dcs.airportsimulator.dto.FrontendFlightDto;
-import uk.ac.warwick.dcs.airportsimulator.dto.FrontendRunwayDto;
-import uk.ac.warwick.dcs.airportsimulator.dto.SimulationRequestDto;
+import uk.ac.warwick.dcs.airportsimulator.dto.*;
 import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 
 import java.io.IOException;
@@ -64,6 +61,7 @@ public class ParsingTest {
     void testFlights() throws Exception
     {
         final List<FrontendFlightDto> flights = json.parseObject(JSON_FROM_FILE).getFlights();
+        assertEquals(7, flights.size());
 
         {
             final FrontendFlightDto easyjet = flights.getFirst();
@@ -149,8 +147,55 @@ public class ParsingTest {
 
 
     @Test
-    void testHazards()
+    void testHazards() throws Exception
     {
+        final List<FrontendHazardDto> hazards = json.parseObject(JSON_FROM_FILE).getHazards();
+        assertEquals(5, hazards.size());
 
+        {
+            final FrontendHazardDto h = hazards.getFirst();
+            assertEquals(1, h.getId());
+            assertEquals("runway_closure", h.getType());
+            assertEquals(34, h.getTime());
+            assertEquals(15, h.getDurationMins());
+            assertEquals(1, h.getAffectedRunway());
+            assertEquals("snow_clearance", h.getClosureMode());
+        }
+
+        {
+            final FrontendHazardDto h = hazards.get(1);
+            assertEquals(2, h.getId());
+            assertEquals("runway_closure", h.getType());
+            assertEquals(56, h.getTime());
+            assertEquals(34, h.getDurationMins());
+            assertEquals(3, h.getAffectedRunway());
+            assertEquals("runway_inspection", h.getClosureMode());
+        }
+
+        {
+            final FrontendHazardDto h = hazards.get(2);
+            assertEquals(3, h.getId());
+            assertEquals("runway_closure", h.getType());
+            assertEquals(34, h.getTime());
+            assertEquals(54, h.getDurationMins());
+            assertEquals(4, h.getAffectedRunway());
+            assertEquals("equipment_failure", h.getClosureMode());
+        }
+
+        {
+            final FrontendHazardDto h = hazards.get(3);
+            assertEquals(4, h.getId());
+            assertEquals("emergency_event", h.getType());
+            assertEquals(879, h.getTime());
+            assertEquals("EVA AIR-5", h.getTargetArrivalCallsign());
+        }
+
+        {
+            final FrontendHazardDto h = hazards.get(4);
+            assertEquals(5, h.getId());
+            assertEquals("emergency_event", h.getType());
+            assertEquals(65, h.getTime());
+            assertEquals("NW-4", h.getTargetArrivalCallsign());
+        }
     }
 }

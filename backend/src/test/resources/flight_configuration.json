@@ -104,7 +104,7 @@
     {
       "id": 1,
       "type": "runway_closure",
-      "start_time_mins": 34,
+      "time": 34,
       "duration_mins": 15,
       "affected_runway": 1,
       "closure_mode": "snow_clearance"
@@ -112,7 +112,7 @@
     {
       "id": 2,
       "type": "runway_closure",
-      "start_time_mins": 56,
+      "time": 56,
       "duration_mins": 34,
       "affected_runway": 3,
       "closure_mode": "runway_inspection"
@@ -120,7 +120,7 @@
     {
       "id": 3,
       "type": "runway_closure",
-      "start_time_mins": 34,
+      "time": 34,
       "duration_mins": 54,
       "affected_runway": 4,
       "closure_mode": "equipment_failure"
