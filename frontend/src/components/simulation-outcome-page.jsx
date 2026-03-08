@@ -120,4 +120,19 @@ const SimulationNotFound = () => {
 	
 		return () => clearTimeout(redirectTimeout);
 	}, [router]);
+
+	return (
+		<Card withBorder>
+			<Stack gap="sm">
+				<Title order={3}>Simulation not found</Title>
+				<Alert color="red">
+					The simulation ID appears to be invalid or unavailable. You will be
+					redirected to the configuration page to run a new simulation.
+				</Alert>
+				<Text c="dimmed" size="sm">
+					If this issue persists, please contact your system administrator.
+				</Text>
+			</Stack>
+		</Card>
+	);
 };
