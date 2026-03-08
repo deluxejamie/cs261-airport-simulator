@@ -7,6 +7,7 @@ import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 import uk.ac.warwick.dcs.airportsimulator.events.IEvent;
 import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
+import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
 import uk.ac.warwick.dcs.airportsimulator.simulation.AircraftOp;
 import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
 
@@ -133,6 +134,42 @@ public class CreateSimTest extends BaseServiceTest {
             assertEquals(AircraftOp.ARRIVAL, flight.getOp());
             assertEquals(EmergencyStatus.PASSENGER_HEALTH, flight.getAircraft().getEmergencyStatus());
             assertEquals(54, flight.getAircraft().getFuelRemaining(23));
+        }
+    }
+
+    @Test
+    void TestRunwayClosures()
+    {
+        final List<ParsedSimulationConfig.ParsedRunwayClosure> parsedRunwayClosures = parsedSimulationConfig.getRunwayClosures();
+
+        assertEquals(3, parsedRunwayClosures.size());
+
+        {
+            final ParsedSimulationConfig.ParsedRunwayClosure closure = parsedRunwayClosures.getFirst();
+            assertEquals(1, closure.getRunwayNumber());
+            assertEquals(34, closure.getScheduled());
+            assertEquals(0, closure.getInterval());
+            assertEquals(34 + 15, closure.getEnd());
+            assertEquals(RunwayStatus.SNOW_CLEARANCE, closure.getStatus());
+        }
+
+
+        {
+            final ParsedSimulationConfig.ParsedRunwayClosure closure = parsedRunwayClosures.get(1);
+            assertEquals(3, closure.getRunwayNumber());
+            assertEquals(56, closure.getScheduled());
+            assertEquals(0, closure.getInterval());
+            assertEquals(34 + 56, closure.getEnd());
+            assertEquals(RunwayStatus.RUNWAY_INSPECTION, closure.getStatus());
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedRunwayClosure closure = parsedRunwayClosures.get(2);
+            assertEquals(4, closure.getRunwayNumber());
+            assertEquals(34, closure.getScheduled());
+            assertEquals(0, closure.getInterval());
+            assertEquals(34 + 54, closure.getEnd());
+            assertEquals(RunwayStatus.EQUIPMENT_FAILURE, closure.getStatus());
         }
     }
 }
