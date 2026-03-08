@@ -111,8 +111,5 @@ const LoadingComponent = () => {
  * @returns A react component to be displayed when a simulation is not found
  */
 const SimulationNotFound = () => {
-	// todo: implement a simulation not found component (SCRUM-38)
-	// should tell the user that the simulation has not been found in our system and redirect them to create one by sending them to index page
-	// todo for yasvi
-	return <></>;
+	const router = useRouter();
 };
