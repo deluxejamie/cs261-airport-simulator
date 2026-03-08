@@ -18,10 +18,10 @@
     }
   ],
   "advancedConfig": {
-    "maxDelayBeforeCancelled": 10,
-    "fuelThresholdBeforeRedirected": 10,
-    "timeTakenForTakeoff": 5,
-    "timeTakenForLanding": 5
+    "maxDelayBeforeCancelled": 15,
+    "fuelThresholdBeforeRedirected": 15,
+    "timeTakenForTakeoff": 8,
+    "timeTakenForLanding": 8
   },
   "flights": [
     {
@@ -124,6 +124,18 @@
       "duration_mins": 54,
       "affected_runway": 4,
       "closure_mode": "equipment_failure"
+    },
+    {
+      "id": 4,
+      "type": "emergency_event",
+      "target_arrival_callsign": "EVA AIR-5",
+      "time": 879
+    },
+    {
+      "id": 5,
+      "type": "emergency_event",
+      "target_arrival_callsign": "NW-4",
+      "time": 65
     }
   ]
 }
