@@ -298,7 +298,7 @@ public class SimulationConfigParser {
                 new ParsedSimulationConfig.ParsedEmergencyEvent(
                         hazard.getTargetArrivalCallsign(),
                         hazard.getTime(),
-                        EmergencyStatus.PASSENGER_HEALTH
+                        parseEmergencyStatus(hazard.getEmergencyType())
                 )
         );
     }

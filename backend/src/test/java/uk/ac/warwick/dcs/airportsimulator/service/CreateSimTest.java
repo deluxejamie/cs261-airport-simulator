@@ -182,6 +182,16 @@ public class CreateSimTest extends BaseServiceTest {
         {
             final ParsedSimulationConfig.ParsedEmergencyEvent e = emergencyEvents.getFirst();
             assertEquals("EVA AIR-5", e.getCallsign());
+            assertEquals(EmergencyStatus.PASSENGER_HEALTH ,e.getEmergencyStatus());
+            assertEquals(879, e.getScheduled());
+        }
+
+
+        {
+            final ParsedSimulationConfig.ParsedEmergencyEvent e = emergencyEvents.get(1);
+            assertEquals("NW-4", e.getCallsign());
+            assertEquals(EmergencyStatus.MECH_FAIL ,e.getEmergencyStatus());
+            assertEquals(65, e.getScheduled());
         }
     }
 }

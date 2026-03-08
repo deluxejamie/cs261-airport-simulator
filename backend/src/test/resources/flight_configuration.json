@@ -127,6 +127,7 @@
     },
     {
       "id": 4,
+      "emergency_type": "passenger_health",
       "type": "emergency_event",
       "target_arrival_callsign": "EVA AIR-5",
       "time": 879
@@ -134,6 +135,7 @@
     {
       "id": 5,
       "type": "emergency_event",
+      "emergency_type": "mech_fail",
       "target_arrival_callsign": "NW-4",
       "time": 65
     }

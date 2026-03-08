@@ -164,7 +164,7 @@ public class ParsingTest extends BaseServiceTest {
             assertEquals("emergency_event", h.getType());
             assertEquals(879, h.getTime());
             assertEquals("EVA AIR-5", h.getTargetArrivalCallsign());
-            assertEquals("SNOW_BS", h.getEmergencyType());
+            assertEquals("passenger_health", h.getEmergencyType());
         }
 
         {
@@ -173,7 +173,7 @@ public class ParsingTest extends BaseServiceTest {
             assertEquals("emergency_event", h.getType());
             assertEquals(65, h.getTime());
             assertEquals("NW-4", h.getTargetArrivalCallsign());
-            assertEquals("SNOW_BS", h.getEmergencyType());
+            assertEquals("mech_fail", h.getEmergencyType());
         }
     }
 }
