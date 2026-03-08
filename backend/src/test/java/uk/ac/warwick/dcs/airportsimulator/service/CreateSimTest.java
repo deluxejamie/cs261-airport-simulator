@@ -31,7 +31,7 @@ public class CreateSimTest extends BaseServiceTest {
     }
 
     @Test
-    void testRunways() throws IOException {
+    public void testRunways() throws IOException {
         final List<Runway> runways = simulation.getRunways();
 
         assertEquals(4, runways.size());
@@ -45,12 +45,12 @@ public class CreateSimTest extends BaseServiceTest {
     }
 
     @Test
-    void testAdvancedConfig() throws Exception {
+    public void testAdvancedConfig() throws Exception {
         throw new Exception("Advanced config not set on simulation!");
     }
 
     @Test
-    void testFlights()
+    public void testFlights()
     {
         final List<ParsedSimulationConfig.ParsedFlight> parsedFlights = parsedSimulationConfig.getFlights();
         assertEquals(7, parsedFlights.size());
@@ -138,7 +138,7 @@ public class CreateSimTest extends BaseServiceTest {
     }
 
     @Test
-    void TestRunwayClosures()
+    public void TestRunwayClosures()
     {
         final List<ParsedSimulationConfig.ParsedRunwayClosure> parsedRunwayClosures = parsedSimulationConfig.getRunwayClosures();
 
@@ -170,6 +170,18 @@ public class CreateSimTest extends BaseServiceTest {
             assertEquals(0, closure.getInterval());
             assertEquals(34 + 54, closure.getEnd());
             assertEquals(RunwayStatus.EQUIPMENT_FAILURE, closure.getStatus());
+        }
+    }
+
+    @Test
+    public void testEmergencyEvents()
+    {
+        final List<ParsedSimulationConfig.ParsedEmergencyEvent> emergencyEvents = parsedSimulationConfig.getEmergencyEvents();
+        assertEquals(2, emergencyEvents.size());
+
+        {
+            final ParsedSimulationConfig.ParsedEmergencyEvent e = emergencyEvents.getFirst();
+            assertEquals("EVA AIR-5", e.getCallsign());
         }
     }
 }
