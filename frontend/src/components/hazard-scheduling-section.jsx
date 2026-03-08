@@ -259,7 +259,9 @@ export default function HazardSchedulingSection() {
 							<Table.Tr key={hazard.id}>
 								<Table.Td>{hazard.id}</Table.Td>
 								<Table.Td>{formatLabel(hazard.type)}</Table.Td>
-								<Table.Td>{hazard.start_time_mins ?? "-"}</Table.Td>
+								<Table.Td>
+									{hazard.start_time_mins ?? hazard.time ?? "-"}
+								</Table.Td>
 								<Table.Td>{hazard.duration_mins ?? "-"}</Table.Td>
 								<Table.Td>{hazard.affected_runway ?? "-"}</Table.Td>
 								<Table.Td>
