@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState, useMemo } from "react";
+import { useContext, useState } from "react";
 import {
 	Alert,
 	Button,
@@ -28,6 +28,7 @@ const formatLabel = (value) =>
 		.join(" ");
 
 export default function HazardSchedulingSection() {
+	"use no memo";
 	const {
 		flights,
 		hazards,
@@ -49,13 +50,9 @@ export default function HazardSchedulingSection() {
 	const [targetArrivalCallsign, setTargetArrivalCallsign] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const arrivalCallsigns = useMemo(
-		() =>
-			[...flights.values()]
-				.filter((flight) => flight.type === FlightType.ARRIVAL)
-				.map((flight) => flight.callsign),
-		[flights],
-	);
+	const arrivalCallsigns = [...flights.values()]
+		.filter((flight) => flight.type === FlightType.ARRIVAL)
+		.map((flight) => flight.callsign);
 
 	const selectedArrivalCallsign =
 		targetArrivalCallsign || arrivalCallsigns[0] || "";
@@ -176,8 +173,8 @@ export default function HazardSchedulingSection() {
 					{arrivalCallsigns.length === 0 &&
 					hazardType === HazardType.EMERGENCY_EVENT ? (
 						<Text size="sm" c="yellow.8">
-							No arrival callsigns available yet. Add an arrival in the
-							scheduling section first.
+							No arrival flights scheduled. Add an arrival in the scheduling
+							section first.
 						</Text>
 					) : null}
 					<Button
@@ -229,7 +226,7 @@ export default function HazardSchedulingSection() {
 								</Table.Td>
 							</Table.Tr>
 						))}
-						{hazards.length === 0 ? (
+						{hazards.size === 0 ? (
 							<Table.Tr>
 								<Table.Td colSpan={8}>
 									<Text c="dimmed" ta="center">

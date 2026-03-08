@@ -50,27 +50,27 @@ export default function FlightSchedulingSection() {
 
 	const handleAddFlight = () => {
 		setErrorMessage("");
-	
+
 		try {
 			let repeating;
-	
+
 			if (isRepeating) {
 				if (repeatPeriod <= 0) {
 					throw new Error("Repeat period must be greater than 0.");
 				}
-	
+
 				if (repeatEnd < expectedTimeMinutes) {
 					throw new Error(
 						"Repeat end time must be greater than or equal to expected time.",
 					);
 				}
-	
+
 				repeating = {
 					end: repeatEnd,
 					period: repeatPeriod,
 				};
 			}
-	
+
 			if (flightType === FlightType.DEPARTURE) {
 				addDepartureFlight(operator, expectedTimeMinutes, repeating);
 			} else {
@@ -82,7 +82,7 @@ export default function FlightSchedulingSection() {
 					repeating,
 				);
 			}
-	
+
 			clearInputs();
 		} catch (error) {
 			setErrorMessage(error.message);
@@ -168,9 +168,7 @@ export default function FlightSchedulingSection() {
 				<Checkbox
 					label="Repeating flight?"
 					checked={isRepeating}
-					onChange={(event) =>
-						setIsRepeating(event.currentTarget.checked)
-					}
+					onChange={(event) => setIsRepeating(event.currentTarget.checked)}
 				/>
 
 				{isRepeating && (
@@ -179,9 +177,7 @@ export default function FlightSchedulingSection() {
 							label="Repeat every (minutes)"
 							min={1}
 							value={repeatPeriod}
-							onChange={(value) =>
-								setRepeatPeriod(Number(value ?? 1))
-							}
+							onChange={(value) => setRepeatPeriod(Number(value ?? 1))}
 						/>
 
 						<NumberInput
@@ -247,7 +243,7 @@ export default function FlightSchedulingSection() {
 								</Table.Td>
 							</Table.Tr>
 						))}
-						{flights.length === 0 ? (
+						{flights.size === 0 ? (
 							<Table.Tr>
 								<Table.Td colSpan={8}>
 									<Text c="dimmed" ta="center">

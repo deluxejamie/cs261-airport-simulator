@@ -60,7 +60,6 @@ export default function ExportImportButtons() {
 						fileReader.onload = () => {
 							try {
 								const data = JSON.parse(fileReader.result);
-								console.log(data);
 
 								// reset all existing config
 								resetRunways();
