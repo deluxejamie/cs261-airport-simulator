@@ -41,6 +41,19 @@ const SimulationEventLogComponent = ({ uuid }) => {
 	const [currentEvents, setCurrentEvents] = useState([]);
 	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
 	const [running, setRunning] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [finished, setFinished] = useState(false);
+
+	// update the time each tick
+	useEffect(() => {
+		if (running && !finished) {
+			const intervalId = setInterval(() => {
+				setCurrentTime((c) => c + speed);
+			}, 1000);
+			return () => clearInterval(intervalId);
+		}
+	}, [finished, speed, running]);
+
 	// References used:
 	// https://mantine.dev/core/slider/
 	return (
@@ -72,11 +85,17 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						fullWidth
 						variant="light"
 						leftSection={<IconPlayerPlay size={18} />}
+						onClick={() => setRunning(true)}
+						disabled={running}
 					>
 						Start Event Simulation
 					</Button>
 				</Stack>
 			</Card>
+
+			{currentEvents.map((e) => (
+				<Card key={e.id}></Card>
+			))}
 		</>
 	);
 };
