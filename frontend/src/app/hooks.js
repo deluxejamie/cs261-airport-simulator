@@ -524,12 +524,16 @@ export const useHazardSchedule = () => {
 				)
 					throw Error("Hazard data is malformed for hazard at index:" + index);
 
-				if (callsigns.has(hazard.id))
+				if (hazards.has(hazard.id))
 					throw Error("Hazard id is repeated in hazard at index:" + index);
 
 				switch (hazard.type) {
 					case HazardType.EMERGENCY_EVENT: {
-						if (!flightSchedule.has(hazard.target_arrival_callsign))
+						if (
+							!flightSchedule.some(
+								(f) => f.callsign == hazard.target_arrival_callsign,
+							)
+						)
 							throw Error(
 								"Hazard at index " + index + " applied to nonexistent flight: ",
 							);
@@ -541,7 +545,7 @@ export const useHazardSchedule = () => {
 						break;
 					}
 					case HazardType.RUNWAY_CLOSURE: {
-						if (!runways.find((r) => r.id == hazard.affected_runway))
+						if (!runways.some((r) => r.id == hazard.affected_runway))
 							throw Error(
 								"Runway closure applied to nonexistent runway id for hazard at index:" +
 									index,
