@@ -103,7 +103,7 @@ describe("SimulationConfigForm", () => {
 	});
 
 	it("calls createSimulation with correct JSON and navigates via router.push on successful submission", async () => {
-		createSimulation.mockReturnValue("sim-123");
+		createSimulation.mockResolvedValue("sim-123");
 
 		renderWithProviders(<SimulationConfigForm />);
 
@@ -134,7 +134,7 @@ describe("SimulationConfigForm", () => {
 	});
 
 	it('shows a notification when createSimulation returns "request_failed"', async () => {
-		createSimulation.mockReturnValue("request_failed");
+		createSimulation.mockResolvedValue("request_failed");
 
 		renderWithProviders(<SimulationConfigForm />);
 
