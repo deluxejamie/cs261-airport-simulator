@@ -29,6 +29,7 @@ public class SimulationSetupService {
                     flight.getScheduled(),
                     flight.getInterval(),
                     flight.getEnd(),
+                    flight.getSeed(),
                     flight.getOp()
             );
         }

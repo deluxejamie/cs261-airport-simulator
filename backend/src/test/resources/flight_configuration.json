@@ -120,7 +120,7 @@
     {
       "id": 3,
       "type": "runway_closure",
-      a"time": 34,
+      "time": 34,
       "duration_mins": 54,
       "affected_runway": 4,
       "closure_mode": "equipment_failure"

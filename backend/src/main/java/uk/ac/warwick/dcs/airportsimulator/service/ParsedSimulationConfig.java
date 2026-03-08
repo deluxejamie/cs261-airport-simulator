@@ -68,13 +68,15 @@ public class ParsedSimulationConfig {
         private final int scheduled;
         private final int interval;
         private final int end;
+        private final long seed;
 
-        public ParsedFlight(Aircraft aircraft, AircraftOp op, int scheduled, int interval, int end) {
+        public ParsedFlight(Aircraft aircraft, AircraftOp op, int scheduled, int interval, int end, long seed) {
             this.aircraft = aircraft;
             this.op = op;
             this.scheduled = scheduled;
             this.interval = interval;
             this.end = end;
+            this.seed = seed;
         }
 
         public Aircraft getAircraft() {
@@ -95,6 +97,10 @@ public class ParsedSimulationConfig {
 
         public int getEnd() {
             return end;
+        }
+
+        public long getSeed() {
+            return seed;
         }
     }
 

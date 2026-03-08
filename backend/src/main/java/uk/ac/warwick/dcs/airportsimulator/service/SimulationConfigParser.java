@@ -159,7 +159,7 @@ public class SimulationConfigParser {
                 0,
                 flight.getRemainingFuelMins(),
                 parseEmergencyStatus(flight.getEmergencyStatus()),
-                0
+                scheduled
         );
 
         parsed.getFlights().add(
@@ -168,7 +168,8 @@ public class SimulationConfigParser {
                         AircraftOp.ARRIVAL,
                         scheduled,
                         interval,
-                        end
+                        end,
+                        flight.getSeed()
                 )
         );
     }
@@ -193,7 +194,7 @@ public class SimulationConfigParser {
                 0,
                 0,
                 EmergencyStatus.NONE,
-                0
+                scheduled
         );
 
         parsed.getFlights().add(
@@ -202,7 +203,8 @@ public class SimulationConfigParser {
                         AircraftOp.DEPARTURE,
                         scheduled,
                         interval,
-                        end
+                        end,
+                        flight.getSeed()
                 )
         );
     }

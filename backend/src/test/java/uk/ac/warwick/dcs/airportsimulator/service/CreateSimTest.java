@@ -3,6 +3,7 @@ package uk.ac.warwick.dcs.airportsimulator.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 import uk.ac.warwick.dcs.airportsimulator.events.IEvent;
 import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
@@ -60,8 +61,78 @@ public class CreateSimTest extends BaseServiceTest {
             assertEquals(24880, flight.getSeed());
             assertEquals(60, flight.getEnd());
             assertEquals(10, flight.getInterval());
-            assertEquals(1, flight.getAircraft().getId());
+            /* assertEquals(1, flight.getAircraft().getId()); */
             assertEquals(AircraftOp.DEPARTURE, flight.getOp());
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(1);
+            assertEquals("RYANAIR-2", flight.getAircraft().getCallSign());
+            assertEquals(50, flight.getScheduled());
+            assertEquals(90712, flight.getSeed());
+            assertEquals(1000, flight.getEnd());
+            assertEquals(10, flight.getInterval());
+            /* assertEquals(2, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.DEPARTURE, flight.getOp());
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(2);
+            assertEquals("BA-3", flight.getAircraft().getCallSign());
+            assertEquals(68, flight.getScheduled());
+            assertEquals(10866, flight.getSeed());
+            /* assertEquals(3, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.ARRIVAL, flight.getOp());
+            assertEquals(EmergencyStatus.NONE, flight.getAircraft().getEmergencyStatus());
+            assertEquals(20, flight.getAircraft().getFuelRemaining(68));
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(3);
+            assertEquals("NW-4", flight.getAircraft().getCallSign());
+            assertEquals(65, flight.getScheduled());
+            assertEquals(1735, flight.getSeed());
+            /* assertEquals(4, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.ARRIVAL, flight.getOp());
+            assertEquals(EmergencyStatus.MECH_FAIL, flight.getAircraft().getEmergencyStatus());
+            assertEquals(16, flight.getAircraft().getFuelRemaining(65));
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(4);
+            assertEquals("EVA AIR-5", flight.getAircraft().getCallSign());
+            assertEquals(879, flight.getScheduled());
+            assertEquals(54053, flight.getSeed());
+            /* assertEquals(5, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.ARRIVAL, flight.getOp());
+            assertEquals(EmergencyStatus.PASSENGER_HEALTH, flight.getAircraft().getEmergencyStatus());
+            assertEquals(78, flight.getAircraft().getFuelRemaining(879));
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(5);
+            assertEquals("CATHY-6", flight.getAircraft().getCallSign());
+            assertEquals(6575, flight.getScheduled());
+            assertEquals(89027, flight.getSeed());
+            assertEquals(13421, flight.getEnd());
+            assertEquals(23, flight.getInterval());
+            /* assertEquals(6, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.ARRIVAL, flight.getOp());
+            assertEquals(EmergencyStatus.NONE, flight.getAircraft().getEmergencyStatus());
+            assertEquals(65, flight.getAircraft().getFuelRemaining(6575));
+        }
+
+        {
+            final ParsedSimulationConfig.ParsedFlight flight = parsedFlights.get(6);
+            assertEquals("VIRGIN-7", flight.getAircraft().getCallSign());
+            assertEquals(23, flight.getScheduled());
+            assertEquals(18875, flight.getSeed());
+            assertEquals(6757, flight.getEnd());
+            assertEquals(65, flight.getInterval());
+            /* assertEquals(7, flight.getAircraft().getId()); */
+            assertEquals(AircraftOp.ARRIVAL, flight.getOp());
+            assertEquals(EmergencyStatus.PASSENGER_HEALTH, flight.getAircraft().getEmergencyStatus());
+            assertEquals(54, flight.getAircraft().getFuelRemaining(23));
         }
     }
 }

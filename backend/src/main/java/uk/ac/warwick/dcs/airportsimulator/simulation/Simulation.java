@@ -291,9 +291,10 @@ public class Simulation {
      * @param scheduled time the aircraft is scheduled
      * @param interval  interval if event is recurring
      * @param end       time to end if the event is recurring
+     * @param seed      the seed for the aircraft
      * @param op        the aircraft operation
      */
-    public void addAircraft(Aircraft a, int scheduled, int interval, int end, AircraftOp op) {
+    public void addAircraft(Aircraft a, int scheduled, int interval, int end, long seed, AircraftOp op) {
         Objects.requireNonNull(a, "aircraft");
         Objects.requireNonNull(op, "op");
 
@@ -312,7 +313,6 @@ public class Simulation {
             }
         };
 
-        long seed = a.getCallSign().hashCode();
         IEvent event;
         if (interval > 0) {
             event = new NormDistEvent(scheduled, interval, end, seed, action);
