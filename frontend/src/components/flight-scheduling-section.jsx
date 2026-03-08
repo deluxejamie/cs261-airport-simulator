@@ -219,7 +219,15 @@ export default function FlightSchedulingSection() {
 								<Table.Td>{flight.type.toUpperCase()}</Table.Td>
 								<Table.Td>
 									{flight.expected_departure_time ??
-										flight.expected_arrival_time}
+										flight.expected_arrival_time}{" "}
+									{flight.repeating ? (
+										<Text
+											c="dimmed"
+											size="sm"
+										>{`repeats every ${flight.repeating.period}m until ${flight.repeating.end}m`}</Text>
+									) : (
+										<></>
+									)}
 								</Table.Td>
 
 								<Table.Td>
