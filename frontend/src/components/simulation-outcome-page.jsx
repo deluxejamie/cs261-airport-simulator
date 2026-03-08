@@ -23,6 +23,7 @@ import { notificationErrorOptions } from "./export-import";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
+const REDIRECT_DELAY_MS = 4000;
 
 const BADGE_COLORS = {
 	in_progress: "yellow",
