@@ -11,7 +11,11 @@ import java.util.Map;
 @Service
 public class SimulationSetupService {
 
-    public Simulation createSimulation(ParsedSimulationConfig config) {
+    public Simulation setupSimulation(ParsedSimulationConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("ParsedSimulationConfig must not be null.");
+        }
+
         Simulation simulation = new Simulation(config.getRunways());
 
         Map<String, Aircraft> aircraftByCallsign = new HashMap<>();
