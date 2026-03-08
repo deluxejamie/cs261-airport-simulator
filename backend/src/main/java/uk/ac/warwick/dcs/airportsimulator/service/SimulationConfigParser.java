@@ -13,8 +13,6 @@ import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
 import uk.ac.warwick.dcs.airportsimulator.simulation.AircraftOp;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -27,24 +25,6 @@ public class SimulationConfigParser {
     private static final int DEFAULT_FUEL_THRESHOLD_BEFORE_REDIRECTED = 10;
     private static final int DEFAULT_TIME_TAKEN_FOR_TAKEOFF = 1;
     private static final int DEFAULT_TIME_TAKEN_FOR_LANDING = 1;
-    private final ObjectMapper objectMapper;
-
-    public SimulationConfigParser(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
-    public ParsedSimulationConfig parseSimulationRequestJson(String json) {
-        if (json == null || json.trim().isEmpty()) {
-            throw new IllegalArgumentException("Simulation request JSON must not be null or blank.");
-        }
-
-        try {
-            SimulationRequestDto request = objectMapper.readValue(json, SimulationRequestDto.class);
-            return parseSimulationRequest(request);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid simulation request JSON.", e);
-        }
-    }
 
     public ParsedSimulationConfig parseSimulationRequest(SimulationRequestDto request) {
         return parse(request);

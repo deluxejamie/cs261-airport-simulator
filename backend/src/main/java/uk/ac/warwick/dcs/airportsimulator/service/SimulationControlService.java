@@ -16,11 +16,6 @@ public class SimulationControlService {
         this.simulationSetupService = simulationSetupService;
     }
 
-    public Simulation buildSimulationFromJson(String json) {
-        ParsedSimulationConfig parsedConfig = simulationConfigParser.parseSimulationRequestJson(json);
-        return simulationSetupService.setupSimulation(parsedConfig);
-    }
-
     public Simulation buildSimulationFromRequest(SimulationRequestDto request) {
         ParsedSimulationConfig parsedConfig = simulationConfigParser.parseSimulationRequest(request);
         return simulationSetupService.setupSimulation(parsedConfig);
