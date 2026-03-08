@@ -451,7 +451,7 @@ export const useHazardSchedule = () => {
 		const hazard = {
 			id: hazardCounter,
 			type: HazardType.RUNWAY_CLOSURE,
-			start_time_mins: startTimeMinutes,
+			time: startTimeMinutes,
 			duration_mins: durationMinutes,
 			affected_runway: affectedRunway,
 			closure_mode: closureMode,
@@ -552,7 +552,7 @@ export const useHazardSchedule = () => {
 							);
 
 						if (
-							!isNaturalNumber(hazard.start_time_mins) ||
+							!isNaturalNumber(hazard.time) ||
 							!isNaturalNumber(hazard.duration_mins) ||
 							!isValueInEnum(RunwayClosureMode, hazard.closure_mode)
 						)
@@ -584,7 +584,7 @@ export const useHazardSchedule = () => {
 	return {
 		/**
 		 * A map from hazard id (can be used as a key) to the hazard schedule data
-		 * @type {Map<Number,{id: Number, type: HazardType.RUNWAY_CLOSURE, start_time_mins: Number, duration_mins: Number, affected_runway: Number, closure_mode: closureMode, repeating?: {}}>}
+		 * @type {Map<Number,{id: Number, type: HazardType.RUNWAY_CLOSURE, time: Number, duration_mins: Number, affected_runway: Number, closure_mode: closureMode, repeating?: {}}>}
 		 * @see https://mantine.dev/hooks/use-map/ I would recommend using these docs to see how to display the hazard schedule. Use the hazard id as a key in lists.
 		 */
 		hazards,
