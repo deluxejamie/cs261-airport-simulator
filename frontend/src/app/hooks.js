@@ -480,6 +480,7 @@ export const useHazardSchedule = () => {
 			type: HazardType.EMERGENCY_EVENT,
 			target_arrival_callsign: arrivalCallsign,
 			time,
+			emergency_type: emergencyType,
 		};
 
 		const res = hazards.set(hazardCounter, hazard);
@@ -542,6 +543,15 @@ export const useHazardSchedule = () => {
 							throw Error(
 								"Invalid or missing hazard time for hazard at index:" + index,
 							);
+
+						if (
+							!isValueInEnum(EmergencyStatusWithoutNone, hazard.emergency_type)
+						)
+							throw Error(
+								"Invalid or missing emergency status for hazard at index:" +
+									index,
+							);
+
 						break;
 					}
 					case HazardType.RUNWAY_CLOSURE: {
