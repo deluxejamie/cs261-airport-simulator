@@ -132,6 +132,9 @@ const SimulationNotFound = () => {
 				<Text c="dimmed" size="sm">
 					If this issue persists, please contact your system administrator.
 				</Text>
+				<Button fullWidth onClick={() => router.push("/")}>
+					Run a new simulation
+				</Button>
 			</Stack>
 		</Card>
 	);
