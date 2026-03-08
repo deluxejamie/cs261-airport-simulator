@@ -65,7 +65,9 @@ export default function HazardSchedulingSection() {
 	);
 
 	const selectedArrivalCallsign =
-		targetArrivalCallsign || arrivalCallsigns[0] || "";
+		(flights.has(targetArrivalCallsign) ? targetArrivalCallsign : undefined) ||
+		arrivalCallsigns[0] ||
+		"";
 
 	const handleAddHazard = () => {
 		setErrorMessage("");
