@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Group, Stack, Text, Title } from "@mantine/core";
+import { Alert,
+	Badge,
+	Button,
+	Card,
+	Group,
+	Loader,
+	Stack,
+	Text,
+	Title,
+} from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
