@@ -7,6 +7,7 @@ import uk.ac.warwick.dcs.airportsimulator.eventlog.EventType;
 import uk.ac.warwick.dcs.airportsimulator.aircraft.EmergencyStatus;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayMode;
 import uk.ac.warwick.dcs.airportsimulator.runway.RunwayStatus;
+import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,10 +107,152 @@ public class Simulation {
             final Aircraft takeoff = takeOffQueue.peekNextAircraft();
             if (takeoff != null && takeoff.getScheduledTime() >= simTime)
             {
-                holdingPattern.getNextAircraft();
+                takeOffQueue.getNextAircraft();
             }
         }
 
+    }
+
+    public SimulationResult run() {
+        final int MAX_TAKEOFF_WAIT_MIN = 30; // spec default
+        final SimulationResult result = new SimulationResult();
+
+        // Execute events scheduled at t=0
+        eventSchedular.step(simTime);
+
+        int safetyCap = 1_000_000;
+        while (!isFinished() && safetyCap-- > 0) {
+
+            //  update max queue sizes
+            result.recordHoldQueueSize(holdingPattern.size(), (double) simTime);
+            result.recordTakeoffQueueSize(takeOffQueue.size(), (double) simTime);
+
+            // diversion: remove fuel-critical aircraft from holding pattern
+            while (true) {
+                Aircraft fuelCritical = holdingPattern.pollIfFuelCritical(simTime);
+                if (fuelCritical == null) break;
+
+                result.recordDiversion();
+
+                HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callSign", fuelCritical.getCallSign());
+                attr.put("reason", "FUEL_CRITICAL");
+                logEvent(EventType.DIVERSION_EVENT, simTime, attr);
+            }
+
+            // cancellation: remove aircraft that waited too long in takeoff queue
+            while (true) {
+                Aircraft nextTake = takeOffQueue.peekNextAircraft();
+                if (nextTake == null) break;
+
+                // Assumption used in your current system: aircraft enters queue at its scheduled time
+                int waited = simTime - nextTake.getScheduledTime();
+                if (waited < MAX_TAKEOFF_WAIT_MIN) break;
+
+                takeOffQueue.getNextAircraft();
+                result.recordCancellation();
+
+                HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callSign", nextTake.getCallSign());
+                attr.put("reason", "MAX_WAIT_EXCEEDED");
+                attr.put("waitedMinutes", waited);
+                logEvent(EventType.CANCELLATION_EVENT, simTime, attr);
+            }
+
+            // runway assignment
+            for (Runway r : runways) {
+                if (r.getStatus() != RunwayStatus.AVAILABLE) continue;
+                if (r.getOccupied() != null) continue;
+
+                Aircraft chosen = null;
+                boolean landing = false;
+
+                switch (r.getMode()) {
+                    case LANDING -> {
+                        chosen = holdingPattern.peekNextAircraft();
+                        landing = true;
+                    }
+                    case TAKE_OFF -> {
+                        chosen = takeOffQueue.peekNextAircraft();
+                        landing = false;
+                    }
+                    case MIXED_MODE -> {
+                        Aircraft nextHold = holdingPattern.peekNextAircraft();
+                        Aircraft nextTake = takeOffQueue.peekNextAircraft();
+
+                        if (nextHold == null && nextTake == null) {
+                            chosen = null;
+                        } else if (nextHold == null) {
+                            chosen = nextTake;
+                            landing = false;
+                        } else if (nextTake == null) {
+                            chosen = nextHold;
+                            landing = true;
+                        } else {
+                            // pick whichever will hit diversion/cancel first
+                            int holdSlack = Math.max(0, nextHold.getFuelRemaining(simTime) - 10);
+                            int takeSlack = Math.max(0, MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime()));
+
+                            if (holdSlack <= takeSlack) {
+                                chosen = nextHold;
+                                landing = true;
+                            } else {
+                                chosen = nextTake;
+                                landing = false;
+                            }
+                        }
+                    }
+                }
+
+                if (chosen == null) continue;
+
+                // remove from queue
+                if (landing) {
+                    holdingPattern.getNextAircraft();
+                } else {
+                    takeOffQueue.getNextAircraft();
+                }
+
+                // occupy runway briefly and release (runway-zone abstraction)
+                r.setOccupied(chosen);
+                r.setOccupied(null);
+
+                // metrics + log
+                HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callSign", chosen.getCallSign());
+                attr.put("runwayNumber", r.getRunwayNumber());
+
+                int delay = simTime - chosen.getScheduledTime();
+                if (delay < 0) delay = 0;
+
+                if (landing) {
+                    // With current data available, hold time is approximated as time since scheduled arrival
+                    int holdTime = Math.max(0, simTime - chosen.getScheduledTime());
+                    result.recordHoldTime((double) holdTime);
+                    result.recordArrivalDelay((double) delay);
+
+                    attr.put("holdMinutes", holdTime);
+                    attr.put("arrivalDelay", delay);
+                    logEvent(EventType.LANDING_EVENT, simTime, attr);
+                } else {
+                    // With current data available, wait time approximated as time since scheduled departure
+                    int waitTime = Math.max(0, simTime - chosen.getScheduledTime());
+                    result.recordTakeoffWait((double) waitTime);
+                    result.recordDepartureDelay((double) delay);
+
+                    attr.put("waitMinutes", waitTime);
+                    attr.put("departureDelay", delay);
+                    logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
+                }
+            }
+
+            // advance time and execute due events
+            simTime += 1;
+            eventSchedular.step(simTime);
+        }
+
+        result.finalizeAverages();
+        return result;
     }
 
     /**
