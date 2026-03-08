@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
 	Alert,
 	Button,
@@ -18,6 +18,7 @@ import {
 	HazardType,
 	RunwayClosureMode,
 	FlightType,
+	EmergencyStatusWithoutNone,
 } from "../app/hooks";
 
 const formatLabel = (value) =>
@@ -47,12 +48,21 @@ export default function HazardSchedulingSection() {
 		RunwayClosureMode.SNOW_CLEARANCE,
 	);
 
-	const [targetArrivalCallsign, setTargetArrivalCallsign] = useState("");
-	const [errorMessage, setErrorMessage] = useState("");
+	const [flightHazard, setFlightHazard] = useState(
+		EmergencyStatusWithoutNone.MECHANICAL_FAIL,
+	);
 
 	const arrivalCallsigns = [...flights.values()]
 		.filter((flight) => flight.type === FlightType.ARRIVAL)
 		.map((flight) => flight.callsign);
+
+	const [targetArrivalCallsign, setTargetArrivalCallsign] = useState(
+		arrivalCallsigns[0] || "",
+	);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [timeFromStartOfSimulation, setTimeFromStartOfSim] = useState(
+		flights.get(targetArrivalCallsign)?.expected_arrival_time ?? 0,
+	);
 
 	const selectedArrivalCallsign =
 		targetArrivalCallsign || arrivalCallsigns[0] || "";
@@ -68,7 +78,11 @@ export default function HazardSchedulingSection() {
 					closureMode,
 				);
 			} else {
-				addEmergencyEventHazard(selectedArrivalCallsign);
+				addEmergencyEventHazard(
+					selectedArrivalCallsign,
+					flightHazard,
+					timeFromStartOfSimulation,
+				);
 			}
 		} catch (error) {
 			setErrorMessage(error.message);
@@ -113,6 +127,7 @@ export default function HazardSchedulingSection() {
 							label="Start time (mins from simulation start)"
 							min={0}
 							value={startTimeMinutes}
+							disabled={runways.length === 0}
 							onChange={(value) => setStartTimeMinutes(Number(value ?? 0))}
 						/>
 
@@ -120,6 +135,7 @@ export default function HazardSchedulingSection() {
 							label="Duration (mins)"
 							min={1}
 							value={durationMinutes}
+							disabled={runways.length === 0}
 							onChange={(value) => setDurationMinutes(Number(value ?? 1))}
 						/>
 
@@ -144,20 +160,53 @@ export default function HazardSchedulingSection() {
 								value: mode,
 								label: formatLabel(mode),
 							}))}
+							disabled={runways.length === 0}
 						/>
 					</Group>
 				) : (
-					<Select
-						label="Intended arrival callsign"
-						value={selectedArrivalCallsign}
-						onChange={(value) => setTargetArrivalCallsign(value || "")}
-						placeholder="Add at least one arrival flight first"
-						data={arrivalCallsigns.map((callsign) => ({
-							value: callsign,
-							label: callsign,
-						}))}
-						disabled={arrivalCallsigns.length === 0}
-					/>
+					<Group grow align="end">
+						<Select
+							label="Intended arrival callsign"
+							value={selectedArrivalCallsign}
+							onChange={(value) => {
+								if (value == null) return;
+								setTargetArrivalCallsign(value || "");
+								setTimeFromStartOfSim(
+									flights.get(value)?.expected_arrival_time ?? 0,
+								);
+							}}
+							placeholder="Add at least one arrival flight first"
+							data={arrivalCallsigns.map((callsign) => ({
+								value: callsign,
+								label: callsign,
+							}))}
+							disabled={arrivalCallsigns.length === 0}
+						/>
+						<NumberInput
+							label="Incident time (mins from start of simulation)"
+							min={1}
+							value={timeFromStartOfSimulation}
+							onChange={(value) => setTimeFromStartOfSim(Number(value ?? 1))}
+							disabled={arrivalCallsigns.length === 0}
+						/>
+						<Select
+							label="Incident type"
+							value={flightHazard}
+							onChange={(value) => setFlightHazard(value || "")}
+							placeholder="Add at least one arrival flight first"
+							data={[
+								{
+									label: "Mechanical Failure",
+									value: EmergencyStatusWithoutNone.MECHANICAL_FAIL,
+								},
+								{
+									label: "Passenger Health",
+									value: EmergencyStatusWithoutNone.PASSENGER_HEALTH,
+								},
+							]}
+							disabled={arrivalCallsigns.length === 0}
+						/>
+					</Group>
 				)}
 
 				{errorMessage ? <Alert color="red">{errorMessage}</Alert> : null}
