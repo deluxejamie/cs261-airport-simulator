@@ -18,10 +18,10 @@
     }
   ],
   "advancedConfig": {
-    "maxDelayBeforeCancelled": 15,
+    "maxDelayBeforeCancelled": 17,
     "fuelThresholdBeforeRedirected": 15,
     "timeTakenForTakeoff": 8,
-    "timeTakenForLanding": 8
+    "timeTakenForLanding": 9
   },
   "flights": [
     {

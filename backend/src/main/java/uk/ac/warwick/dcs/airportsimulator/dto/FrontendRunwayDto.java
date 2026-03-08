@@ -2,7 +2,7 @@ package uk.ac.warwick.dcs.airportsimulator.dto;
 
 public class FrontendRunwayDto {
     private Integer id;
-    private String type;
+    private String mode;
 
     public Integer getId() {
         return id;
@@ -12,11 +12,11 @@ public class FrontendRunwayDto {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getMode() {
+        return mode;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 }

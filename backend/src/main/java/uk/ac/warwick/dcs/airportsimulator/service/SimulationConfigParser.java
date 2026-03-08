@@ -86,7 +86,7 @@ public class SimulationConfigParser {
         for (FrontendRunwayDto config : request.getRunways()) {
             requireNonNull(config, "runway");
             requireNonNull(config.getId(), "runway.id");
-            requireNonBlank(config.getType(), "runway.type");
+            requireNonBlank(config.getMode(), "runway.type");
 
             if (!seenIds.add(config.getId())) {
                 throw new IllegalArgumentException("Duplicate runway id: " + config.getId());
@@ -96,7 +96,7 @@ public class SimulationConfigParser {
                     config.getId(),
                     0.0,
                     0.0,
-                    parseRunwayMode(config.getType()),
+                    parseRunwayMode(config.getMode()),
                     RunwayStatus.AVAILABLE,
                     null
             );
