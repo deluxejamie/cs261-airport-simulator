@@ -112,4 +112,12 @@ const LoadingComponent = () => {
  */
 const SimulationNotFound = () => {
 	const router = useRouter();
+
+	useEffect(() => {
+		const redirectTimeout = setTimeout(() => {
+			router.push("/");
+		}, REDIRECT_DELAY_MS);
+	
+		return () => clearTimeout(redirectTimeout);
+	}, [router]);
 };
