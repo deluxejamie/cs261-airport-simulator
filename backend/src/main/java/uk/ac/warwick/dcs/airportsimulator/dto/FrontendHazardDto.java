@@ -20,6 +20,9 @@ public class FrontendHazardDto {
     @JsonProperty("target_arrival_callsign")
     private String targetArrivalCallsign;
 
+    @JsonProperty("emergency_type")
+    private String emergencyType;
+
     private RepeatingDto repeating;
 
     public Integer getId() {
@@ -76,6 +79,14 @@ public class FrontendHazardDto {
 
     public void setTargetArrivalCallsign(String targetArrivalCallsign) {
         this.targetArrivalCallsign = targetArrivalCallsign;
+    }
+
+    public String getEmergencyType() {
+        return emergencyType;
+    }
+
+    public void setEmergencyType(String emergencyType) {
+        this.emergencyType = emergencyType;
     }
 
     public RepeatingDto getRepeating() {
