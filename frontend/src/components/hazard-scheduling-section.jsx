@@ -53,7 +53,7 @@ export default function HazardSchedulingSection() {
 	);
 
 	const arrivalCallsigns = [...flights.values()]
-		.filter((flight) => flight.type === FlightType.ARRIVAL)
+		.filter((flight) => flight.type === FlightType.ARRIVAL && !flight.repeating)
 		.map((flight) => flight.callsign);
 
 	const [targetArrivalCallsign, setTargetArrivalCallsign] = useState(
@@ -117,7 +117,7 @@ export default function HazardSchedulingSection() {
 							value: HazardType.RUNWAY_CLOSURE,
 						},
 						{
-							label: "Emergency events hazard",
+							label: "Deferred emergency hazard",
 							value: HazardType.EMERGENCY_EVENT,
 						},
 					]}
@@ -224,8 +224,8 @@ export default function HazardSchedulingSection() {
 					{arrivalCallsigns.length === 0 &&
 					hazardType === HazardType.EMERGENCY_EVENT ? (
 						<Text size="sm" c="yellow.8">
-							No arrival flights scheduled. Add an arrival in the scheduling
-							section first.
+							No arrival flights scheduled. Add a non-repeating arrival in the
+							scheduling section first.
 						</Text>
 					) : null}
 					<Button
