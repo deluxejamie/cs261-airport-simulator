@@ -535,34 +535,74 @@ public class Simulation {
         eventLog.addEntry(new EventLogEntry(type, timestamp, attr));
     }
 
+    /**
+     * Returns the maximum delay allowed before a flight is cancelled.
+     *
+     * @return the maximum delay before cancellation
+     */
     public int getMaxDelayBeforeCancelled() {
         return maxDelayBeforeCancelled;
     }
 
+    /**
+     * Sets the maximum delay allowed before a flight is cancelled.
+     *
+     * @param maxDelayBeforeCancelled the maximum delay before cancellation
+     */
     public void setMaxDelayBeforeCancelled(int maxDelayBeforeCancelled) {
         this.maxDelayBeforeCancelled = maxDelayBeforeCancelled;
     }
 
+    /**
+     * Returns the fuel threshold below which an aircraft may be redirected.
+     *
+     * @return the fuel threshold before redirection
+     */
     public int getFuelThresholdBeforeRedirected() {
         return fuelThresholdBeforeRedirected;
     }
 
+    /**
+     * Sets the fuel threshold below which an aircraft may be redirected.
+     *
+     * @param fuelThresholdBeforeRedirected the fuel threshold before redirection
+     */
     public void setFuelThresholdBeforeRedirected(int fuelThresholdBeforeRedirected) {
         this.fuelThresholdBeforeRedirected = fuelThresholdBeforeRedirected;
     }
 
+    /**
+     * Returns the time required for a takeoff operation.
+     *
+     * @return the time taken for takeoff
+     */
     public int getTimeTakenForTakeoff() {
         return timeTakenForTakeoff;
     }
 
+    /**
+     * Sets the time required for a takeoff operation.
+     *
+     * @param timeTakenForTakeoff the time taken for takeoff
+     */
     public void setTimeTakenForTakeoff(int timeTakenForTakeoff) {
         this.timeTakenForTakeoff = timeTakenForTakeoff;
     }
 
+    /**
+     * Returns the time required for a landing operation.
+     *
+     * @return the time taken for landing
+     */
     public int getTimeTakenForLanding() {
         return timeTakenForLanding;
     }
 
+    /**
+     * Sets the time required for a landing operation.
+     *
+     * @param timeTakenForLanding the time taken for landing
+     */
     public void setTimeTakenForLanding(int timeTakenForLanding) {
         this.timeTakenForLanding = timeTakenForLanding;
     }

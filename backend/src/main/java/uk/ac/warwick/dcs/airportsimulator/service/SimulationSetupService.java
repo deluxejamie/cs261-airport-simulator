@@ -8,9 +8,22 @@ import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service responsible for converting a parsed simulation configuration into
+ * a fully initialised {@link Simulation} object.
+ *
+ */
 @Service
 public class SimulationSetupService {
 
+    /**
+     * Builds and initialises a simulation instance from a parsed configuration.
+     *
+     * @param config parsed simulation configuration
+     * @return configured simulation ready to run
+     * @throws IllegalArgumentException if the configuration is null
+     * @throws IllegalStateException if an emergency references an unknown aircraft
+     */
     public Simulation setupSimulation(ParsedSimulationConfig config) {
         if (config == null) {
             throw new IllegalArgumentException("ParsedSimulationConfig must not be null.");

@@ -18,6 +18,14 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Service responsible for parsing and validating a frontend simulation request
+ * into a structured {@link ParsedSimulationConfig}.
+ *
+ * This class applies default values where needed, checks constraints on input
+ * fields, converts string-based DTO values into internal enum types, and
+ * prepares parsed flight and hazard definitions for simulation setup.
+ */
 @Service
 public class SimulationConfigParser {
 
@@ -26,10 +34,23 @@ public class SimulationConfigParser {
     private static final int DEFAULT_TIME_TAKEN_FOR_TAKEOFF = 1;
     private static final int DEFAULT_TIME_TAKEN_FOR_LANDING = 1;
 
+    /**
+     * Parses a simulation request into a validated internal configuration.
+     *
+     * @param request simulation request received from the frontend
+     * @return parsed and validated simulation configuration
+     */
     public ParsedSimulationConfig parseSimulationRequest(SimulationRequestDto request) {
         return parse(request);
     }
 
+    /**
+     * Parses a simulation request into a validated internal configuration.
+     *
+     * @param request simulation request received from the frontend
+     * @return parsed and validated simulation configuration
+     * @throws IllegalArgumentException if the request is invalid
+     */
     public ParsedSimulationConfig parse(SimulationRequestDto request) {
         if (request == null) {
             throw new IllegalArgumentException("Simulation request must not be null.");
@@ -72,6 +93,12 @@ public class SimulationConfigParser {
         return parsed;
     }
 
+    /**
+     * Parses runway definitions from the request and adds them to the parsed config.
+     *
+     * @param request original simulation request
+     * @param parsed parsed configuration being built
+     */
     private void parseRunways(SimulationRequestDto request, ParsedSimulationConfig parsed) {
         if (request.getRunways() == null || request.getRunways().isEmpty()) {
             throw new IllegalArgumentException("At least one runway must be provided.");
@@ -105,6 +132,12 @@ public class SimulationConfigParser {
         }
     }
 
+    /**
+     * Parses all flight definitions from the request.
+     *
+     * @param request original simulation request
+     * @param parsed parsed configuration being built
+     */
     private void parseFlights(SimulationRequestDto request, ParsedSimulationConfig parsed) {
         if (request.getFlights() == null) {
             return;
@@ -135,6 +168,12 @@ public class SimulationConfigParser {
         }
     }
 
+    /**
+     * Parses an arrival flight and adds it to the parsed config.
+     *
+     * @param flight frontend flight DTO
+     * @param parsed parsed configuration being built
+     */
     private void parseArrivalFlight(FrontendFlightDto flight, ParsedSimulationConfig parsed) {
         requireNonNull(flight.getExpectedArrivalTime(), "arrival.expected_arrival_time");
         requireNonBlank(flight.getEmergencyStatus(), "arrival.emergency_status");
@@ -174,6 +213,12 @@ public class SimulationConfigParser {
         );
     }
 
+    /**
+     * Parses a departure flight and adds it to the parsed config.
+     *
+     * @param flight frontend flight DTO
+     * @param parsed parsed configuration being built
+     */
     private void parseDepartureFlight(FrontendFlightDto flight, ParsedSimulationConfig parsed) {
         requireNonNull(flight.getExpectedDepartureTime(), "departure.expected_departure_time");
         validateNonNegative(flight.getExpectedDepartureTime(), "departure.expected_departure_time");
@@ -209,6 +254,12 @@ public class SimulationConfigParser {
         );
     }
 
+    /**
+     * Parses all hazard definitions from the request.
+     *
+     * @param request original simulation request
+     * @param parsed parsed configuration being built
+     */
     private void parseHazards(SimulationRequestDto request, ParsedSimulationConfig parsed) {
         if (request.getHazards() == null) {
             return;
@@ -242,6 +293,13 @@ public class SimulationConfigParser {
         }
     }
 
+    /**
+     * Parses a runway closure hazard and adds it to the parsed config.
+     *
+     * @param hazard runway closure hazard DTO
+     * @param parsed parsed configuration being built
+     * @param validRunways set of valid runway identifiers
+     */
     private void parseRunwayClosure(FrontendHazardDto hazard,
                                     ParsedSimulationConfig parsed,
                                     Set<Integer> validRunways) {
@@ -283,6 +341,13 @@ public class SimulationConfigParser {
         );
     }
 
+    /**
+     * Parses an aircraft emergency hazard and adds it to the parsed config.
+     *
+     * @param hazard emergency hazard DTO
+     * @param parsed parsed configuration being built
+     * @param arrivalCallsigns set of valid arrival aircraft callsigns
+     */
     private void parseEmergencyEvent(FrontendHazardDto hazard,
                                      ParsedSimulationConfig parsed,
                                      Set<String> arrivalCallsigns) {
@@ -303,6 +368,12 @@ public class SimulationConfigParser {
         );
     }
 
+    /**
+     * Converts a runway mode string into the corresponding enum value.
+     *
+     * @param value raw runway mode string
+     * @return parsed runway mode
+     */
     private RunwayMode parseRunwayMode(String value) {
         return switch (normalize(value)) {
             case "TAKEOFF", "TAKE_OFF" -> RunwayMode.TAKE_OFF;
@@ -312,6 +383,12 @@ public class SimulationConfigParser {
         };
     }
 
+    /**
+     * Converts a runway closure mode string into the corresponding runway status.
+     *
+     * @param value raw closure mode string
+     * @return parsed runway status
+     */
     private RunwayStatus parseRunwayStatus(String value) {
         return switch (normalize(value)) {
             case "SNOW_CLEARANCE" -> RunwayStatus.SNOW_CLEARANCE;
@@ -321,6 +398,12 @@ public class SimulationConfigParser {
         };
     }
 
+    /**
+     * Converts an emergency status string into the corresponding enum value.
+     *
+     * @param value raw emergency status string
+     * @return parsed emergency status
+     */
     private EmergencyStatus parseEmergencyStatus(String value) {
         return switch (normalize(value)) {
             case "NONE" -> EmergencyStatus.NONE;
@@ -330,10 +413,24 @@ public class SimulationConfigParser {
         };
     }
 
+    /**
+     * Normalises a user-provided string for robust enum parsing.
+     *
+     * @param value raw string value
+     * @return trimmed, upper-case, underscore-normalised string
+     */
     private String normalize(String value) {
         return value.trim().toUpperCase(Locale.ROOT).replace('-', '_').replace(' ', '_');
     }
 
+    /**
+     * Validates scheduling information for a possibly repeating event.
+     *
+     * @param scheduled initial scheduled time
+     * @param interval repeat interval
+     * @param end end time of repetition
+     * @param field logical field name for error reporting
+     */
     private void validateRecurring(int scheduled, int interval, int end, String field) {
         validateNonNegative(scheduled, field + ".scheduled");
         validateNonNegative(interval, field + ".period");
@@ -348,6 +445,12 @@ public class SimulationConfigParser {
         }
     }
 
+    /**
+     * Validates that a seed value exists and falls within the accepted range.
+     *
+     * @param seed seed value to validate
+     * @param field logical field name for error reporting
+     */
     private void requireSeedValid(Integer seed, String field) {
         requireNonNull(seed, field);
         if (seed < 0 || seed > 100000) {
@@ -355,24 +458,48 @@ public class SimulationConfigParser {
         }
     }
 
+    /**
+     * Ensures that a value is not null.
+     *
+     * @param value value to check
+     * @param field logical field name for error reporting
+     */
     private void requireNonNull(Object value, String field) {
         if (value == null) {
             throw new IllegalArgumentException(field + " must not be null.");
         }
     }
 
+    /**
+     * Ensures that a string value is not null or blank.
+     *
+     * @param value value to check
+     * @param field logical field name for error reporting
+     */
     private void requireNonBlank(String value, String field) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(field + " must not be blank.");
         }
     }
 
+    /**
+     * Ensures that an integer value is non-negative.
+     *
+     * @param value value to validate
+     * @param field logical field name for error reporting
+     */
     private void validateNonNegative(int value, String field) {
         if (value < 0) {
             throw new IllegalArgumentException(field + " must be >= 0.");
         }
     }
 
+    /**
+     * Ensures that an integer value is strictly positive.
+     *
+     * @param value value to validate
+     * @param field logical field name for error reporting
+     */
     private void validatePositive(int value, String field) {
         if (value <= 0) {
             throw new IllegalArgumentException(field + " must be > 0.");
