@@ -73,6 +73,13 @@ export async function getSimulationResult(uuid) {
 	return await request(`/simulation/result/${safeID}`);
 }
 
+/**
+ * Gets event log entries for a provided simulation
+ * @param {String} uuid The uuid of the simulation to get entries for
+ * @param {Number} offset The offset to gather from
+ * @param {Number} count The count of events to get
+ * @returns {success: boolean, events?: Event[], total_events?: Number} (expected from server) The response from the server. Other properties only populated if success is true
+ */
 export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 	try {
 		const res = await request(
