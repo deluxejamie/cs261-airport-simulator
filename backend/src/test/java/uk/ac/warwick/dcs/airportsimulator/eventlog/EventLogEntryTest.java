@@ -12,7 +12,7 @@ class EventLogEntryTest {
     void constructor_shouldSetAllAttributesCorrectly() {
         // Arrange
         EventType type = EventType.LANDING_EVENT;
-        double timestamp = 123.45;
+        int timestamp = 123;
 
         HashMap<String, Object> attr = new HashMap<>();
         attr.put("runway", 1);
@@ -33,7 +33,7 @@ class EventLogEntryTest {
     void attrMap_shouldBeSameReference_soMutationsAreVisible() {
         EventLogEntry entry = new EventLogEntry(
                 EventType.EMERGENCY_EVENT,
-                1.0,
+                1,
                 new HashMap<>()
         );
 
