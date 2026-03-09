@@ -58,6 +58,10 @@ public class SimulationService {
         logRepo.save(new EventLogEntryEntity(uuid, eventType, simTimestamp, attributesJson));
     }
 
+    public long getEventLogCount(String uuid) {
+        return logRepo.countBySimulationId(uuid);
+    }
+
     /** Get the status of a simulation (RUNNING / COMPLETED / not found). */
     public Optional<String> getStatus(String uuid) {
         return simRepo.findById(uuid).map(SimulationEntity::getStatus);

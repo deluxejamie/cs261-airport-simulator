@@ -45,7 +45,10 @@ public class SimulationController {
                     log.getAttributes()
             ));
         }
-        return ResponseEntity.ok(eventItems);
+
+        long totalEvents = simulationService.getEventLogCount(uuid);
+        EventLogResponse response = new EventLogResponse(eventItems, totalEvents);
+        return ResponseEntity.ok(response);
 }
 
     @GetMapping("/{uuid}/result")
