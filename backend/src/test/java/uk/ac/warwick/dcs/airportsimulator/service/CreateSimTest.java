@@ -43,13 +43,13 @@ public class CreateSimTest extends BaseServiceTest {
             assertEquals(runways.get(i).getMode(), expected[i]);
         }
     }
-
+    
     @Test
     public void testAdvancedConfig() {
-        assertEquals(parsedConfig.getMaxDelayBeforeCancelled(), simulation.getMaxDelayBeforeCancelled());
-        assertEquals(parsedConfig.getFuelThresholdBeforeRedirected(), simulation.getFuelThresholdBeforeRedirected());
-        assertEquals(parsedConfig.getTimeTakenForTakeoff(), simulation.getTimeTakenForTakeoff());
-        assertEquals(parsedConfig.getTimeTakenForLanding(), simulation.getTimeTakenForLanding());
+        assertEquals(17, simulation.getMaxDelayBeforeCancelled());
+        assertEquals(8, simulation.getFuelThresholdBeforeRedirected());
+        assertEquals(3, simulation.getTimeTakenForTakeoff());
+        assertEquals(4, simulation.getTimeTakenForLanding());
     }
 
     @Test
