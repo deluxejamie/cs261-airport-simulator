@@ -74,6 +74,12 @@ export async function getSimulationResult(uuid) {
 }
 
 export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
-	const safeID = encodeURIComponent(uuid);
-	return request(`/simulation/eventlog/${safeID}/${offset}/${count}`);
+	return await request(
+		`/simulation/eventlog/` +
+			encodeURIComponent(uuid) +
+			"/" +
+			encodeURIComponent(offset) +
+			"/" +
+			encodeURIComponent(count),
+	);
 }
