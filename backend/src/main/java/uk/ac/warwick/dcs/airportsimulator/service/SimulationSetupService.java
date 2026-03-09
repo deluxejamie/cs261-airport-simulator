@@ -22,7 +22,7 @@ public class SimulationSetupService {
         simulation.setFuelThresholdBeforeRedirected(config.getFuelThresholdBeforeRedirected());
         simulation.setTimeTakenForTakeoff(config.getTimeTakenForTakeoff());
         simulation.setTimeTakenForLanding(config.getTimeTakenForLanding());
-        
+
         Map<String, Aircraft> aircraftByCallsign = new HashMap<>();
 
         for (ParsedSimulationConfig.ParsedFlight flight : config.getFlights()) {

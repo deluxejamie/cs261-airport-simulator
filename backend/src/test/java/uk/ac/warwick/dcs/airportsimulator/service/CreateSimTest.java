@@ -43,10 +43,13 @@ public class CreateSimTest extends BaseServiceTest {
             assertEquals(runways.get(i).getMode(), expected[i]);
         }
     }
-
+    
     @Test
-    public void testAdvancedConfig() throws Exception {
-        throw new Exception("Advanced config not set on simulation!");
+    public void testAdvancedConfig() {
+        assertEquals(30, simulation.getMaxDelayBeforeCancelled());
+        assertEquals(10, simulation.getFuelThresholdBeforeRedirected());
+        assertEquals(1, simulation.getTimeTakenForTakeoff());
+        assertEquals(1, simulation.getTimeTakenForLanding());
     }
 
     @Test
