@@ -104,7 +104,7 @@ public class DataBaseTest
 
         final String uuid = createInitialSim();
 
-        int timestamp = 0;
+        long timestamp = 0;
 
         /* Create random test data */
         for (int i = 0; i < TEST_ITERATIONS; ++i)

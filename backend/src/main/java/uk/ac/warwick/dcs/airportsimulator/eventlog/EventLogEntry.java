@@ -15,7 +15,7 @@ public class EventLogEntry {
      * @param timestamp the time of the event log entry
      * @param attr      any extra attributes about the log entry
      */
-    public EventLogEntry(EventType type, int timestamp, HashMap<String, Object> attr)
+    public EventLogEntry(EventType type, long timestamp, HashMap<String, Object> attr)
     {
         this.type = type;
         this.timestamp = timestamp;
@@ -34,7 +34,7 @@ public class EventLogEntry {
      * Gets timestamp of EventLogEntry
      * @return the timestamp of the event log entry
      */
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -50,7 +50,7 @@ public class EventLogEntry {
     private final EventType type;
 
     /* The timestamp of the EventLogEntry */
-    private final int timestamp;
+    private final long timestamp;
 
     /* The attribute of the EventLogEntry */
     private final HashMap<String, Object> attr;
