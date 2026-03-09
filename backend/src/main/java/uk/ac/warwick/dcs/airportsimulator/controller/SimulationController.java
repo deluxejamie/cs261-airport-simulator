@@ -6,6 +6,7 @@ import uk.ac.warwick.dcs.airportsimulator.entity.EventLogEntryEntity;
 import uk.ac.warwick.dcs.airportsimulator.entity.SimulationResultEntity;
 import uk.ac.warwick.dcs.airportsimulator.service.SimulationService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,13 +31,22 @@ public class SimulationController {
     }
 
     @GetMapping("/{uuid}/event-log")
-    public ResponseEntity<?> getEventLog(@PathVariable String uuid,@RequestParam(defaultValue="0") int offset,@RequestParam(defaultValue="50") int count) {
+    public ResponseEntity<?> getEventLog(@PathVariable String uuid,@RequestParam(defaultValue = "0") int offset,@RequestParam(defaultValue = "50") int count) {
         if (offset<0 || count<=0) {
-            return ResponseEntity.badRequest().body(Map.of("error", "offset must be more than or equal to 0 and count > 0"));
+            return ResponseEntity.badRequest().body(Map.of("error", "offset must be more than or equal to 0 and count>0"));
         }
         List<EventLogEntryEntity> logs = simulationService.getEventLog(uuid, offset, count);
-        return ResponseEntity.ok(logs);
-    }
+        List<EventLogItemResponse> eventItems = new ArrayList<>();
+
+        for (EventLogEntryEntity log : logs) {
+            eventItems.add(new EventLogItemResponse(
+                    log.getEventType(),
+                    log.getSimTimestamp(),
+                    log.getAttributes()
+            ));
+        }
+        return ResponseEntity.ok(eventItems);
+}
 
     @GetMapping("/{uuid}/result")
     public ResponseEntity<?> getResult(@PathVariable String uuid) {
