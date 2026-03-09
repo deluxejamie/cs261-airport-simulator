@@ -22,6 +22,9 @@ import {
 import { IconPlayerPlay } from "@tabler/icons-react";
 
 const DEFAULT_PLAY_SPEED = 20; // 20 minutes = 1 second of playthrough
+const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual to have before more should be fetched
+const EVENTS_REQUESTED_PER_BATCH = 100; // the amount of events requested per batch
+const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures before the simulation log will display "failure to load"
 
 export default function SimulationOutcomeFoundPage({ uuid }) {
 	return (
@@ -34,11 +37,15 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
 
 /**
  * This function generates a Card to display in the event log using the provided event data
- * @param {object} event An event which
+ * @param {{event:object}} param0 An event from the server side event log
  * @returns {} A react component
  */
-const generateEventCard = (event) => {
-	return <>temp card</>;
+const EventCard = ({ event }) => {
+	return <div>temp card</div>;
+};
+
+const UnableToConnectToServerCard = () => {
+	return <div>unable to connect to server</div>;
 };
 
 /**
@@ -57,13 +64,14 @@ const SimulationEventLogComponent = ({ uuid }) => {
 	const [running, setRunning] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	// temporarily 4, should be updated based on reqs to the eventlog endpoint
-	const [totalEvents, setTotalEvents] = useState(4);
+	const [totalEvents, setTotalEvents] = useState(Number.POSITIVE_INFINITY);
 	const [indexSeenUntil, setIndexSeenUntil] = useState(-1);
 	const currentEvents = useMemo(
 		() => eventsFromSvr.filter((e) => e.time <= currentTime),
 		[currentTime, eventsFromSvr],
 	);
 	const finished = currentEvents.length == totalEvents;
+	const [serverUnavailable, setServerUnavailable] = useState(false);
 
 	// update the time each tick
 	useEffect(() => {
@@ -82,6 +90,43 @@ const SimulationEventLogComponent = ({ uuid }) => {
 			// processed in the event loop after they have fully rendered
 			setTimeout(() => setIndexSeenUntil(currentEvents.length - 1), 600);
 	}, [currentEvents.length, running]);
+
+	// keeps the eventsFromSvr full with at least THRESHOLD_RESIDUAL_EVENTS
+	useEffect(() => {
+		(async () => {
+			const residualEvents = eventsFromSvr.length - currentEvents.length;
+			let failedAttempts = 0;
+			if (
+				!serverUnavailable &&
+				residualEvents < THRESHOLD_RESIDUAL_EVENTS &&
+				eventsFromSvr.length < totalEvents
+			) {
+				while (failedAttempts < CONSECUTIVE_FAILURES_THRESHOLD) {
+					const eventsData = await getSimulationEventLog(
+						uuid,
+						eventsFromSvr.length,
+						EVENTS_REQUESTED_PER_BATCH,
+					);
+					if (!eventsData.success) {
+						failedAttempts += 1;
+						continue;
+					}
+
+					setEventsFromSvr((e) => e.push(...eventsData.events));
+					setTotalEvents(eventsData.total_events);
+					break;
+				}
+				if (failedAttempts == CONSECUTIVE_FAILURES_THRESHOLD)
+					setServerUnavailable(true);
+			}
+		})();
+	}, [
+		eventsFromSvr.length,
+		currentEvents.length,
+		totalEvents,
+		uuid,
+		serverUnavailable,
+	]);
 
 	// References used:
 	// https://mantine.dev/ (several pages)
@@ -126,7 +171,8 @@ const SimulationEventLogComponent = ({ uuid }) => {
 			{running ? (
 				<>
 					{currentEvents.map((e, i) => (
-						<Card
+						<EventCard
+							event={e}
 							key={e.id}
 							style={
 								i > indexSeenUntil
@@ -139,14 +185,21 @@ const SimulationEventLogComponent = ({ uuid }) => {
 										}
 									: {}
 							}
-						>
-							{generateEventCard(e)}
-						</Card>
+						/>
 					))}
+					{eventsFromSvr.length == currentEvents.length && serverUnavailable ? (
+						<UnableToConnectToServerCard
+							style={{
+								opacity: 0,
+								animationName: "fadeIn",
+								animationDuration: `0.4s`,
+								animationFillMode: "forwards",
+								animationTimingFunction: "ease",
+							}}
+						/>
+					) : undefined}
 				</>
-			) : (
-				<></>
-			)}
+			) : undefined}
 		</>
 	);
 };

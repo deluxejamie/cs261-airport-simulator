@@ -74,12 +74,17 @@ export async function getSimulationResult(uuid) {
 }
 
 export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
-	return await request(
-		`/simulation/eventlog/` +
-			encodeURIComponent(uuid) +
-			"/" +
-			encodeURIComponent(offset) +
-			"/" +
-			encodeURIComponent(count),
-	);
+	try {
+		const res = await request(
+			`/simulation/eventlog/` +
+				encodeURIComponent(uuid) +
+				"/" +
+				encodeURIComponent(offset) +
+				"/" +
+				encodeURIComponent(count),
+		);
+		return { ...res, success: true };
+	} catch (e) {
+		return { success: false };
+	}
 }
