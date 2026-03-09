@@ -18,6 +18,11 @@ public class SimulationSetupService {
 
         Simulation simulation = new Simulation(config.getRunways());
 
+        simulation.setMaxDelayBeforeCancelled(config.getMaxDelayBeforeCancelled());
+        simulation.setFuelThresholdBeforeRedirected(config.getFuelThresholdBeforeRedirected());
+        simulation.setTimeTakenForTakeoff(config.getTimeTakenForTakeoff());
+        simulation.setTimeTakenForLanding(config.getTimeTakenForLanding());
+        
         Map<String, Aircraft> aircraftByCallsign = new HashMap<>();
 
         for (ParsedSimulationConfig.ParsedFlight flight : config.getFlights()) {

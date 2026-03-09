@@ -41,6 +41,11 @@ public class Simulation {
     private final EventSchedular eventSchedular;
     private final EventLog eventLog;
 
+    private int maxDelayBeforeCancelled = 30;
+    private int fuelThresholdBeforeRedirected = 10;
+    private int timeTakenForTakeoff = 1;
+    private int timeTakenForLanding = 1;
+
     /**
      * Constructs the simulation class with given runways
      * @param runways runways for sim
@@ -114,7 +119,7 @@ public class Simulation {
     }
 
     public SimulationResult run() {
-        final int MAX_TAKEOFF_WAIT_MIN = 30; // spec default
+        final int MAX_TAKEOFF_WAIT_MIN = maxDelayBeforeCancelled;
         final SimulationResult result = new SimulationResult();
 
         // Execute events scheduled at t=0
@@ -190,7 +195,7 @@ public class Simulation {
                             landing = true;
                         } else {
                             // pick whichever will hit diversion/cancel first
-                            int holdSlack = Math.max(0, nextHold.getFuelRemaining(simTime) - 10);
+                            int holdSlack = Math.max(0, nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected);
                             int takeSlack = Math.max(0, MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime()));
 
                             if (holdSlack <= takeSlack) {
@@ -445,5 +450,37 @@ public class Simulation {
      */
     private void logEvent(EventType type, int timestamp, HashMap<String, Object> attr) {
         eventLog.addEntry(new EventLogEntry(type, timestamp, attr));
+    }
+
+    public int getMaxDelayBeforeCancelled() {
+        return maxDelayBeforeCancelled;
+    }
+
+    public void setMaxDelayBeforeCancelled(int maxDelayBeforeCancelled) {
+        this.maxDelayBeforeCancelled = maxDelayBeforeCancelled;
+    }
+
+    public int getFuelThresholdBeforeRedirected() {
+        return fuelThresholdBeforeRedirected;
+    }
+
+    public void setFuelThresholdBeforeRedirected(int fuelThresholdBeforeRedirected) {
+        this.fuelThresholdBeforeRedirected = fuelThresholdBeforeRedirected;
+    }
+
+    public int getTimeTakenForTakeoff() {
+        return timeTakenForTakeoff;
+    }
+
+    public void setTimeTakenForTakeoff(int timeTakenForTakeoff) {
+        this.timeTakenForTakeoff = timeTakenForTakeoff;
+    }
+
+    public int getTimeTakenForLanding() {
+        return timeTakenForLanding;
+    }
+
+    public void setTimeTakenForLanding(int timeTakenForLanding) {
+        this.timeTakenForLanding = timeTakenForLanding;
     }
 }
