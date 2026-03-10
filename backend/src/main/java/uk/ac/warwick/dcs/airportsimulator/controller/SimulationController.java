@@ -11,16 +11,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * REST controller exposing GET endpoints for retrieving simulation status, event logs, and final simulation results.
+ */
 @RestController
 @RequestMapping("/simulations")
 
 public class SimulationController {
     private final SimulationService simulationService;
 
+    /**
+     * Constructs a SimulationController with the required service
+     * @param simulationService service used to retrieve simulation data
+     */
     public SimulationController(SimulationService simulationService) {
         this.simulationService = simulationService;
     }
 
+    /**
+     * Gets the current status of a simulation
+     * @param uuid unique identifier of simulation
+     * @return HTTP 200 with the simulation status if found,otherwise HTTP 404
+     */
     @GetMapping("/{uuid}/status")
     public ResponseEntity<?> getStatus(@PathVariable String uuid) {
         Optional<String> status = simulationService.getStatus(uuid);
@@ -30,6 +42,13 @@ public class SimulationController {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * Gets the event log for a simulation.
+     * @param uuid unique identifier of simulation
+     * @param offset starting index in event log
+     * @param count number of events to return
+     * @return HTTP 200 with event log data if the request is valid,otherwise HTTP 400
+     */
     @GetMapping("/{uuid}/event-log")
     public ResponseEntity<?> getEventLog(@PathVariable String uuid,@RequestParam(defaultValue = "0") int offset,@RequestParam(defaultValue = "50") int count) {
         if (offset<0 || count<=0) {
@@ -49,8 +68,13 @@ public class SimulationController {
         long totalEvents = simulationService.getEventLogCount(uuid);
         EventLogResponse response = new EventLogResponse(eventItems, totalEvents);
         return ResponseEntity.ok(response);
-}
+    }
 
+    /**
+     * Gets the final result metrics for a simulation.
+     * @param uuid unique identifier of simulation
+     * @return HTTP 200 with the simulation result if found,otherwise HTTP 404
+     */
     @GetMapping("/{uuid}/result")
     public ResponseEntity<?> getResult(@PathVariable String uuid) {
         Optional<SimulationResultEntity> result = simulationService.getResult(uuid);
