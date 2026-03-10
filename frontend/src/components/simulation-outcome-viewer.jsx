@@ -19,7 +19,11 @@ import {
 	getSimulationResult,
 	getSimulationStatus,
 } from "@/lib/simulation-api";
-import { IconPlayerPlay, IconRefresh } from "@tabler/icons-react";
+import {
+	IconAlertCircleFilled,
+	IconPlayerPlay,
+	IconRefresh,
+} from "@tabler/icons-react";
 
 const DEFAULT_PLAY_SPEED = 20; // 20 minutes = 1 second of playthrough
 const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual to have before more should be fetched
@@ -45,7 +49,22 @@ const EventCard = ({ event }) => {
 };
 
 const UnableToConnectToServerCard = () => {
-	return <div>unable to connect to server</div>;
+	return (
+		<Card padding="xl" shadow="sm" withBorder bg="orange" radius="md">
+			<Group justify="center">
+				<IconAlertCircleFilled color="white" />
+				<Title order={3} c="white">
+					Unable to connect to server
+				</Title>
+			</Group>
+			<Group justify="center">
+				<Text size="sm" c="white" fs="italic">
+					An error has occured while attempting to access the simulation
+					results. Please run the simulation again to try again.
+				</Text>
+			</Group>
+		</Card>
+	);
 };
 
 /**
