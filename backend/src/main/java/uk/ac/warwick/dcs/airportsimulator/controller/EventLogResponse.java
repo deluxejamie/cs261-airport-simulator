@@ -22,10 +22,16 @@ public class EventLogResponse {
         this.total_events=total_events;
     }
 
+    /**
+     * @return the events
+     */
     public List<EventLogItemResponse> getEvents() {
         return events;
     }
 
+    /**
+     * @return the number of events
+     */
     public long getTotal_events() {
         return total_events;
     }
