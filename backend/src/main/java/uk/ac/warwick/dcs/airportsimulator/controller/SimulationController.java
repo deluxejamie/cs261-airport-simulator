@@ -22,7 +22,6 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/simulation")
-@CrossOrigin(origins = "*")
 public class SimulationController {
 
     private final SimManager simManager;
@@ -50,10 +49,10 @@ public class SimulationController {
     @PostMapping("/request")
     public ResponseEntity<String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
         final Simulation simulation = simulationControlService.buildSimulationFromRequest(requestDto);
-        final String simId = java.util.UUID.randomUUID().toString(); /* If it is not necessary to return the sim_id, delete this line */
-        simManager.runSimulation(simulation, simId);
+        final String uuid = java.util.UUID.randomUUID().toString(); /* If it is not necessary to return the sim_id, delete this line */
+        simManager.runSimulation(simulation, uuid);
 
-        return ResponseEntity.ok(simId);
+        return ResponseEntity.ok(uuid);
     }
 
 
