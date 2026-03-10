@@ -1,5 +1,6 @@
 package uk.ac.warwick.dcs.airportsimulator.events;
 
+import java.util.List;
 import java.util.PriorityQueue;
 
 
@@ -50,6 +51,7 @@ public class EventSchedular {
     public boolean isEmpty() {
         return events.isEmpty();
     }
+
     /* Stores events in the correct ordering */
     private final PriorityQueue<IEvent> events;
 }

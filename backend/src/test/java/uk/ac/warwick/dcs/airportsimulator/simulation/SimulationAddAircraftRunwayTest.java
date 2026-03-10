@@ -24,7 +24,7 @@ public class SimulationAddAircraftRunwayTest {
     {
         final Simulation sim = genBaseSim();
 
-        sim.addAircraft(genAircraft(), 1, 0, 0, AircraftOp.ARRIVAL);
+        sim.addAircraft(genAircraft(), 1, 0, 0, 0, AircraftOp.ARRIVAL);
         sim.stepTestTillScrumMerged(0);
 
         assertEquals(0, sim.getEventLog(0, 100).size());
@@ -37,7 +37,7 @@ public class SimulationAddAircraftRunwayTest {
             assertEquals(EventType.HOLDING_EVENT, ele.getType());
         }
 
-        sim.addAircraft(genAircraft(), 150, 0, 0, AircraftOp.DEPARTURE);
+        sim.addAircraft(genAircraft(), 150, 0, 0, 0, AircraftOp.DEPARTURE);
         sim.stepTestTillScrumMerged(200);
 
         {
@@ -90,7 +90,7 @@ public class SimulationAddAircraftRunwayTest {
 
         {
             final Aircraft a = genAircraft();
-            sim.addAircraft(a, 50, 0, 0, AircraftOp.ARRIVAL);
+            sim.addAircraft(a, 50, 0, 0, 0, AircraftOp.ARRIVAL);
             sim.addAircraftEmergency(a, 2, 0, 0, EmergencyStatus.MECH_FAIL);
             sim.addAircraftEmergency(a, 200, 0, 0, EmergencyStatus.FUEL);
         }
@@ -123,7 +123,7 @@ public class SimulationAddAircraftRunwayTest {
 
         {
             final Aircraft a = genAircraft();
-            sim.addAircraft(a, 400, 0, 0, AircraftOp.DEPARTURE);
+            sim.addAircraft(a, 400, 0, 0, 0, AircraftOp.DEPARTURE);
             sim.addAircraftEmergency(a, 500, 0, 0, EmergencyStatus.PASSENGER_HEALTH);
         }
 
@@ -174,7 +174,7 @@ public class SimulationAddAircraftRunwayTest {
         final int interval = 400;
         final int end = 1800;
 
-        sim.addAircraft(genAircraft(), start, interval, end, AircraftOp.ARRIVAL);
+        sim.addAircraft(genAircraft(), start, interval, end, 0, AircraftOp.ARRIVAL);
 
         for (int i = 0; i <= end; i += interval)
         {

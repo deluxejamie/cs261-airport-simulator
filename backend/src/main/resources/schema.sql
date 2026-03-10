@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS event_log_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     simulation_id VARCHAR(36) NOT NULL,
     event_type VARCHAR(50),
-    sim_timestamp REAL,
+    sim_timestamp INTEGER,
     attributes TEXT,
     FOREIGN KEY (simulation_id) REFERENCES simulations(id)
 );

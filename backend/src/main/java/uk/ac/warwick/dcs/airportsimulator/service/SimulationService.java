@@ -54,7 +54,7 @@ public class SimulationService {
     }
 
     /** Append a single event log entry for a simulation. */
-    public void saveEventLogEntry(String uuid, String eventType, double simTimestamp, String attributesJson) {
+    public void saveEventLogEntry(String uuid, String eventType, int simTimestamp, String attributesJson) {
         logRepo.save(new EventLogEntryEntity(uuid, eventType, simTimestamp, attributesJson));
     }
 

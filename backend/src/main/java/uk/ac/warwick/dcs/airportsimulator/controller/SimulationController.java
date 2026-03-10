@@ -6,6 +6,11 @@ import uk.ac.warwick.dcs.airportsimulator.entity.EventLogEntryEntity;
 import uk.ac.warwick.dcs.airportsimulator.entity.SimulationResultEntity;
 import uk.ac.warwick.dcs.airportsimulator.service.SimulationService;
 
+import org.springframework.web.bind.annotation.*;
+import uk.ac.warwick.dcs.airportsimulator.dto.SimulationRequestDto;
+import uk.ac.warwick.dcs.airportsimulator.service.SimulationControlService;
+import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,18 +20,37 @@ import java.util.Optional;
  * REST controller exposing GET endpoints for retrieving simulation status, event logs, and final simulation results.
  */
 @RestController
-@RequestMapping("/simulations")
-
+@RequestMapping("/simulation")
+@CrossOrigin(origins = "*")
 public class SimulationController {
+
+
     private final SimulationService simulationService;
+    private final SimulationControlService simulationControlService;
 
     /**
      * Constructs a SimulationController with the required service
      * @param simulationService service used to retrieve simulation data
      */
-    public SimulationController(SimulationService simulationService) {
+    public SimulationController(SimulationService simulationService, SimulationControlService simulationControlService) {
         this.simulationService = simulationService;
+        this.simulationControlService = simulationControlService;
     }
+
+    /**
+     * Request simulation
+     * @param requestDto request config
+     * @return           the uuid for the simulation
+     */
+    @PostMapping("/request")
+    public ResponseEntity<String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
+        Simulation simulation = simulationControlService.buildSimulationFromRequest(requestDto);
+        String simId = java.util.UUID.randomUUID().toString(); /* If it is not necessary to return the sim_id, delete this line */
+        simulation.run();
+
+        return ResponseEntity.ok("Simulation created successfully.");
+    }
+
 
     /**
      * Gets the current status of a simulation
