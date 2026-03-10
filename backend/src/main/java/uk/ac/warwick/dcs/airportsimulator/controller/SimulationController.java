@@ -70,11 +70,7 @@ public class SimulationController {
         }
 
         final Optional<String> fromDb = simulationService.getStatus(uuid);
-        if (fromDb.isPresent()) {
-            return Map.of("status", fromDb.get());
-        }
-
-        return Map.of("status", "unavailable");
+        return fromDb.map(s -> Map.of("status", s)).orElseGet(() -> Map.of("status", "unavailable"));
     }
 
     /**
