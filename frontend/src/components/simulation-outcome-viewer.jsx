@@ -159,11 +159,17 @@ const SimulationEventLogComponent = ({ uuid }) => {
 					<Button
 						fullWidth
 						variant="light"
-						leftSection={<IconPlayerPlay size={18} />}
-						onClick={() => setRunning(true)}
-						disabled={running}
+						leftSection={
+							running ? <IconRefresh size={18} /> : <IconPlayerPlay size={18} />
+						}
+						onClick={() => {
+							setCurrentTime(0);
+							setServerUnavailable(false);
+							setRunning(true);
+						}}
+						disabled={running && !finished}
 					>
-						Start Event Simulation
+						{running ? "Restart Event Simulation" : "Start Event Simulation"}
 					</Button>
 				</Stack>
 			</Card>
