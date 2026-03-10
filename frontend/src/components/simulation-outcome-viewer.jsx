@@ -19,7 +19,7 @@ import {
 	getSimulationResult,
 	getSimulationStatus,
 } from "@/lib/simulation-api";
-import { IconPlayerPlay } from "@tabler/icons-react";
+import { IconPlayerPlay, IconRefresh } from "@tabler/icons-react";
 
 const DEFAULT_PLAY_SPEED = 20; // 20 minutes = 1 second of playthrough
 const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual to have before more should be fetched
@@ -54,12 +54,7 @@ const UnableToConnectToServerCard = () => {
  */
 const SimulationEventLogComponent = ({ uuid }) => {
 	// display the simulation event log (SCRUM-37)
-	const [eventsFromSvr, setEventsFromSvr] = useState([
-		{ id: 1, simTimestamp: 0 },
-		{ id: 2, simTimestamp: 0 },
-		{ id: 3, simTimestamp: 0 },
-		{ id: 4, simTimestamp: 25 },
-	]);
+	const [eventsFromSvr, setEventsFromSvr] = useState([]);
 	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
 	const [running, setRunning] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -93,6 +88,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 
 	// keeps the eventsFromSvr full with at least THRESHOLD_RESIDUAL_EVENTS
 	useEffect(() => {
+		let aborted = false;
 		(async () => {
 			const residualEvents = eventsFromSvr.length - currentEvents.length;
 			let failedAttempts = 0;
@@ -107,12 +103,14 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						eventsFromSvr.length,
 						EVENTS_REQUESTED_PER_BATCH,
 					);
+					if (aborted == true) break;
 					if (!eventsData.success) {
 						failedAttempts += 1;
 						continue;
 					}
+					console.log(eventsData);
 
-					setEventsFromSvr((e) => e.push(...eventsData.events));
+					setEventsFromSvr((e) => [...e, ...eventsData.events]);
 					setTotalEvents(eventsData.total_events);
 					break;
 				}
@@ -120,6 +118,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 					setServerUnavailable(true);
 			}
 		})();
+		return () => (aborted = true);
 	}, [
 		eventsFromSvr.length,
 		currentEvents.length,

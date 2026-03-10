@@ -22,7 +22,7 @@ const BADGE_COLORS = {
 };
 
 // extremely standard sleep fn, sleeps ms milliseconds.
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function SimulationOutcomeView({ uuid }) {
 	const [status, setStatus] = useState("in_progress");
