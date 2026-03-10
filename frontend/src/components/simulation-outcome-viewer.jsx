@@ -184,7 +184,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						max={100}
 						defaultValue={DEFAULT_PLAY_SPEED}
 						onChange={setSpeed}
-						disabled={running}
+						disabled={running && !finished}
 						marks={[
 							{ value: 10, label: "10" },
 							{ value: 40, label: "40" },
