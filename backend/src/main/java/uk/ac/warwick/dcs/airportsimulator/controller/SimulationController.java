@@ -47,12 +47,12 @@ public class SimulationController {
      * @return the uuid for the simulation
      */
     @PostMapping("/request")
-    public ResponseEntity<String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
+    public Map<String, String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
         final Simulation simulation = simulationControlService.buildSimulationFromRequest(requestDto);
         final String uuid = java.util.UUID.randomUUID().toString();
-        simManager.runSimulation(simulation, uuid);
+        simManager.runSimulation(simulation, uuid, requestDto.toString());
 
-        return ResponseEntity.ok(uuid);
+        return Map.of("sim_id", uuid);
     }
 
 
@@ -62,19 +62,19 @@ public class SimulationController {
      * @param uuid unique identifier of simulation
      * @return HTTP 200 with the simulation status if found,otherwise HTTP 404
      */
-    @GetMapping("/{uuid}/status")
-    public ResponseEntity<?> getStatus(@PathVariable String uuid) {
+    @GetMapping("/status/{uuid}")
+    public Map<String, String> getStatus(@PathVariable String uuid) {
         final Optional<String> fromManager = simManager.getStatus(uuid);
         if (fromManager.isPresent()) {
-            return ResponseEntity.ok(Map.of("status", fromManager.get()));
+            return Map.of("status", fromManager.get());
         }
 
         final Optional<String> fromDb = simulationService.getStatus(uuid);
         if (fromDb.isPresent()) {
-            return ResponseEntity.ok(Map.of("status", fromDb.get()));
+            return Map.of("status", fromDb.get());
         }
 
-        return ResponseEntity.notFound().build();
+        return Map.of("status", "unavailable");
     }
 
     /**
@@ -85,8 +85,8 @@ public class SimulationController {
      * @param count  number of events to return
      * @return HTTP 200 with event log data if the request is valid,otherwise HTTP 400
      */
-    @GetMapping("/{uuid}/event-log")
-    public ResponseEntity<?> getEventLog(@PathVariable String uuid, @RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "50") int count) {
+    @GetMapping("/eventlog/{uuid}/{offset}/{count}")
+    public ResponseEntity<?> getEventLog(@PathVariable String uuid, @PathVariable int offset, @PathVariable int count) {
         if (offset < 0 || count <= 0) {
             return ResponseEntity.badRequest().body(Map.of("error", "offset must be more than or equal to 0 and count>0"));
         }
@@ -130,7 +130,7 @@ public class SimulationController {
      * @param uuid unique identifier of simulation
      * @return HTTP 200 with the simulation result if found,otherwise HTTP 404
      */
-    @GetMapping("/{uuid}/result")
+    @GetMapping("/result/{uuid}")
     public ResponseEntity<?> getResult(@PathVariable String uuid) {
         final Optional<SimulationResultEntity> result = simulationService.getResult(uuid);
         if (result.isPresent()) {

@@ -38,15 +38,22 @@ public class SimManager {
      * @param simulation simulation to run
      * @param uuid       the uuid of the simulation
      */
-    public void runSimulation(Simulation simulation, String uuid) {
+    public void runSimulation(Simulation simulation, String uuid, String configJson) {
         /* Sim already ran */
         if (simulationService.getResult(uuid).isPresent()) return;
+        simulationService.createSimulation(uuid, configJson);
 
         simulationToState.put(uuid, simulation);
 
         executor.execute(() -> {
             final SimulationResult result = simulation.run();
             simulationService.saveResult(uuid, result);
+
+            for (final var entry : simulation.getEventLog(0, (int) simulation.getNumOfEventsInLog()))
+            {
+                simulationService.saveEventLogEntry(uuid, entry.getType().toString(), entry.getTimestamp(), entry.getAttr().toString());
+            }
+
             simulationToState.remove(uuid);
         });
     }
@@ -60,7 +67,7 @@ public class SimManager {
     public Optional<String> getStatus(String uuid) {
         final Simulation sim = simulationToState.get(uuid);
         if (sim == null) return Optional.empty();
-        return Optional.of("RUNNING");
+        return Optional.of("in_progress");
     }
 
     /**
