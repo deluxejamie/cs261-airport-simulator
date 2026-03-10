@@ -25,6 +25,8 @@ import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The simulation class represents the simulation
@@ -46,6 +48,8 @@ public class Simulation {
     private int fuelThresholdBeforeRedirected = 10;
     private int timeTakenForTakeoff = 1;
     private int timeTakenForLanding = 1;
+
+    private final Lock mutex = new ReentrantLock(true);
 
     /**
      * Constructs the simulation class with given runways
@@ -174,6 +178,8 @@ public class Simulation {
 
         int safetyCap = 1_000_000;
         while (!isFinished() && safetyCap-- > 0) {
+            mutex.lock();
+
             releaseCompletedRunways();
 
             result.recordHoldQueueSize(holdingPattern.size(), (double) simTime);
@@ -324,6 +330,8 @@ public class Simulation {
 
             simTime += 1;
             eventSchedular.step(simTime);
+
+            mutex.unlock();
         }
 
         result.finalizeAverages();
@@ -605,5 +613,13 @@ public class Simulation {
      */
     public void setTimeTakenForLanding(int timeTakenForLanding) {
         this.timeTakenForLanding = timeTakenForLanding;
+    }
+
+    /**
+     * Gets the mutex
+     * @return get mutex for simulation
+     */
+    public Lock getMutex() {
+        return mutex;
     }
 }
