@@ -8,7 +8,6 @@ export default async function Simulation({ params }) {
 
 	// clearly an invalid uuid. Reduces processing with redirects
 	if (simulationId.length != UUID_LENGTH) {
-		// uuids generated are all
 		redirect("/");
 	}
 	return <SimulationOutcomeView uuid={simulationId} />;

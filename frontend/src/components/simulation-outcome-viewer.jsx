@@ -55,10 +55,10 @@ const UnableToConnectToServerCard = () => {
 const SimulationEventLogComponent = ({ uuid }) => {
 	// display the simulation event log (SCRUM-37)
 	const [eventsFromSvr, setEventsFromSvr] = useState([
-		{ id: 1, time: 0 },
-		{ id: 2, time: 0 },
-		{ id: 3, time: 0 },
-		{ id: 4, time: 25 },
+		{ id: 1, simTimestamp: 0 },
+		{ id: 2, simTimestamp: 0 },
+		{ id: 3, simTimestamp: 0 },
+		{ id: 4, simTimestamp: 25 },
 	]);
 	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
 	const [running, setRunning] = useState(false);
@@ -67,7 +67,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 	const [totalEvents, setTotalEvents] = useState(Number.POSITIVE_INFINITY);
 	const [indexSeenUntil, setIndexSeenUntil] = useState(-1);
 	const currentEvents = useMemo(
-		() => eventsFromSvr.filter((e) => e.time <= currentTime),
+		() => eventsFromSvr.filter((e) => e.simTimestamp <= currentTime),
 		[currentTime, eventsFromSvr],
 	);
 	const finished = currentEvents.length == totalEvents;

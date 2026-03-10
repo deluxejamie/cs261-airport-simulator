@@ -73,6 +73,16 @@ export async function getSimulationResult(uuid) {
 	return await request(`/simulation/result/${safeID}`);
 }
 
+export const EventTypes = {
+	LANDING: "landing_event",
+	TAKEOFF: "takeoff_event",
+	HOLDING: "holding_event",
+	DIVERSION: "diversion_event",
+	CANCELLATION: "cancellation_event",
+	EMERGENCY: "emergency_event",
+	RUNWAY_MODE: "runway_mode_event",
+	RUNWAY_STATUS: "runway_status_event",
+};
 /**
  * Gets event log entries for a provided simulation
  * @param {String} uuid The uuid of the simulation to get entries for
@@ -81,6 +91,25 @@ export async function getSimulationResult(uuid) {
  * @returns {success: boolean, events?: Event[], total_events?: Number} (expected from server) The response from the server. Other properties only populated if success is true
  */
 export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
+	if (uuid == "84f43a1c-9ec3-4139-885c-f929f3167cce") {
+		const mockedEvents = [
+			{
+				id: 1,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					arrivalDelay: 4,
+				},
+			},
+		];
+		return {
+			events: mockedEvents.slice(offset, offset + count),
+			total_events: mockedEvents.length,
+		};
+	}
 	try {
 		const res = await request(
 			`/simulation/eventlog/` +
