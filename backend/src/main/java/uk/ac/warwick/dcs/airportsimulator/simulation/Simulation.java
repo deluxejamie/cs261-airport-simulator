@@ -622,4 +622,14 @@ public class Simulation {
     public Lock getMutex() {
         return mutex;
     }
+
+
+    /**
+     * Get Event Log Count
+     * @return number of the events in the log
+     */
+    public long getNumOfEventsInLog()
+    {
+        return eventLog.getNumOfEvents();
+    }
 }

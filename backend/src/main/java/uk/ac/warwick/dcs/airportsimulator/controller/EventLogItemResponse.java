@@ -8,7 +8,7 @@ public class EventLogItemResponse {
      * Private fields
      */
     private final String eventType;
-    private final double simTimestamp;
+    private final int simTimestamp;
     private final String attributes;
 
     /**
@@ -17,7 +17,7 @@ public class EventLogItemResponse {
      * @param simTimestamp sim timestamp
      * @param attributes   attributes
      */
-    public EventLogItemResponse(String eventType, double simTimestamp, String attributes) {
+    public EventLogItemResponse(String eventType, int simTimestamp, String attributes) {
         this.eventType = eventType;
         this.simTimestamp = simTimestamp;
         this.attributes = attributes;
@@ -33,7 +33,7 @@ public class EventLogItemResponse {
     /**
      * @return sim timestamp
      */
-    public double getSimTimestamp() {
+    public int getSimTimestamp() {
         return simTimestamp;
     }
 
