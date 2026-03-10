@@ -40,7 +40,7 @@ public class SimManager {
      */
     public void runSimulation(Simulation simulation, String uuid, String configJson) {
         /* Sim already ran */
-        if (simulationService.getResult(uuid).isPresent()) return;
+        if (simulationToState.containsKey(uuid) || simulationService.getResult(uuid).isPresent()) return;
         simulationService.createSimulation(uuid, configJson);
 
         simulationToState.put(uuid, simulation);
@@ -51,7 +51,7 @@ public class SimManager {
 
             for (final var entry : simulation.getEventLog(0, (int) simulation.getNumOfEventsInLog()))
             {
-                simulationService.saveEventLogEntry(uuid, entry.getType().toString(), entry.getTimestamp(), entry.getAttr().toString());
+                simulationService.saveEventLogEntry(uuid, entry.getType().toString().toLowerCase(), entry.getTimestamp(), entry.getAttr().toString());
             }
 
             simulationToState.remove(uuid);

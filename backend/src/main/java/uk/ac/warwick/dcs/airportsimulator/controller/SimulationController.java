@@ -94,7 +94,7 @@ public class SimulationController {
                     ._1()
                     .stream()
                     .map((og) -> new EventLogItemResponse(
-                            og.getType().toString(),
+                            og.getType().toString().toLowerCase(),
                             og.getTimestamp(),
                             og.getAttr().toString()
                     ))
