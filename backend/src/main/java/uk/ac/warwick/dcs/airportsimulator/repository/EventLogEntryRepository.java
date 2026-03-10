@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface EventLogEntryRepository extends JpaRepository<EventLogEntryEntity, Long> {
     List<EventLogEntryEntity> findBySimulationIdOrderBySimTimestampAsc(String simulationId, Pageable pageable);
+    long countBySimulationId(String simulationId);
 }
