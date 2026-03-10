@@ -152,13 +152,13 @@ public class DataBaseTest
 
         {
             final String uuid = createInitialSim();
-            assertEquals("RUNNING", simulationService.getStatus(uuid).orElseThrow());
+            assertEquals("in_progress", simulationService.getStatus(uuid).orElseThrow());
         }
 
         {
             final String uuid = createInitialSim();
             simulationService.saveResult(uuid, new SimulationResult());
-            assertEquals("COMPLETED", simulationService.getStatus(uuid).orElseThrow());
+            assertEquals("complete", simulationService.getStatus(uuid).orElseThrow());
         }
     }
 
