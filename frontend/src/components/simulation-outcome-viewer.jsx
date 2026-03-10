@@ -44,8 +44,20 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
  * @param {{event:object}} param0 An event from the server side event log
  * @returns {} A react component
  */
-const EventCard = ({ event }) => {
-	return <div>temp card</div>;
+const EventCard = ({ event, style }) => {
+	return (
+		<Card padding="xl" shadow="sm" withBorder radius="md" style={style}>
+			<Group justify="center">
+				<IconAlertCircleFilled />
+				<Title order={3}>Dummy card</Title>
+			</Group>
+			<Group justify="center">
+				<Text size="sm" fs="italic">
+					Description of card will go here
+				</Text>
+			</Group>
+		</Card>
+	);
 };
 
 const UnableToConnectToServerCard = () => {
@@ -96,6 +108,11 @@ const SimulationEventLogComponent = ({ uuid }) => {
 			return () => clearInterval(intervalId);
 		}
 	}, [finished, speed, running]);
+
+	useEffect(() => {
+		const bottom = document.getElementById("bottom-of-page");
+		bottom.scrollIntoView({ behavior: "smooth" });
+	}, [currentEvents.length, serverUnavailable]);
 
 	// updates index seen up until this current tick
 	useEffect(() => {
@@ -224,6 +241,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 					) : undefined}
 				</>
 			) : undefined}
+			<span id="bottom-of-page" />
 		</>
 	);
 };
