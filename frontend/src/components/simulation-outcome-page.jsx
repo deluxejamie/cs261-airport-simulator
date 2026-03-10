@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Group, Stack, Text, Title } from "@mantine/core";
+import { Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
@@ -11,6 +11,7 @@ import SimulationOutcomeFoundPage from "./simulation-outcome-viewer";
 import { useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 import { notificationErrorOptions } from "./export-import";
+import { IconCircleArrowLeft } from "@tabler/icons-react";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
@@ -22,7 +23,7 @@ const BADGE_COLORS = {
 };
 
 // extremely standard sleep fn, sleeps ms milliseconds.
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function SimulationOutcomeView({ uuid }) {
 	const [status, setStatus] = useState("in_progress");
@@ -67,13 +68,26 @@ export default function SimulationOutcomeView({ uuid }) {
 
 	return (
 		<Stack maw={1000} mx="auto" p="xl" gap="lg">
-			<Group justify="space-between">
-				<div>
+			<Stack p="xs">
+				<Group justify="space-between" pb="0">
 					<Title order={1}>Simulation Outcome</Title>
+					<Button
+						component="a"
+						href="/"
+						target="_blank"
+						leftSection={<IconCircleArrowLeft />}
+						variant="light"
+					>
+						Simulation page
+					</Button>
+				</Group>
+				<Group justify="flex-start">
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
-				</div>
-				<Badge color={BADGE_COLORS[status]}>{status}</Badge>
-			</Group>
+					<Badge component="span" color={BADGE_COLORS[status]} size="sm">
+						{status}
+					</Badge>
+				</Group>
+			</Stack>
 
 			{status == "in_progress" ? (
 				<LoadingComponent />
