@@ -49,7 +49,7 @@ public class SimulationController {
     @PostMapping("/request")
     public ResponseEntity<String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
         final Simulation simulation = simulationControlService.buildSimulationFromRequest(requestDto);
-        final String uuid = java.util.UUID.randomUUID().toString(); /* If it is not necessary to return the sim_id, delete this line */
+        final String uuid = java.util.UUID.randomUUID().toString();
         simManager.runSimulation(simulation, uuid);
 
         return ResponseEntity.ok(uuid);
