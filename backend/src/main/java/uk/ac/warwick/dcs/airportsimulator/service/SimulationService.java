@@ -58,6 +58,11 @@ public class SimulationService {
         logRepo.save(new EventLogEntryEntity(uuid, eventType, simTimestamp, attributesJson));
     }
 
+    /**
+     * Get Event Log Count
+     * @param uuid the sim uuid
+     * @return     the number of event log count
+     */
     public long getEventLogCount(String uuid) {
         return logRepo.countBySimulationId(uuid);
     }
