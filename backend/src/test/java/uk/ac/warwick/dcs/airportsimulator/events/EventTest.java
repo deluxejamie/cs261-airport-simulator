@@ -60,7 +60,7 @@ class EventTest {
     {
         final int seed = new Random().nextInt();
         final int correctScheduledTime = new Random().nextInt();
-        NormDistEvent nde = new NormDistEvent(correctScheduledTime, seed, ()->{});
+        NormDistEvent nde = new NormDistEvent(correctScheduledTime, seed, (x)->{});
 
         assertEquals(nde.getScheduledTime(), (int) new Random(seed).nextGaussian(correctScheduledTime, 5));
     }
@@ -73,7 +73,7 @@ class EventTest {
 
         final Random rng = new Random(seed);
 
-        IEvent nde = new NormDistEvent(correctScheduledTime, 15, correctScheduledTime + 60 * 10, seed, ()->{});
+        IEvent nde = new NormDistEvent(correctScheduledTime, 15, correctScheduledTime + 60 * 10, seed, (x)->{});
 
         while (nde != null)
         {

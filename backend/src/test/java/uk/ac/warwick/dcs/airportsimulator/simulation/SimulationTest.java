@@ -16,7 +16,7 @@ public class SimulationTest {
 
     @Test
     void testConstructorInitialisesState() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
 
         assertEquals(2, sim.getRunways().size());
         assertNotNull(sim.getHoldingPattern());
@@ -28,50 +28,51 @@ public class SimulationTest {
 
     @Test
     void testIsFinishedTrueWhenEmpty() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         assertTrue(sim.isFinished());
     }
 
     @Test
     void testIsFinishedFalseWhenHoldingPatternNotEmpty() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         sim.getHoldingPattern().addAircraft(genAircraft());
         assertFalse(sim.isFinished());
     }
 
     @Test
     void testIsFinishedFalseWhenTakeOffQueueNotEmpty() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         sim.getTakeOffQueue().addAircraft(genAircraft());
         assertFalse(sim.isFinished());
     }
 
     @Test
     void testIsFinishedFalseWhenRunwayOccupied() {
-        Simulation sim = genBaseSim();
-        Runway runway = sim.getRunways().get(0);
+        final Simulation sim = genBaseSim();
+        final Runway runway = sim.getRunways().getFirst();
         runway.setOccupied(genAircraft());
         assertFalse(sim.isFinished());
     }
 
     @Test
     void testIsFinishedFalseWhenEventPending() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         sim.addRunwayStatusChange(0, 10, 0, 0, RunwayStatus.SNOW_CLEARANCE);
         assertFalse(sim.isFinished());
     }
 
     @Test
     void testGetEventLogInitiallyEmpty() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         assertEquals(0, sim.getEventLog(0, 10).size());
     }
 
     @Test
     void testGetEventLogAfterScheduledEventExecutes() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
+        final SimulationAddAircraftRunwayTest.SimTester simTester = new SimulationAddAircraftRunwayTest.SimTester(sim);
         sim.addRunwayStatusChange(0, 1, 0, 0, RunwayStatus.SNOW_CLEARANCE);
-        sim.stepTestTillScrumMerged(5);
+        simTester.step(5);
 
         assertEquals(1, sim.getEventLog(0, 10).size());
     }

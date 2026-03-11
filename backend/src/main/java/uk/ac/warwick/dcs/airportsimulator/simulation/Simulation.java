@@ -99,29 +99,7 @@ public class Simulation {
         return eventLog.getEvents(offset, count);
     }
 
-    /**
-     * TODO: REMOVE THIS FUNCTION
-     * This is for testing as certain tickets needed have not been merged
-     * Note: this is not an example of how to implement, this is missing important
-     *       behaviour but suffices for the tests.
-     * @param dt change in sim time
-     */
-    public void stepTestTillScrumMerged(int dt) {
-        for (int i = 0; i < dt; ++i) {
-            simTime += 1;
-            eventSchedular.step(simTime);
 
-            final Aircraft landing = holdingPattern.peekNextAircraft();
-            if (landing != null && landing.getScheduledTime() >= simTime) {
-                holdingPattern.getNextAircraft();
-            }
-
-            final Aircraft takeoff = takeOffQueue.peekNextAircraft();
-            if (takeoff != null && takeoff.getScheduledTime() >= simTime) {
-                takeOffQueue.getNextAircraft();
-            }
-        }
-    }
 
     /**
      * Releases runways whose occupancy time has elapsed.

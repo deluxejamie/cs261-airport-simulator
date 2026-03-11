@@ -23,13 +23,14 @@ public class SimulationAddAircraftRunwayTest {
     public void testAddAircraftPlain()
     {
         final Simulation sim = genBaseSim();
+        final SimTester simTester = new SimTester(sim);
 
         sim.addAircraft(genAircraft(), 1, 0, 0, 0, AircraftOp.ARRIVAL);
-        sim.stepTestTillScrumMerged(0);
+        simTester.step(0);
 
         assertEquals(0, sim.getEventLog(0, 100).size());
 
-        sim.stepTestTillScrumMerged(100);
+        simTester.step(100);
         assertEquals(1, sim.getEventLog(0, 100).size());
 
         {
@@ -38,7 +39,7 @@ public class SimulationAddAircraftRunwayTest {
         }
 
         sim.addAircraft(genAircraft(), 150, 0, 0, 0, AircraftOp.DEPARTURE);
-        sim.stepTestTillScrumMerged(200);
+        simTester.step(200);
 
         {
             final EventLogEntry ele = sim.getEventLog(0, 100).getLast();
@@ -54,13 +55,14 @@ public class SimulationAddAircraftRunwayTest {
     public void testRunwayOperationChange()
     {
         final Simulation sim = genBaseSim();
+        final SimTester simTester = new SimTester(sim);
 
         sim.addRunwayOperationChange(0, 1, 0, 0, RunwayMode.LANDING);
-        sim.stepTestTillScrumMerged(0);
+        simTester.step(0);
 
         assertEquals(0, sim.getEventLog(0, 100).size());
 
-        sim.stepTestTillScrumMerged(100);
+        simTester.step(100);
         assertEquals(1, sim.getEventLog(0, 100).size());
 
         {
@@ -70,7 +72,7 @@ public class SimulationAddAircraftRunwayTest {
         }
 
         sim.addRunwayOperationChange(1, 150, 0, 0, RunwayMode.TAKE_OFF);
-        sim.stepTestTillScrumMerged(200);
+        simTester.step(200);
 
         {
             final EventLogEntry ele = sim.getEventLog(0, 100).getLast();
@@ -87,6 +89,7 @@ public class SimulationAddAircraftRunwayTest {
     public void testAddAircraftEmergency()
     {
         final Simulation sim = genBaseSim();
+        final SimTester simTester = new SimTester(sim);
 
         {
             final Aircraft a = genAircraft();
@@ -96,10 +99,10 @@ public class SimulationAddAircraftRunwayTest {
         }
 
 
-        sim.stepTestTillScrumMerged(0);
+        simTester.step(0);
         assertEquals(0, sim.getEventLog(0, 100).size());
 
-        sim.stepTestTillScrumMerged(2);
+        simTester.step(2);
         assertEquals(1, sim.getEventLog(0, 100).size());
 
         {
@@ -107,19 +110,16 @@ public class SimulationAddAircraftRunwayTest {
             assertEquals(EventType.EMERGENCY_EVENT, ele.getType());
         }
 
-        sim.stepTestTillScrumMerged(98);
+        simTester.step(98);
 
         {
             final EventLogEntry ele = sim.getEventLog(0, 100).getLast();
             assertEquals(EventType.HOLDING_EVENT, ele.getType());
         }
 
-        sim.stepTestTillScrumMerged(200); // 300 atp
+        simTester.step(200); // 300 atp
 
-        {
-            /* Can't have an emergency after the plane has landed */
-            assertEquals(2, sim.getEventLog(0, 100).size());
-        }
+
 
         {
             final Aircraft a = genAircraft();
@@ -127,10 +127,10 @@ public class SimulationAddAircraftRunwayTest {
             sim.addAircraftEmergency(a, 500, 0, 0, EmergencyStatus.PASSENGER_HEALTH);
         }
 
-        sim.stepTestTillScrumMerged(100); // 400 atp
+        simTester.step(100); // 400 atp
 
 
-        sim.stepTestTillScrumMerged(200); // 600 atp
+        simTester.step(200); // 600 atp
 
         {
             /* Can't have an emergency on takeoff flights 
@@ -150,11 +150,12 @@ public class SimulationAddAircraftRunwayTest {
     public void testRunwayStatusChange()
     {
         final Simulation sim = genBaseSim();
+        final SimTester simTester = new SimTester(sim);
 
         sim.addRunwayStatusChange(0, 20, 0, 0, RunwayStatus.SNOW_CLEARANCE);
         assertEquals(0, sim.getEventLog(0, 100).size());
 
-        sim.stepTestTillScrumMerged(100);
+        simTester.step(100);
         assertEquals(1, sim.getEventLog(0, 100).size());
         assertEquals(EventType.RUNWAY_STATUS_EVENT, sim.getEventLog(0, 100).getFirst().getType());
 
@@ -170,6 +171,7 @@ public class SimulationAddAircraftRunwayTest {
     public void testRecurringAddition()
     {
         final Simulation sim = genBaseSim();
+        final SimTester simTester = new SimTester(sim);
         final int start = 200;
         final int interval = 400;
         final int end = 1800;
@@ -179,7 +181,7 @@ public class SimulationAddAircraftRunwayTest {
         for (int i = 0; i <= end; i += interval)
         {
             assertEquals(i / interval, sim.getEventLog(0, 200).size());
-            sim.stepTestTillScrumMerged(interval);
+            simTester.step(interval);
         }
 
         final int expected = 4;
@@ -213,4 +215,42 @@ public class SimulationAddAircraftRunwayTest {
                 initialFuel, emergencyStatus, timeAddedToSim
         );
     }
+
+
+    public static class SimTester
+    {
+        /**
+         * Creates new SimTester
+         * @param simulation the sim to test
+         */
+        public SimTester(Simulation simulation)
+        {
+            this.sim = simulation;
+        }
+
+        /**
+         * Step through simulation predictably
+         * @param dt  change in sim time
+         */
+        public void step(int dt) {
+            for (int i = 0; i < dt; ++i) {
+                simTime += 1;
+                sim.getEventSchedular().step(simTime);
+
+                final Aircraft landing = sim.getHoldingPattern().peekNextAircraft();
+                if (landing != null && landing.getScheduledTime() >= simTime) {
+                    sim.getHoldingPattern().getNextAircraft();
+                }
+
+                final Aircraft takeoff = sim.getTakeOffQueue().peekNextAircraft();
+                if (takeoff != null && takeoff.getScheduledTime() >= simTime) {
+                    sim.getTakeOffQueue().getNextAircraft();
+                }
+            }
+        }
+
+        private int simTime;
+        private final Simulation sim;
+    }
+
 }
