@@ -2,6 +2,7 @@ package uk.ac.warwick.dcs.airportsimulator.service;
 
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.util.Tuple;
+import tools.jackson.databind.ObjectMapper;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLogEntry;
 import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
 import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
@@ -49,9 +50,9 @@ public class SimManager {
             final SimulationResult result = simulation.run();
             simulationService.saveResult(uuid, result);
 
-            for (final var entry : simulation.getEventLog(0, (int) simulation.getNumOfEventsInLog()))
-            {
-                simulationService.saveEventLogEntry(uuid, entry.getType().toString().toLowerCase(), entry.getTimestamp(), entry.getAttr().toString());
+            final ObjectMapper objectMapper = new ObjectMapper();
+            for (final var entry : simulation.getEventLog(0, (int) simulation.getNumOfEventsInLog())) {
+                simulationService.saveEventLogEntry(uuid, entry.getType().toString().toLowerCase(), entry.getTimestamp(), objectMapper.writeValueAsString(entry.getAttr()));
             }
 
             simulationToState.remove(uuid);
@@ -81,9 +82,7 @@ public class SimManager {
     public Optional<Tuple<List<EventLogEntry>, Long>> getEventLog(String uuid, int offset, int count) {
         final Simulation sim = simulationToState.get(uuid);
         if (sim == null) return Optional.empty();
-        return withLock(sim.getMutex(), () -> Optional.of(
-                new Tuple<>(sim.getEventLog(offset, count), sim.getNumOfEventsInLog()))
-        );
+        return withLock(sim.getMutex(), () -> Optional.of(new Tuple<>(sim.getEventLog(offset, count), sim.getNumOfEventsInLog())));
     }
 
     /**

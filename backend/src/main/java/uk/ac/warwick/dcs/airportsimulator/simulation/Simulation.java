@@ -195,7 +195,7 @@ public class Simulation {
                 result.recordDiversion();
 
                 HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", fuelCritical.getCallSign());
+                attr.put("callsign", fuelCritical.getCallSign());
                 attr.put("reason", "FUEL_CRITICAL");
                 logEvent(EventType.DIVERSION_EVENT, simTime, attr);
             }
@@ -216,7 +216,7 @@ public class Simulation {
                 result.recordCancellation();
 
                 HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", nextTake.getCallSign());
+                attr.put("callsign", nextTake.getCallSign());
                 attr.put("reason", "MAX_WAIT_EXCEEDED");
                 attr.put("waitedMinutes", waited);
                 logEvent(EventType.CANCELLATION_EVENT, simTime, attr);
@@ -299,7 +299,7 @@ public class Simulation {
                 runwayBusyUntil.put(r.getRunwayNumber(), simTime + operationDuration);
 
                 HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", chosen.getCallSign());
+                attr.put("callsign", chosen.getCallSign());
                 attr.put("runwayNumber", r.getRunwayNumber());
 
                 int delay = simTime - chosen.getScheduledTime();
@@ -393,7 +393,7 @@ public class Simulation {
 
         Runnable action = () -> {
             HashMap<String, Object> attr = new HashMap<>();
-            attr.put("callSign", a.getCallSign());
+            attr.put("callsign", a.getCallSign());
             attr.put("op", op.toString());
 
             if (op == AircraftOp.ARRIVAL) {
@@ -402,7 +402,7 @@ public class Simulation {
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
             } else {
                 takeOffQueue.addAircraft(a);
-                logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
+                logEvent(EventType.HOLDING_EVENT, simTime, attr);
             }
         };
 
@@ -473,7 +473,7 @@ public class Simulation {
             }
 
             HashMap<String, Object> attr = new HashMap<>();
-            attr.put("callSign", a.getCallSign());
+            attr.put("callsign", a.getCallSign());
             attr.put("emergencyStatus", emergencyStatus.toString());
 
             logEvent(EventType.EMERGENCY_EVENT, simTime, attr);

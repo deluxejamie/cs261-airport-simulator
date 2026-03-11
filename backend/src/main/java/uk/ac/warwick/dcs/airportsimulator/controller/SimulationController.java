@@ -3,6 +3,7 @@ package uk.ac.warwick.dcs.airportsimulator.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.yaml.snakeyaml.util.Tuple;
+import tools.jackson.databind.ObjectMapper;
 import uk.ac.warwick.dcs.airportsimulator.entity.EventLogEntryEntity;
 import uk.ac.warwick.dcs.airportsimulator.entity.SimulationResultEntity;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLogEntry;
@@ -13,6 +14,7 @@ import uk.ac.warwick.dcs.airportsimulator.service.SimManager;
 import uk.ac.warwick.dcs.airportsimulator.service.SimulationControlService;
 import uk.ac.warwick.dcs.airportsimulator.simulation.Simulation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,31 +92,40 @@ public class SimulationController {
 
         final Optional<Tuple<List<EventLogEntry>, Long>> fromMem = simManager.getEventLog(uuid, offset, count);
         if (fromMem.isPresent()) {
-            final List<EventLogItemResponse> eventItems = fromMem.get()
-                    ._1()
-                    .stream()
-                    .map((og) -> new EventLogItemResponse(
-                            og.getType().toString().toLowerCase(),
-                            og.getTimestamp(),
-                            og.getAttr().toString()
-                    ))
-                    .toList();
+            final List<EventLogEntry> eventLogEntries = fromMem.get()._1();
+            final List<EventLogItemResponse> eventItems = new ArrayList<>(eventLogEntries.size());
+
+            final ObjectMapper objectMapper = new ObjectMapper();
+            for (int i = 0; i < eventLogEntries.size(); ++i) {
+                final EventLogEntry e = eventLogEntries.get(i);
+                eventItems.add(new EventLogItemResponse(
+                                offset + i + 1,
+                                e.getType().toString().toLowerCase(),
+                                e.getTimestamp(),
+                                objectMapper.writeValueAsString(e.getAttr())
+                        )
+                );
+            }
 
             return ResponseEntity.ok(new EventLogResponse(
-               eventItems, fromMem.get()._2()
+                    eventItems, fromMem.get()._2()
             ));
         }
 
 
         final List<EventLogEntryEntity> fromDb = simulationService.getEventLog(uuid, offset, count);
-        final List<EventLogItemResponse> eventItems = fromDb
-                .stream()
-                .map((og) -> new EventLogItemResponse(
-                        og.getEventType(),
-                        og.getSimTimestamp(),
-                        og.getAttributes()
-                ))
-                .toList();
+        final List<EventLogItemResponse> eventItems = new ArrayList<>(fromDb.size());
+
+        for (int i = 0; i < fromDb.size(); ++i) {
+            final EventLogEntryEntity e = fromDb.get(i);
+            eventItems.add(new EventLogItemResponse(
+                            offset + i + 1,
+                            e.getEventType(),
+                            e.getSimTimestamp(),
+                            e.getAttributes()
+                    )
+            );
+        }
 
         final long totalEvents = simulationService.getEventLogCount(uuid);
         return ResponseEntity.ok(new EventLogResponse(eventItems, totalEvents));
