@@ -21,12 +21,14 @@ import {
 	EventTypes,
 } from "@/lib/simulation-api";
 import {
-	IconAirTrafficControl,
 	IconAlertCircleFilled,
 	IconAlertHexagon,
+	IconArrowUpRight,
 	IconBrandFlightradar24,
 	IconBuildingAirport,
+	IconCircleCheckFilled,
 	IconClock,
+	IconPlane,
 	IconPlaneArrival,
 	IconPlaneDeparture,
 	IconPlaneOff,
@@ -43,6 +45,7 @@ const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures 
 export default function SimulationOutcomeFoundPage({ uuid }) {
 	return (
 		<>
+			<span id="sim-stats-section" />
 			<SimulationStatsComponent uuid={uuid} />
 			<SimulationEventLogComponent uuid={uuid} />
 		</>
@@ -288,6 +291,38 @@ const UnableToConnectToServerCard = ({ style }) => {
 	);
 };
 
+const SimulationCompleteCard = ({ style }) => {
+	return (
+		<Card
+			padding="md"
+			shadow="sm"
+			withBorder
+			bg="#d4ffd5" // light greend4ffd5
+			radius="md"
+			style={style}
+		>
+			<Group justify="space-between">
+				<Group justify="center">
+					<IconPlane />
+					<Title order={3}>Simulation complete!</Title>
+				</Group>
+				<Button
+					variant="subtle"
+					c="dark"
+					radius="md"
+					rightSection={<IconArrowUpRight size="16" />}
+					onClick={() => {
+						const targetElem = document.getElementById("sim-stats-section");
+						if (targetElem) targetElem.scrollIntoView({ behavior: "smooth" });
+					}}
+				>
+					View Simulation Statistics
+				</Button>
+			</Group>
+		</Card>
+	);
+};
+
 /**
  * @param {{ uuid: String}} param0 The uuid for the simulation
  * @returns A react component
@@ -451,6 +486,18 @@ const SimulationEventLogComponent = ({ uuid }) => {
 							/>
 						) : undefined}
 					</>
+				) : undefined}
+
+				{finished ? (
+					<SimulationCompleteCard
+						style={{
+							opacity: 0,
+							animationName: "fadeIn",
+							animationDuration: `0.6s`,
+							animationFillMode: "forwards",
+							animationTimingFunction: "ease",
+						}}
+					/>
 				) : undefined}
 
 				<span id="bottom-of-page" />
