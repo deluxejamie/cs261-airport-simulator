@@ -108,13 +108,14 @@ public final class HoldingPattern {
 
     /**
      * Gets the next aircraft if the fuel is critical
-     * @param simTime the sim time
+     * @param simTime  the sim time
+     * @param critical the fuel at which it is critical
      * @return        the next aircraft if fuel is critical otherwise null
      */
-    public Aircraft pollIfFuelCritical(int simTime) {
+    public Aircraft pollIfFuelCritical(int simTime, int critical) {
         Entry e = queue.peek();
         if (e == null) return null;
-        if (e.aircraft.isFuelCritical(simTime)) {
+        if (e.aircraft.isFuelCritical(simTime, critical)) {
             queue.poll();
             return e.aircraft;
         }
