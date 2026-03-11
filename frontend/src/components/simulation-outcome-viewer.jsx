@@ -320,7 +320,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 
 	useEffect(() => {
 		const bottom = document.getElementById("bottom-of-page");
-		bottom.scrollIntoView({ behavior: "smooth" });
+		if (bottom) bottom.scrollIntoView({ behavior: "smooth" });
 	}, [currentEvents.length, serverUnavailable]);
 
 	// updates index seen up until this current tick
