@@ -118,7 +118,7 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				simTimestamp: 10,
 				attributes: {
 					callsign: "BA-2",
-					runwayNumber: 2,
+					runwayNumber: 1,
 					waitMinutes: 3,
 					departureDelay: 5,
 				},
@@ -140,7 +140,7 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				simTimestamp: 50,
 				attributes: {
 					callsign: "EASYJET-4",
-					reason: "Flight has low fuel.",
+					reason: "Low fuel",
 				},
 			},
 			{
@@ -150,7 +150,7 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				simTimestamp: 55,
 				attributes: {
 					callsign: "EASYJET-5",
-					reason: `No takeoff capacity after waiting 20 minutes`,
+					reason: `insufficient takeoff capacity`,
 					waitingMinutes: 20,
 				},
 			},
@@ -170,7 +170,7 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				simulationId: uuid,
 				simTimestamp: 80,
 				attributes: {
-					callsign: "QATAR-6",
+					runwayNumber: 2,
 					emergencyStatus: "fuel",
 				},
 			},
@@ -180,8 +180,8 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				simulationId: uuid,
 				simTimestamp: 80,
 				attributes: {
-					callsign: "QATAR-6",
-					status: "not sure what this is",
+					runwayNumber: 3,
+					status: "available",
 				},
 			},
 		];
