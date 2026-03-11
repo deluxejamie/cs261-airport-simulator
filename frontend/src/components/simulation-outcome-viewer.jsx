@@ -18,11 +18,23 @@ import {
 	getSimulationEventLog,
 	getSimulationResult,
 	getSimulationStatus,
+	EventTypes,
 } from "@/lib/simulation-api";
 import {
 	IconAlertCircleFilled,
+	IconAlertHexagon,
+	IconArrowUpRight,
+	IconBrandFlightradar24,
+	IconBuildingAirport,
+	IconCircleCheckFilled,
+	IconClock,
+	IconPlane,
+	IconPlaneArrival,
+	IconPlaneDeparture,
+	IconPlaneOff,
 	IconPlayerPlay,
 	IconRefresh,
+	IconSignRight,
 } from "@tabler/icons-react";
 
 const DEFAULT_PLAY_SPEED = 20; // 20 minutes = 1 second of playthrough
@@ -33,11 +45,186 @@ const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures 
 export default function SimulationOutcomeFoundPage({ uuid }) {
 	return (
 		<>
+			<span id="sim-stats-section" />
 			<SimulationStatsComponent uuid={uuid} />
 			<SimulationEventLogComponent uuid={uuid} />
 		</>
 	);
 }
+
+const eventBadgeColor = (val, defaultColor = "blue") =>
+	val ? defaultColor : "orange";
+
+const eventDisplayers = Object.fromEntries([
+	[
+		EventTypes.LANDING,
+		{
+			icon: <IconPlaneArrival />,
+			title: (attributes) => `Flight ${attributes.callsign} has landed`,
+			badges: (attributes) => {
+				const HOLD_WARN_THRESHOLD = 3; // minutes
+				const ARRIVAL_DELAY_WARN_THRESHOLD = 2; // minutes
+				return (
+					<Group justify="flex-start">
+						<Badge variant="light" color="blue">
+							Runway {attributes.runwayNumber}
+						</Badge>
+						<Badge
+							variant="light"
+							color={eventBadgeColor(
+								attributes.holdMinutes < HOLD_WARN_THRESHOLD,
+								"green",
+							)}
+						>
+							Hold time {attributes.holdMinutes} min
+						</Badge>
+						<Badge
+							variant="light"
+							color={eventBadgeColor(
+								attributes.arrivalDelay < ARRIVAL_DELAY_WARN_THRESHOLD,
+								"green",
+							)}
+						>
+							{attributes.arrivalDelay >= 0
+								? `${attributes.arrivalDelay} min delay`
+								: "On time"}
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+	[
+		EventTypes.TAKEOFF,
+		{
+			icon: <IconPlaneDeparture />,
+			title: (attributes) => `Flight ${attributes.callsign} has departed`,
+			badges: (attributes) => {
+				const WAIT_THRESHOLD = 4; // minutes
+				const DEPARTURE_DELAY_WARN_THRESHOLD = 2; // minutes
+				return (
+					<Group justify="flex-start">
+						<Badge variant="light" color="blue">
+							Runway {attributes.runwayNumber}
+						</Badge>
+						<Badge
+							variant="light"
+							color={eventBadgeColor(
+								attributes.waitMinutes < WAIT_THRESHOLD,
+								"green",
+							)}
+						>
+							Wait time {attributes.waitMinutes} min
+						</Badge>
+						<Badge
+							variant="light"
+							color={eventBadgeColor(
+								attributes.departureDelay < DEPARTURE_DELAY_WARN_THRESHOLD,
+								"green",
+							)}
+						>
+							{attributes.departureDelay > 0
+								? `${attributes.departureDelay} min delay`
+								: "On time"}
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+	[
+		EventTypes.HOLDING,
+		{
+			icon: <IconBuildingAirport />,
+			title: (attributes) =>
+				`Flight ${attributes.callsign} entered holding pattern`,
+			badges: (attributes) => undefined,
+		},
+	],
+	[
+		EventTypes.DIVERSION,
+		{
+			icon: <IconBrandFlightradar24 />,
+			title: (attributes) => `Arrival flight ${attributes.callsign} diverted`,
+			badges: (attributes) => {
+				return (
+					<Group justify="flex-start">
+						<Badge variant="light" color="red">
+							{attributes.reason}
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+	[
+		EventTypes.CANCELLATION,
+		{
+			icon: <IconPlaneOff />,
+			title: (attributes) =>
+				`Departure flight ${attributes.callsign} cancelled`,
+			badges: (attributes) => {
+				return (
+					<Group justify="flex-start">
+						<Badge variant="light" color="orange">
+							Wait time {attributes.waitingMinutes} min
+						</Badge>
+						<Badge variant="light" color="red">
+							{attributes.reason}
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+	[
+		EventTypes.EMERGENCY,
+		{
+			icon: <IconAlertHexagon />,
+			title: (attributes) =>
+				`Aircraft ${attributes.callsign} experiencing emergency`,
+			badges: (attributes) => {
+				return (
+					<Group justify="flex-start">
+						<Badge variant="light" color="red">
+							{attributes.emergencyStatus.replace("_", " ")} emergency
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+
+	// Runway mode event is excluded as it cannot change currently within our simulation
+	// [
+	// 	EventTypes.RUNWAY_MODE,
+	// 	{
+	// 		icon: <IconAlertHexagon />,
+	// 		title: "Aircraft Emergency",
+	// 	},
+	// ],
+
+	[
+		EventTypes.RUNWAY_STATUS,
+		{
+			icon: <IconSignRight />,
+			title: (attributes) =>
+				`Runway ${attributes.runwayNumber} availability status changed`,
+			badges: (attributes) => {
+				return (
+					<Group justify="flex-start">
+						<Badge
+							variant="light"
+							color={eventBadgeColor(attributes.status == "available", "green")}
+						>
+							{attributes.status.replace("_", " ")}
+						</Badge>
+					</Group>
+				);
+			},
+		},
+	],
+]);
 
 /**
  * This function generates a Card to display in the event log using the provided event data
@@ -45,24 +232,49 @@ export default function SimulationOutcomeFoundPage({ uuid }) {
  * @returns {} A react component
  */
 const EventCard = ({ event, style }) => {
+	const eventDisplayer = eventDisplayers[event.eventType];
+	if (!eventDisplayer) return undefined;
 	return (
-		<Card padding="xl" shadow="sm" withBorder radius="md" style={style}>
-			<Group justify="center">
-				<IconAlertCircleFilled />
-				<Title order={3}>Dummy card</Title>
+		<Card
+			padding="lg"
+			shadow="sm"
+			withBorder
+			radius="md"
+			style={style}
+			bg="#fafafa"
+		>
+			<Group justify="space-between">
+				<Group justify="flex-start">
+					{eventDisplayer.icon}
+					<Title order={5} fw={500}>
+						{eventDisplayer.title(event.attributes)}
+					</Title>
+					{eventDisplayer.badges?.(event.attributes)}
+				</Group>
+				<Group justify="flex-start" gap="5">
+					<Text size="sm" c="dimmed">
+						<IconClock />
+					</Text>
+					<Text size="sm" c="dimmed">
+						{event.simTimestamp}m
+					</Text>
+				</Group>
 			</Group>
-			<Group justify="center">
-				<Text size="sm" fs="italic">
-					Description of card will go here
-				</Text>
-			</Group>
+			{eventDisplayer.body?.(event.attributes)}
 		</Card>
 	);
 };
 
-const UnableToConnectToServerCard = () => {
+const UnableToConnectToServerCard = ({ style }) => {
 	return (
-		<Card padding="xl" shadow="sm" withBorder bg="orange" radius="md">
+		<Card
+			padding="xl"
+			shadow="sm"
+			withBorder
+			bg="orange"
+			radius="md"
+			style={style}
+		>
 			<Group justify="center">
 				<IconAlertCircleFilled color="white" />
 				<Title order={3} c="white">
@@ -74,6 +286,38 @@ const UnableToConnectToServerCard = () => {
 					An error has occured while attempting to access the simulation
 					results. Please run the simulation again to try again.
 				</Text>
+			</Group>
+		</Card>
+	);
+};
+
+const SimulationCompleteCard = ({ style }) => {
+	return (
+		<Card
+			padding="md"
+			shadow="sm"
+			withBorder
+			bg="#d4ffd5" // light greend4ffd5
+			radius="md"
+			style={style}
+		>
+			<Group justify="space-between">
+				<Group justify="center">
+					<IconPlane />
+					<Title order={3}>Simulation complete!</Title>
+				</Group>
+				<Button
+					variant="subtle"
+					c="dark"
+					radius="md"
+					rightSection={<IconArrowUpRight size="16" />}
+					onClick={() => {
+						const targetElem = document.getElementById("sim-stats-section");
+						if (targetElem) targetElem.scrollIntoView({ behavior: "smooth" });
+					}}
+				>
+					View Simulation Statistics
+				</Button>
 			</Group>
 		</Card>
 	);
@@ -111,7 +355,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 
 	useEffect(() => {
 		const bottom = document.getElementById("bottom-of-page");
-		bottom.scrollIntoView({ behavior: "smooth" });
+		if (bottom) bottom.scrollIntoView({ behavior: "smooth" });
 	}, [currentEvents.length, serverUnavailable]);
 
 	// updates index seen up until this current tick
@@ -209,39 +453,55 @@ const SimulationEventLogComponent = ({ uuid }) => {
 					</Button>
 				</Stack>
 			</Card>
-			{running ? (
-				<>
-					{currentEvents.map((e, i) => (
-						<EventCard
-							event={e}
-							key={e.id}
-							style={
-								i > indexSeenUntil
-									? {
-											opacity: 0,
-											animationName: "fadeIn",
-											animationDuration: `0.4s`,
-											animationFillMode: "forwards",
-											animationTimingFunction: "ease",
-										}
-									: {}
-							}
-						/>
-					))}
-					{eventsFromSvr.length == currentEvents.length && serverUnavailable ? (
-						<UnableToConnectToServerCard
-							style={{
-								opacity: 0,
-								animationName: "fadeIn",
-								animationDuration: `0.4s`,
-								animationFillMode: "forwards",
-								animationTimingFunction: "ease",
-							}}
-						/>
-					) : undefined}
-				</>
-			) : undefined}
-			<span id="bottom-of-page" />
+			<Stack>
+				{running ? (
+					<>
+						{currentEvents.map((e, i) => (
+							<EventCard
+								event={e}
+								key={e.id}
+								style={
+									i > indexSeenUntil
+										? {
+												opacity: 0,
+												animationName: "fadeIn",
+												animationDuration: `0.4s`,
+												animationFillMode: "forwards",
+												animationTimingFunction: "ease",
+											}
+										: {}
+								}
+							/>
+						))}
+						{eventsFromSvr.length == currentEvents.length &&
+						serverUnavailable ? (
+							<UnableToConnectToServerCard
+								style={{
+									opacity: 0,
+									animationName: "fadeIn",
+									animationDuration: `0.4s`,
+									animationFillMode: "forwards",
+									animationTimingFunction: "ease",
+								}}
+							/>
+						) : undefined}
+					</>
+				) : undefined}
+
+				{finished ? (
+					<SimulationCompleteCard
+						style={{
+							opacity: 0,
+							animationName: "fadeIn",
+							animationDuration: `0.6s`,
+							animationFillMode: "forwards",
+							animationTimingFunction: "ease",
+						}}
+					/>
+				) : undefined}
+
+				<span id="bottom-of-page" />
+			</Stack>
 		</>
 	);
 };
