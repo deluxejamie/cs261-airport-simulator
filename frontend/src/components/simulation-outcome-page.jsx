@@ -6,6 +6,7 @@ import {
 	getSimulationEventLog,
 	getSimulationResult,
 	getSimulationStatus,
+	sleep,
 } from "@/lib/simulation-api";
 import SimulationOutcomeFoundPage from "./simulation-outcome-viewer";
 import { useRouter } from "next/navigation";
@@ -21,9 +22,6 @@ const BADGE_COLORS = {
 	unavailable: "red",
 	complete: "green",
 };
-
-// extremely standard sleep fn, sleeps ms milliseconds.
-export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function SimulationOutcomeView({ uuid }) {
 	const [status, setStatus] = useState("in_progress");

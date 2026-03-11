@@ -1,11 +1,12 @@
 "use client";
-import { EmergencyStatus } from "@/app/hooks";
-import { sleep } from "@/components/simulation-outcome-page";
 /**
  * Note that requests are made directly from the browser (not via the next server) for benefits discussed in design document
  * including easier ratelimiting, etc.
  */
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+// extremely standard sleep fn, sleeps ms milliseconds.
+export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 /**
  * Utility function used to make requests to the backend server
