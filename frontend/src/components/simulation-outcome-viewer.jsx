@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
 	Alert,
 	Badge,
@@ -20,6 +20,7 @@ import {
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
+	getSimulationConfiguration,
 	getSimulationResult,
 	getSimulationStatus,
 	EventTypes,
@@ -32,6 +33,7 @@ import {
 	IconBuildingAirport,
 	IconCircleCheckFilled,
 	IconClock,
+	IconDownload,
 	IconPlane,
 	IconPlaneArrival,
 	IconPlaneDeparture,
@@ -550,7 +552,114 @@ const SimulationEventLogComponent = ({ uuid }) => {
  * @returns A react component
  */
 const SimulationStatsComponent = ({ uuid }) => {
-	// display the stats for the simulation (SCRUM-36)
-	// todo for yasvi
-	return <></>;
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
+	const [result, setResult] = useState(null);
+	const [exporting, setExporting] = useState(false);
+
+	useEffect(() => {
+		let isMounted = true;
+		(async () => {
+			setLoading(true);
+			setError(null);
+			try {
+				console.log(uuid);
+				const fetchedResult = await getSimulationResult(uuid);
+				if (!isMounted) return;
+				setResult(fetchedResult);
+			} catch (e) {
+				console.log(e);
+				if (!isMounted) return;
+				setError("Failed to load simulation statistics.");
+			} finally {
+				if (isMounted) setLoading(false);
+			}
+		})();
+		return () => {
+			isMounted = false;
+		};
+	}, [uuid]);
+
+	const rows = useMemo(() => {
+		if (!result) return [];
+		return [
+			["Max take-off queue", result.maxTakeOffQueue],
+			["Average take-off wait (mins)", formatDecimal(result.avgTakeOffWait)],
+			["Max holding queue", result.maxHoldQueue],
+			["Average hold time (mins)", formatDecimal(result.avgHoldTime)],
+			["Total cancellations", result.totalCancellations],
+			["Total diversions", result.totalDiversions],
+			["Average arrival delay (mins)", formatDecimal(result.avgArrivalDelay)],
+			[
+				"Average departure delay (mins)",
+				formatDecimal(result.avgDepartureDelay),
+			],
+		];
+	}, [result]);
+
+	return (
+		<Card withBorder>
+			<Stack>
+				<Title order={2}>Simulation statistics</Title>
+				{loading ? (
+					<Center>
+						<Loader size="sm" />
+					</Center>
+				) : error ? (
+					<Alert color="red">{error}</Alert>
+				) : (
+					<>
+						<Table striped withTableBorder>
+							<Table.Tbody>
+								{rows.map(([label, value]) => (
+									<Table.Tr key={label}>
+										<Table.Td>{label}</Table.Td>
+										<Table.Td>{value}</Table.Td>
+									</Table.Tr>
+								))}
+							</Table.Tbody>
+						</Table>
+						<Button
+							fullWidth
+							variant="light"
+							leftSection={<IconDownload size={16} />}
+							loading={exporting}
+							onClick={() => {
+								setExporting(true);
+								setError(null);
+
+								try {
+									const response = result.configData;
+									const configString =
+										typeof response === "string"
+											? response
+											: (response?.config ?? JSON.stringify(response, null, 2));
+
+									const tempLink = document.createElement("a");
+									tempLink.href = window.URL.createObjectURL(
+										new Blob([configString]),
+									);
+									tempLink.setAttribute("download", `${uuid}.json`);
+									document.body.appendChild(tempLink);
+									tempLink.click();
+									document.body.removeChild(tempLink);
+								} catch (e) {
+									setError("Failed to download the simulation configuration.");
+								} finally {
+									setExporting(false);
+								}
+							}}
+						>
+							Export configuration
+						</Button>
+					</>
+				)}
+			</Stack>
+		</Card>
+	);
+};
+
+const formatDecimal = (value) => {
+	if (typeof value !== "number") return "-";
+	return value.toFixed(2);
 };
