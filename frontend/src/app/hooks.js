@@ -451,7 +451,7 @@ export const useHazardSchedule = () => {
 		const hazard = {
 			id: hazardCounter,
 			type: HazardType.RUNWAY_CLOSURE,
-			start_time_mins: startTimeMinutes,
+			time: startTimeMinutes,
 			duration_mins: durationMinutes,
 			affected_runway: affectedRunway,
 			closure_mode: closureMode,
@@ -480,6 +480,7 @@ export const useHazardSchedule = () => {
 			type: HazardType.EMERGENCY_EVENT,
 			target_arrival_callsign: arrivalCallsign,
 			time,
+			emergency_type: emergencyType,
 		};
 
 		const res = hazards.set(hazardCounter, hazard);
@@ -524,12 +525,16 @@ export const useHazardSchedule = () => {
 				)
 					throw Error("Hazard data is malformed for hazard at index:" + index);
 
-				if (callsigns.has(hazard.id))
+				if (hazards.has(hazard.id))
 					throw Error("Hazard id is repeated in hazard at index:" + index);
 
 				switch (hazard.type) {
 					case HazardType.EMERGENCY_EVENT: {
-						if (!flightSchedule.has(hazard.target_arrival_callsign))
+						if (
+							!flightSchedule.some(
+								(f) => f.callsign == hazard.target_arrival_callsign,
+							)
+						)
 							throw Error(
 								"Hazard at index " + index + " applied to nonexistent flight: ",
 							);
@@ -538,17 +543,26 @@ export const useHazardSchedule = () => {
 							throw Error(
 								"Invalid or missing hazard time for hazard at index:" + index,
 							);
+
+						if (
+							!isValueInEnum(EmergencyStatusWithoutNone, hazard.emergency_type)
+						)
+							throw Error(
+								"Invalid or missing emergency status for hazard at index:" +
+									index,
+							);
+
 						break;
 					}
 					case HazardType.RUNWAY_CLOSURE: {
-						if (!runways.find((r) => r.id == hazard.affected_runway))
+						if (!runways.some((r) => r.id == hazard.affected_runway))
 							throw Error(
 								"Runway closure applied to nonexistent runway id for hazard at index:" +
 									index,
 							);
 
 						if (
-							!isNaturalNumber(hazard.start_time_mins) ||
+							!isNaturalNumber(hazard.time) ||
 							!isNaturalNumber(hazard.duration_mins) ||
 							!isValueInEnum(RunwayClosureMode, hazard.closure_mode)
 						)
@@ -580,7 +594,7 @@ export const useHazardSchedule = () => {
 	return {
 		/**
 		 * A map from hazard id (can be used as a key) to the hazard schedule data
-		 * @type {Map<Number,{id: Number, type: HazardType.RUNWAY_CLOSURE, start_time_mins: Number, duration_mins: Number, affected_runway: Number, closure_mode: closureMode, repeating?: {}}>}
+		 * @type {Map<Number,{id: Number, type: HazardType.RUNWAY_CLOSURE, time: Number, duration_mins: Number, affected_runway: Number, closure_mode: closureMode, repeating?: {}}>}
 		 * @see https://mantine.dev/hooks/use-map/ I would recommend using these docs to see how to display the hazard schedule. Use the hazard id as a key in lists.
 		 */
 		hazards,

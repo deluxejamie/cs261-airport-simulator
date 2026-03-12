@@ -42,6 +42,15 @@ public class EventLog {
         return logs.subList(offset, endIndex);
     }
 
+    /**
+     * Gets the number of events in event log
+     * @return number of events
+     */
+    public long getNumOfEvents()
+    {
+        return logs.size();
+    }
+
     /* List of EventLogEntry */
     private final List<EventLogEntry> logs;
 }

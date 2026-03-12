@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EventLogTest {
 
-    private static EventLogEntry entry(EventType type, double ts) {
+    private static EventLogEntry entry(EventType type, int ts) {
         return new EventLogEntry(type, ts, new HashMap<>());
     }
 
@@ -25,8 +25,8 @@ class EventLogTest {
     void addEntry_shouldIncreaseReturnedEvents() {
         EventLog log = new EventLog();
 
-        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1.0);
-        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2.0);
+        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1);
+        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2);
 
         log.addEntry(e1);
         log.addEntry(e2);
@@ -41,9 +41,9 @@ class EventLogTest {
     @Test
     void getEvents_shouldRespectOffsetAndCount_andClampToSize() {
         EventLog log = new EventLog();
-        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1.0);
-        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2.0);
-        EventLogEntry e3 = entry(EventType.HOLDING_EVENT, 3.0);
+        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1);
+        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2);
+        EventLogEntry e3 = entry(EventType.HOLDING_EVENT, 3);
 
         log.addEntry(e1);
         log.addEntry(e2);
@@ -64,9 +64,9 @@ class EventLogTest {
     @Test
     void getEvents_returnsView_modifyingReturnedListModifiesUnderlyingLog() {
         EventLog log = new EventLog();
-        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1.0);
-        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2.0);
-        EventLogEntry e3 = entry(EventType.HOLDING_EVENT, 3.0);
+        EventLogEntry e1 = entry(EventType.LANDING_EVENT, 1);
+        EventLogEntry e2 = entry(EventType.TAKEOFF_EVENT, 2);
+        EventLogEntry e3 = entry(EventType.HOLDING_EVENT, 3);
 
         log.addEntry(e1);
         log.addEntry(e2);
