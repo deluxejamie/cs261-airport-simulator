@@ -48,6 +48,14 @@ public class EventSchedular {
         }
     }
 
+    public int nextEventTime()
+    {
+        return events.isEmpty() ? -1 : events.peek().getScheduledTime();
+    }
+
+    /**
+     * @return whether there are any events left
+     */
     public boolean isEmpty() {
         return events.isEmpty();
     }

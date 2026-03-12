@@ -54,6 +54,7 @@ public class Simulation {
 
     /**
      * Constructs the simulation class with given runways
+     *
      * @param runways runways for sim
      */
     public Simulation(List<Runway> runways) {
@@ -66,16 +67,17 @@ public class Simulation {
         this.eventLog = new EventLog();
 
         for (Runway runway : this.runways) {
-            runwayBusyUntil.put(runway.getRunwayNumber(), 0);
+            runwayBusyUntil.put(runway.getRunwayNumber(), Integer.MIN_VALUE);
         }
     }
 
     /**
      * Checks if the Simulation is finished
+     *
      * @return whether the sim is finished
      */
     public boolean isFinished() {
-        final boolean queuesEmpty = holdingPattern.size() == 0 && takeOffQueue.size() == 0;
+        final boolean queuesEmpty = holdingPattern.isEmpty() && takeOffQueue.isEmpty();
 
         boolean anyOccupied = false;
         for (Runway r : runways) {
@@ -91,14 +93,14 @@ public class Simulation {
 
     /**
      * Returns section of event log from offset and count
+     *
      * @param offset offset to read event log from
      * @param count  amount to read from event log
-     * @return       the section of event log requested
+     * @return the section of event log requested
      */
     public List<EventLogEntry> getEventLog(int offset, int count) {
         return eventLog.getEvents(offset, count);
     }
-
 
 
     /**
@@ -115,6 +117,7 @@ public class Simulation {
 
     /**
      * Returns true if the runway is available for a new operation at the current time.
+     *
      * @param runway runway to check
      * @return whether the runway is available now
      */
@@ -128,6 +131,7 @@ public class Simulation {
 
     /**
      * Returns true if the runway can currently handle a landing.
+     *
      * @param runway runway to check
      * @return whether landing can be handled
      */
@@ -139,6 +143,7 @@ public class Simulation {
 
     /**
      * Returns true if the runway can currently handle a takeoff.
+     *
      * @param runway runway to check
      * @return whether takeoff can be handled
      */
@@ -148,11 +153,21 @@ public class Simulation {
                 && isRunwayAvailableNow(runway);
     }
 
+    private int startingTime() {
+        final int firstInTakeOffQueue = takeOffQueue.isEmpty() ? 0 : takeOffQueue.peekNextAircraft().getScheduledTime();
+        final int firstInHoldingPattern = holdingPattern.isEmpty() || holdingPattern.peekNextAircraft() == null ? 0 : holdingPattern.peekNextAircraft().getScheduledTime();
+        final int firstEventScheduled = eventSchedular.isEmpty() ? 0 : eventSchedular.nextEventTime();
+
+        final int minOfQueues = Math.min(firstInTakeOffQueue, firstInHoldingPattern);
+        return Math.min(minOfQueues, firstEventScheduled);
+    }
+
     public SimulationResult run() {
         final int MAX_TAKEOFF_WAIT_MIN = maxDelayBeforeCancelled;
         final SimulationResult result = new SimulationResult();
 
-        // Execute events scheduled at t=0
+        // Set correct starting simTime
+        simTime = startingTime();
         eventSchedular.step(simTime);
 
         int safetyCap = 1_000_000;
@@ -316,6 +331,7 @@ public class Simulation {
 
     /**
      * Gets event schedular
+     *
      * @return the event schedular
      */
     public EventSchedular getEventSchedular() {
@@ -324,6 +340,7 @@ public class Simulation {
 
     /**
      * Gets the event log store
+     *
      * @return event log store
      */
     public EventLog getEventLogStore() {
@@ -332,6 +349,7 @@ public class Simulation {
 
     /**
      * Gets the holding pattern
+     *
      * @return the holding pattern
      */
     public HoldingPattern getHoldingPattern() {
@@ -340,6 +358,7 @@ public class Simulation {
 
     /**
      * Gets the takeoff queue
+     *
      * @return the takeoff queue
      */
     public TakeOffQueue getTakeOffQueue() {
@@ -348,6 +367,7 @@ public class Simulation {
 
     /**
      * Gets the runways
+     *
      * @return the runways
      */
     public List<Runway> getRunways() {
@@ -356,6 +376,7 @@ public class Simulation {
 
     /**
      * Adds an aircraft to a simulation
+     *
      * @param a         aircraft to add
      * @param scheduled time the aircraft is scheduled
      * @param interval  interval if event is recurring
@@ -396,6 +417,7 @@ public class Simulation {
 
     /**
      * Adds a runway operation change event
+     *
      * @param runwayNumber the runway to modify
      * @param scheduled    the time the event should happen
      * @param interval     if recurring at what interval
@@ -426,6 +448,7 @@ public class Simulation {
 
     /**
      * Adds an aircraft emergency
+     *
      * @param a               the aircraft to add the emergency for
      * @param scheduled       the time to add the emergency
      * @param interval        if recurring the interval for the event
@@ -470,6 +493,7 @@ public class Simulation {
 
     /**
      * Adds a runway status change event
+     *
      * @param runwayNumber the runway to change
      * @param scheduled    the time to change
      * @param interval     if recurring the interval
@@ -500,8 +524,9 @@ public class Simulation {
 
     /**
      * Gets the runway from runway number
+     *
      * @param runwayNumber the runway number
-     * @return             the runway
+     * @return the runway
      */
     private Runway getRunwayByNumber(int runwayNumber) {
         for (Runway r : runways) {
@@ -514,6 +539,7 @@ public class Simulation {
 
     /**
      * Logs an event
+     *
      * @param type      the event type
      * @param timestamp the event timestamp
      * @param attr      the event attributes
@@ -596,19 +622,19 @@ public class Simulation {
 
     /**
      * Gets the mutex
+     *
      * @return get mutex for simulation
      */
     public Lock getMutex() {
         return mutex;
     }
 
-
     /**
      * Get Event Log Count
+     *
      * @return number of the events in the log
      */
-    public long getNumOfEventsInLog()
-    {
+    public long getNumOfEventsInLog() {
         return eventLog.getNumOfEvents();
     }
 }
