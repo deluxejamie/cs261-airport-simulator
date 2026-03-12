@@ -22,6 +22,14 @@ public final class TakeOffQueue {
     }
 
     /**
+     * @return if the queue is empty
+     */
+    public boolean isEmpty()
+    {
+        return queue.isEmpty();
+    }
+
+    /**
      * Adds an aircraft to the queue
      * @param a aircraft
      */

@@ -30,7 +30,7 @@ public class SimulationService {
 
     /** Called when a simulation is first submitted. Saves it with RUNNING status. */
     public void createSimulation(String uuid, String configJson) {
-        simRepo.save(new SimulationEntity(uuid, "RUNNING", configJson));
+        simRepo.save(new SimulationEntity(uuid, "in_progress", configJson));
     }
 
     /** Called when the simulation finishes. Saves results and marks it COMPLETED. */
@@ -48,7 +48,7 @@ public class SimulationService {
             result.getAvgDepartureDelay()
         ));
         simRepo.findById(uuid).ifPresent(sim -> {
-            sim.setStatus("COMPLETED");
+            sim.setStatus("complete");
             simRepo.save(sim);
         });
     }

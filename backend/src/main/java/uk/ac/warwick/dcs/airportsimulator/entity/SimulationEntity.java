@@ -23,7 +23,9 @@ public class SimulationEntity {
     private String config;
     private LocalDateTime createdAt;
 
-    public SimulationEntity() {}
+    public SimulationEntity() {
+
+    }
 
     /**
      * Constructs a new simulation entity with the given parameters.
@@ -31,7 +33,6 @@ public class SimulationEntity {
      * @param status current status of the simulation
      * @param config JSON configuration to initialise the simulation
      */
-
     public SimulationEntity(String id, String status, String config) {
         this.id = id;
         this.status = status;
