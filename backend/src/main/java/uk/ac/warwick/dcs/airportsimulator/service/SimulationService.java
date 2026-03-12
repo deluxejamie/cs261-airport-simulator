@@ -54,8 +54,17 @@ public class SimulationService {
     }
 
     /** Append a single event log entry for a simulation. */
-    public void saveEventLogEntry(String uuid, String eventType, double simTimestamp, String attributesJson) {
+    public void saveEventLogEntry(String uuid, String eventType, int simTimestamp, String attributesJson) {
         logRepo.save(new EventLogEntryEntity(uuid, eventType, simTimestamp, attributesJson));
+    }
+
+    /**
+     * Get Event Log Count
+     * @param uuid the sim uuid
+     * @return     the number of event log count
+     */
+    public long getEventLogCount(String uuid) {
+        return logRepo.countBySimulationId(uuid);
     }
 
     /** Get the status of a simulation (RUNNING / COMPLETED / not found). */
