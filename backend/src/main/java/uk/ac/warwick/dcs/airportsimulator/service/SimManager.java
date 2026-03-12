@@ -48,7 +48,7 @@ public class SimManager {
 
         executor.execute(() -> {
             final SimulationResult result = simulation.run();
-            simulationService.saveResult(uuid, result);
+            simulationService.saveResult(uuid, result, configJson);
 
             final ObjectMapper objectMapper = new ObjectMapper();
             for (final var entry : simulation.getEventLog(0, (int) simulation.getNumOfEventsInLog())) {

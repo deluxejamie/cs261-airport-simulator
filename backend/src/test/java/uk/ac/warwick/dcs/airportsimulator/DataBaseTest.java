@@ -80,7 +80,7 @@ public class DataBaseTest
         final double avgArrivalDelay = randomDouble();
         final double avgDepartureDelay = randomDouble();
 
-        final SimulationResultEntity sre = new SimulationResultEntity(id, maxTakeOffQueue, avgTakeOffWait, maxHoldQueue, avgHoldTime, totalCancellations, totalDiversion, avgArrivalDelay, avgDepartureDelay);
+        final SimulationResultEntity sre = new SimulationResultEntity(id, maxTakeOffQueue, avgTakeOffWait, maxHoldQueue, avgHoldTime, totalCancellations, totalDiversion, avgArrivalDelay, avgDepartureDelay, "");
 
         assertEquals(sre.getSimulationId(), id);
         assertEquals(sre.getMaxTakeOffQueue(), maxTakeOffQueue);
@@ -157,7 +157,7 @@ public class DataBaseTest
 
         {
             final String uuid = createInitialSim();
-            simulationService.saveResult(uuid, new SimulationResult());
+            simulationService.saveResult(uuid, new SimulationResult(), "");
             assertEquals("complete", simulationService.getStatus(uuid).orElseThrow());
         }
     }
@@ -190,7 +190,7 @@ public class DataBaseTest
         sr.recordArrivalDelay(avgArrivalDelay);
         sr.recordDepartureDelay(avgDepartureDelay);
 
-        simulationService.saveResult(uuid, sr);
+        simulationService.saveResult(uuid, sr, "");
 
         final SimulationResultEntity sre = simulationService.getResult(uuid).orElseThrow();
 

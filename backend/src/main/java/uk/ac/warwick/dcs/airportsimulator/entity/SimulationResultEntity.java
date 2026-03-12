@@ -1,10 +1,11 @@
 package uk.ac.warwick.dcs.airportsimulator.entity;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import jakarta.persistence.*;
 
 /**
  * Entity representing the results of a completed simulation.
- *
+ * <p>
  * This class stores statistics produced after a simulation
  * run, including queue sizes, waiting times, delays, cancellations,
  * and diversions.
@@ -23,26 +24,29 @@ public class SimulationResultEntity {
     private int totalDiversions;
     private double avgArrivalDelay;
     private double avgDepartureDelay;
+    @JsonRawValue
+    private String configData;
 
-    public SimulationResultEntity() {}
+    public SimulationResultEntity() {
+    }
 
     /**
      * Constructs a simulation result entity with calculated metrics.
      *
-     * @param simulationId id of the simulation
-     * @param maxTakeOffQueue max take off queue length
-     * @param avgTakeOffWait avg waiting time in the take off queue
-     * @param maxHoldQueue max holding pattern size
-     * @param avgHoldTime avg holding time for arrivals
+     * @param simulationId       id of the simulation
+     * @param maxTakeOffQueue    max take off queue length
+     * @param avgTakeOffWait     avg waiting time in the take off queue
+     * @param maxHoldQueue       max holding pattern size
+     * @param avgHoldTime        avg holding time for arrivals
      * @param totalCancellations no. of cancelled departures
-     * @param totalDiversions no. of diverted aircraft
-     * @param avgArrivalDelay avg arrival delay
-     * @param avgDepartureDelay avg departure delay
+     * @param totalDiversions    no. of diverted aircraft
+     * @param avgArrivalDelay    avg arrival delay
+     * @param avgDepartureDelay  avg departure delay
      */
 
     public SimulationResultEntity(String simulationId, int maxTakeOffQueue, double avgTakeOffWait,
-                                   int maxHoldQueue, double avgHoldTime, int totalCancellations,
-                                   int totalDiversions, double avgArrivalDelay, double avgDepartureDelay) {
+                                  int maxHoldQueue, double avgHoldTime, int totalCancellations,
+                                  int totalDiversions, double avgArrivalDelay, double avgDepartureDelay, String configData) {
         this.simulationId = simulationId;
         this.maxTakeOffQueue = maxTakeOffQueue;
         this.avgTakeOffWait = avgTakeOffWait;
@@ -52,15 +56,46 @@ public class SimulationResultEntity {
         this.totalDiversions = totalDiversions;
         this.avgArrivalDelay = avgArrivalDelay;
         this.avgDepartureDelay = avgDepartureDelay;
+        this.configData = configData;
     }
 
-    public String getSimulationId() { return simulationId; }
-    public int getMaxTakeOffQueue() { return maxTakeOffQueue; }
-    public double getAvgTakeOffWait() { return avgTakeOffWait; }
-    public int getMaxHoldQueue() { return maxHoldQueue; }
-    public double getAvgHoldTime() { return avgHoldTime; }
-    public int getTotalCancellations() { return totalCancellations; }
-    public int getTotalDiversions() { return totalDiversions; }
-    public double getAvgArrivalDelay() { return avgArrivalDelay; }
-    public double getAvgDepartureDelay() { return avgDepartureDelay; }
+    public String getSimulationId() {
+        return simulationId;
+    }
+
+    public int getMaxTakeOffQueue() {
+        return maxTakeOffQueue;
+    }
+
+    public double getAvgTakeOffWait() {
+        return avgTakeOffWait;
+    }
+
+    public int getMaxHoldQueue() {
+        return maxHoldQueue;
+    }
+
+    public double getAvgHoldTime() {
+        return avgHoldTime;
+    }
+
+    public int getTotalCancellations() {
+        return totalCancellations;
+    }
+
+    public int getTotalDiversions() {
+        return totalDiversions;
+    }
+
+    public double getAvgArrivalDelay() {
+        return avgArrivalDelay;
+    }
+
+    public double getAvgDepartureDelay() {
+        return avgDepartureDelay;
+    }
+
+    public String getConfigData() {
+        return configData;
+    }
 }
