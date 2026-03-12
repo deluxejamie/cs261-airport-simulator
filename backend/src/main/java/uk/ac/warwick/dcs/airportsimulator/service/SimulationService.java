@@ -34,7 +34,7 @@ public class SimulationService {
     }
 
     /** Called when the simulation finishes. Saves results and marks it COMPLETED. */
-    public void saveResult(String uuid, SimulationResult result) {
+    public void saveResult(String uuid, SimulationResult result, String configData) {
         result.finalizeAverages();
         resultRepo.save(new SimulationResultEntity(
             uuid,
@@ -45,7 +45,8 @@ public class SimulationService {
             result.getTotalCancellations(),
             result.getTotalDiversions(),
             result.getAvgArrivalDelay(),
-            result.getAvgDepartureDelay()
+            result.getAvgDepartureDelay(),
+            configData
         ));
         simRepo.findById(uuid).ifPresent(sim -> {
             sim.setStatus("complete");

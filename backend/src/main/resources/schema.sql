@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS simulation_results (
     total_diversions INTEGER,
     avg_arrival_delay REAL,
     avg_departure_delay REAL,
+    config_data TEXT,
     FOREIGN KEY (simulation_id) REFERENCES simulations(id)
 );
 

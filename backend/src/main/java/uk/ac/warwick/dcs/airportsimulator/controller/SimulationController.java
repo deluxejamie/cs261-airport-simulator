@@ -52,7 +52,7 @@ public class SimulationController {
     public Map<String, String> requestSimulation(@RequestBody SimulationRequestDto requestDto) {
         final Simulation simulation = simulationControlService.buildSimulationFromRequest(requestDto);
         final String uuid = java.util.UUID.randomUUID().toString();
-        simManager.runSimulation(simulation, uuid, requestDto.toString());
+        simManager.runSimulation(simulation, uuid, new ObjectMapper().writeValueAsString(requestDto));
 
         return Map.of("sim_id", uuid);
     }
