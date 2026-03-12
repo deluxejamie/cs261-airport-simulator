@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
 	Alert,
 	Badge,
@@ -33,6 +33,7 @@ import {
 	IconBuildingAirport,
 	IconCircleCheckFilled,
 	IconClock,
+	IconDownload,
 	IconPlane,
 	IconPlaneArrival,
 	IconPlaneDeparture,
@@ -334,7 +335,7 @@ const SimulationCompleteCard = ({ style }) => {
  * @param {{ uuid: String}} param0 The uuid for the simulation
  * @returns A react component
  */
-const SimulationEventLogComponent = ({ uuid: _uuid }) => {
+const SimulationEventLogComponent = ({ uuid: uuid }) => {
 	// display the simulation event log (SCRUM-37)
 	const [eventsFromSvr, setEventsFromSvr] = useState([]);
 	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
@@ -602,7 +603,7 @@ const SimulationStatsComponent = ({ uuid }) => {
 			const configString =
 				typeof response === "string"
 					? response
-					: response?.config ?? JSON.stringify(response, null, 2);
+					: (response?.config ?? JSON.stringify(response, null, 2));
 
 			const tempLink = document.createElement("a");
 			tempLink.href = window.URL.createObjectURL(new Blob([configString]));
@@ -621,7 +622,9 @@ const SimulationStatsComponent = ({ uuid }) => {
 			<Stack>
 				<Title order={2}>Simulation statistics</Title>
 				{loading ? (
-					<Loader size="sm" />
+					<Center>
+						<Loader size="sm" />
+					</Center>
 				) : error ? (
 					<Alert color="red">{error}</Alert>
 				) : (
