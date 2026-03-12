@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
+import {
+	Badge,
+	Button,
+	Group,
+	Stack,
+	Text,
+	Title,
+	Card,
+	Loader,
+} from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
@@ -13,7 +22,6 @@ import { useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 import { notificationErrorOptions } from "./export-import";
 import { IconCircleArrowLeft } from "@tabler/icons-react";
-
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
@@ -48,7 +56,11 @@ export default function SimulationOutcomeView({ uuid }) {
 		let failedAccessAttempts = 0;
 		let finished = false;
 		(async () => {
-			while (!cancelled && failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+			while (
+				!cancelled &&
+				failedAccessAttempts < MAX_FAILED_ATTEMPTS &&
+				!finished
+			) {
 				const currentStatus = await getSimulationStatus(uuid);
 				if (cancelled) return;
 
@@ -115,7 +127,8 @@ const LoadingComponent = () => {
 				<Loader size="md" />
 				<Title order={3}>Simulation in progress</Title>
 				<Text c="dimmed" ta="center">
-					We are periodically checking for updates. This page will automatically refresh when results are ready.
+					Please wait patiently while your simulation is executed. Once the
+					results have been gathered, this page will automatically refresh.
 				</Text>
 			</Stack>
 		</Card>
