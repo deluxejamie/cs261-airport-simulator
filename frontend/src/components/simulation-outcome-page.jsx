@@ -101,7 +101,7 @@ export default function SimulationOutcomeView({ uuid }) {
 				<Group justify="flex-start">
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
 					<Badge component="span" color={BADGE_COLORS[status]} size="sm">
-						{status}
+						{status.replace("_", " ")}
 					</Badge>
 				</Group>
 			</Stack>
