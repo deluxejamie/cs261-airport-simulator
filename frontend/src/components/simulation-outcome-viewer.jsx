@@ -45,7 +45,6 @@ import {
 	IconSignRight,
 } from "@tabler/icons-react";
 
-const DEFAULT_PLAY_SPEED = 20; // 20 minutes = 1 second of playthrough
 const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual to have before more should be fetched
 const EVENTS_REQUESTED_PER_BATCH = 100; // the amount of events requested per batch
 const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures before the simulation log will display "failure to load"
@@ -356,7 +355,7 @@ const SimulationCompleteCard = ({ style }) => {
 const SimulationEventLogComponent = ({ uuid }) => {
 	// display the simulation event log (SCRUM-37)
 	const [eventsFromSvr, setEventsFromSvr] = useState([]);
-	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
+	const [speed, setSpeed] = useState(SPEED_VALS[1]); // number of minutes displayed per second of playthrough
 	const [running, setRunning] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	// temporarily 4, should be updated based on reqs to the eventlog endpoint
@@ -456,7 +455,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						pb="xl"
 						min={0}
 						max={SPEED_VALS.length - 1}
-						defaultValue={DEFAULT_PLAY_SPEED}
+						defaultValue={1}
 						onChange={(i) => {
 							if (i !== null) setSpeed(SPEED_VALS[i]);
 						}}
