@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+	Alert,
 	Badge,
 	Button,
 	Group,
@@ -25,15 +26,17 @@ import { IconCircleArrowLeft } from "@tabler/icons-react";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
+const REDIRECT_DELAY_MS = 8000;
 
 const BADGE_COLORS = {
+	loading: "yellow",
 	in_progress: "yellow",
 	unavailable: "red",
 	complete: "green",
 };
 
 export default function SimulationOutcomeView({ uuid }) {
-	const [status, setStatus] = useState("in_progress");
+	const [status, setStatus] = useState("loading");
 	// This is now handled on the server side (in the simulation/[sim_id]/page.js file)
 	// const router = useRouter();
 	// useEffect(() => {
@@ -110,9 +113,9 @@ export default function SimulationOutcomeView({ uuid }) {
 				<LoadingComponent />
 			) : status == "complete" ? (
 				<SimulationOutcomeFoundPage uuid={uuid} />
-			) : (
+			) : status == "unavailable" ? (
 				<SimulationNotFound />
-			)}
+			) : undefined}
 		</Stack>
 	);
 }
@@ -139,8 +142,31 @@ const LoadingComponent = () => {
  * @returns A react component to be displayed when a simulation is not found
  */
 const SimulationNotFound = () => {
-	// todo: implement a simulation not found component (SCRUM-38)
-	// should tell the user that the simulation has not been found in our system and redirect them to create one by sending them to index page
-	// todo for yasvi
-	return <></>;
+	const router = useRouter();
+
+	useEffect(() => {
+		const redirectTimeout = setTimeout(() => {
+			router.push("/");
+		}, REDIRECT_DELAY_MS);
+
+		return () => clearTimeout(redirectTimeout);
+	}, [router]);
+
+	return (
+		<Card withBorder>
+			<Stack gap="sm">
+				<Title order={3}>Simulation not found</Title>
+				<Alert color="red">
+					The simulation ID appears to be invalid or unavailable. You will be
+					redirected to the configuration page to run a new simulation.
+				</Alert>
+				<Text c="dimmed" size="sm">
+					If this issue persists, please contact your system administrator.
+				</Text>
+				<Button fullWidth onClick={() => router.push("/")}>
+					Run a new simulation
+				</Button>
+			</Stack>
+		</Card>
+	);
 };

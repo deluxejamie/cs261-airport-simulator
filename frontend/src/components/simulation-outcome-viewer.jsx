@@ -348,7 +348,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 	);
 	const finished = currentEvents.length == totalEvents;
 	const [serverUnavailable, setServerUnavailable] = useState(false);
-	const [autoScroll, setAutoScroll] = useState(false);
+	const [autoScroll, setAutoScroll] = useState(true);
 
 	// update the time each tick
 	useEffect(() => {
