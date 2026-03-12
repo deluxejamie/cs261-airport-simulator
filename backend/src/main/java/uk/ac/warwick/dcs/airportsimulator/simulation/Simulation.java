@@ -389,19 +389,19 @@ public class Simulation {
         Objects.requireNonNull(op, "op");
 
         final Consumer<Integer> action = (currSchedule) -> {
-            final Aircraft copy = a.copyWith(currSchedule, simTime);
+            a.updateWith(currSchedule, simTime);
 
             final HashMap<String, Object> attr = new HashMap<>();
-            attr.put("callsign", copy.getCallSign());
+            attr.put("callsign", a.getCallSign());
             attr.put("op", op.toString());
 
 
             if (op == AircraftOp.ARRIVAL) {
-                holdingPattern.addAircraft(copy);
-                arrivalsEnteredSim.add(copy);
+                holdingPattern.addAircraft(a);
+                arrivalsEnteredSim.add(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
             } else {
-                takeOffQueue.addAircraft(copy);
+                takeOffQueue.addAircraft(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
             }
         };

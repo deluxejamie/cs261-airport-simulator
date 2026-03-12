@@ -120,19 +120,15 @@ public class Aircraft {
         this.emergencyStatus = emergencyStatus;
     }
 
-    public Aircraft copyWith(int scheduled, int currSimTime)
+    /**
+     * Updates aircraft with new values
+     * @param scheduled   the new scheduled time
+     * @param currSimTime the current sim time
+     */
+    public void updateWith(int scheduled, int currSimTime)
     {
-        return new Aircraft(
-                callSign,
-                origin,
-                destination,
-                scheduled,
-                altitude,
-                groundSpeed,
-                initialFuel,
-                emergencyStatus,
-                currSimTime
-        );
+        this.scheduledTime = scheduled;
+        this.timeFuelRunsOut = initialFuel + currSimTime;
     }
 
     /* The aircraft's initialFuel (in minutes) */
@@ -148,7 +144,7 @@ public class Aircraft {
     private final String destination;
 
     /* The aircraft's scheduledTime */
-    private final int scheduledTime;
+    private int scheduledTime;
 
     /* The aircraft's altitude */
     private final int altitude;
@@ -160,5 +156,5 @@ public class Aircraft {
     private EmergencyStatus emergencyStatus;
 
     /* The time the aircraft has no fuel remaining */
-    private final int timeFuelRunsOut;
+    private int timeFuelRunsOut;
 }
