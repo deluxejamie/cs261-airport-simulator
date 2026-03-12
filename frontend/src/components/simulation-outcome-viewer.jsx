@@ -669,7 +669,7 @@ const SimulationStatsComponent = ({ uuid }) => {
 								}
 							}}
 						>
-							Export configuration
+							Export simulation configuration
 						</Button>
 					</>
 				)}
