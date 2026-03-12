@@ -52,8 +52,8 @@ const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures 
 
 // number of minutes displayed per second
 const SPEED_VALS = [
-	10, 25, 40, 60, 80, 100, 150, 200, 300, 500, 750, 1000, 2000, 3000, 4000,
-	5000,
+	10, 25, 40, 60, 80, 120, 150, 240, 360, 600, 840, 1080, 1440, 2880, 4320,
+	5760, 14400,
 ];
 const formatSpeedVal = (val) => {
 	const hrs = Math.floor(val / 60) % 24;
@@ -447,7 +447,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 				<Stack>
 					<Group justify="space-between">
 						<Title order={4}>Configure Simulation Playback</Title>
-						<Text size="lg">
+						<Text size="md">
 							Speed: {formatSpeedVal(speed)} simulated/second
 						</Text>
 					</Group>
@@ -463,7 +463,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						label={() => null}
 						disabled={running && !finished}
 						marks={SPEED_VALS.map((x, i) => {
-							return { value: i, label: `${x}/s` };
+							return { value: i, label: null };
 						})}
 					/>
 					<Button
