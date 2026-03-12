@@ -17,8 +17,8 @@ public class SimulationRunTest {
 
     @Test
     void testRunReturnsResultForEmptySimulation() {
-        Simulation sim=genBaseSim();
-        SimulationResult result=sim.run();
+        final Simulation sim = genBaseSim();
+        final SimulationResult result = sim.run();
 
         assertNotNull(result);
         assertTrue(sim.isFinished());
@@ -26,7 +26,7 @@ public class SimulationRunTest {
 
     @Test
     void testRunProcessesArrivalEvent() {
-        Simulation sim=genBaseSim();
+        final Simulation sim = genBaseSim();
 
         sim.addAircraft(genAircraft(), 1, 0, 0, 0L, AircraftOp.ARRIVAL);
         sim.run();
@@ -36,14 +36,14 @@ public class SimulationRunTest {
 
     @Test
     void testRunProcessesDepartureEvent() {
-        Simulation sim = genBaseSim();
+        final Simulation sim = genBaseSim();
         sim.addAircraft(genAircraft(), 1, 0, 0, 0L, AircraftOp.DEPARTURE);
         sim.run();
         assertFalse(sim.getEventLog(0, 100).isEmpty());
     }
 
     private Simulation genBaseSim() {
-        List<Runway> runways=new ArrayList<>();
+        final List<Runway> runways = new ArrayList<>();
         runways.add(new Runway(0, 1000, 120, RunwayMode.TAKE_OFF, RunwayStatus.AVAILABLE, null));
         runways.add(new Runway(1, 1000, 120, RunwayMode.LANDING, RunwayStatus.AVAILABLE, null));
         return new Simulation(runways);
@@ -51,53 +51,53 @@ public class SimulationRunTest {
 
     @Test
     void testRunResultForSingleArrival() {
-        Simulation sim=genBaseSim();
+        final Simulation sim = genBaseSim();
 
-        Aircraft arrival=genAircraft();
+        final Aircraft arrival = genAircraft();
         sim.addAircraft(arrival, 1, 0, 0, 0L, AircraftOp.ARRIVAL);
 
-        SimulationResult result=sim.run();
+        final SimulationResult result = sim.run();
 
         assertNotNull(result);
-        assertTrue(result.getMaxHoldQueue()>=1);
+        assertTrue(result.getMaxHoldQueue() >= 1);
         assertEquals(0, result.getTotalDiversions());
         assertEquals(0, result.getTotalCancellations());
     }
 
     @Test
     void testRunResultForSingleDeparture() {
-        Simulation sim=genBaseSim();
+        final Simulation sim = genBaseSim();
 
-        Aircraft departure=genAircraft();
+        final Aircraft departure = genAircraft();
         sim.addAircraft(departure, 1, 0, 0, 0L, AircraftOp.DEPARTURE);
 
-        SimulationResult result = sim.run();
+        final SimulationResult result = sim.run();
 
         assertNotNull(result);
-        assertTrue(result.getMaxTakeOffQueue()>=1);
+        assertTrue(result.getMaxTakeOffQueue() >= 1);
         assertEquals(0, result.getTotalDiversions());
         assertEquals(0, result.getTotalCancellations());
     }
 
     @Test
     void testRunResultForMixedTraffic() {
-        Simulation sim=genBaseSim();
+        final Simulation sim = genBaseSim();
 
-        Aircraft arrival1 = genAircraft("ARR1", 1, 20);
-        Aircraft arrival2 = genAircraft("ARR2", 2, 25);
-        Aircraft departure1 = genAircraft("DEP1", 1, 120);
-        Aircraft departure2 = genAircraft("DEP2", 2, 120);
+        final Aircraft arrival1 = genAircraft("ARR1", 1, 20);
+        final Aircraft arrival2 = genAircraft("ARR2", 2, 25);
+        final Aircraft departure1 = genAircraft("DEP1", 1, 120);
+        final Aircraft departure2 = genAircraft("DEP2", 2, 120);
 
         sim.addAircraft(arrival1, 1, 0, 0, 0L, AircraftOp.ARRIVAL);
         sim.addAircraft(arrival2, 2, 0, 0, 0L, AircraftOp.ARRIVAL);
         sim.addAircraft(departure1, 1, 0, 0, 0l, AircraftOp.DEPARTURE);
         sim.addAircraft(departure2, 2, 0, 0, 0L, AircraftOp.DEPARTURE);
 
-        SimulationResult result=sim.run();
+        SimulationResult result = sim.run();
 
         assertNotNull(result);
-        assertTrue(result.getMaxHoldQueue()>=1);
-        assertTrue(result.getMaxTakeOffQueue()>=1);
+        assertTrue(result.getMaxHoldQueue() >= 1);
+        assertTrue(result.getMaxTakeOffQueue() >= 1);
     }
 
     private Aircraft genAircraft() {

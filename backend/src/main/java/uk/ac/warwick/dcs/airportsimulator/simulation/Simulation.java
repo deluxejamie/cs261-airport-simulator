@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 /**
  * The simulation class represents the simulation
@@ -53,6 +54,7 @@ public class Simulation {
 
     /**
      * Constructs the simulation class with given runways
+     *
      * @param runways runways for sim
      */
     public Simulation(List<Runway> runways) {
@@ -65,16 +67,17 @@ public class Simulation {
         this.eventLog = new EventLog();
 
         for (Runway runway : this.runways) {
-            runwayBusyUntil.put(runway.getRunwayNumber(), 0);
+            runwayBusyUntil.put(runway.getRunwayNumber(), Integer.MIN_VALUE);
         }
     }
 
     /**
      * Checks if the Simulation is finished
+     *
      * @return whether the sim is finished
      */
     public boolean isFinished() {
-        boolean queuesEmpty = holdingPattern.size() == 0 && takeOffQueue.size() == 0;
+        final boolean queuesEmpty = holdingPattern.isEmpty() && takeOffQueue.isEmpty();
 
         boolean anyOccupied = false;
         for (Runway r : runways) {
@@ -84,43 +87,21 @@ public class Simulation {
             }
         }
 
-        boolean noPendingEvents = eventSchedular.isEmpty();
+        final boolean noPendingEvents = eventSchedular.isEmpty();
         return queuesEmpty && !anyOccupied && noPendingEvents;
     }
 
     /**
      * Returns section of event log from offset and count
+     *
      * @param offset offset to read event log from
      * @param count  amount to read from event log
-     * @return       the section of event log requested
+     * @return the section of event log requested
      */
     public List<EventLogEntry> getEventLog(int offset, int count) {
         return eventLog.getEvents(offset, count);
     }
 
-    /**
-     * TODO: REMOVE THIS FUNCTION
-     * This is for testing as certain tickets needed have not been merged
-     * Note: this is not an example of how to implement, this is missing important
-     *       behaviour but suffices for the tests.
-     * @param dt change in sim time
-     */
-    public void stepTestTillScrumMerged(int dt) {
-        for (int i = 0; i < dt; ++i) {
-            simTime += 1;
-            eventSchedular.step(simTime);
-
-            final Aircraft landing = holdingPattern.peekNextAircraft();
-            if (landing != null && landing.getScheduledTime() >= simTime) {
-                holdingPattern.getNextAircraft();
-            }
-
-            final Aircraft takeoff = takeOffQueue.peekNextAircraft();
-            if (takeoff != null && takeoff.getScheduledTime() >= simTime) {
-                takeOffQueue.getNextAircraft();
-            }
-        }
-    }
 
     /**
      * Releases runways whose occupancy time has elapsed.
@@ -136,11 +117,12 @@ public class Simulation {
 
     /**
      * Returns true if the runway is available for a new operation at the current time.
+     *
      * @param runway runway to check
      * @return whether the runway is available now
      */
     private boolean isRunwayAvailableNow(Runway runway) {
-        Integer busyUntil = runwayBusyUntil.get(runway.getRunwayNumber());
+        final Integer busyUntil = runwayBusyUntil.get(runway.getRunwayNumber());
         if (busyUntil == null) {
             return runway.getOccupied() == null;
         }
@@ -149,6 +131,7 @@ public class Simulation {
 
     /**
      * Returns true if the runway can currently handle a landing.
+     *
      * @param runway runway to check
      * @return whether landing can be handled
      */
@@ -160,6 +143,7 @@ public class Simulation {
 
     /**
      * Returns true if the runway can currently handle a takeoff.
+     *
      * @param runway runway to check
      * @return whether takeoff can be handled
      */
@@ -169,11 +153,21 @@ public class Simulation {
                 && isRunwayAvailableNow(runway);
     }
 
+    private int startingTime() {
+        final int firstInTakeOffQueue = takeOffQueue.isEmpty() ? 0 : takeOffQueue.peekNextAircraft().getScheduledTime();
+        final int firstInHoldingPattern = holdingPattern.isEmpty() || holdingPattern.peekNextAircraft() == null ? 0 : holdingPattern.peekNextAircraft().getScheduledTime();
+        final int firstEventScheduled = eventSchedular.isEmpty() ? 0 : eventSchedular.nextEventTime();
+
+        final int minOfQueues = Math.min(firstInTakeOffQueue, firstInHoldingPattern);
+        return Math.min(minOfQueues, firstEventScheduled);
+    }
+
     public SimulationResult run() {
         final int MAX_TAKEOFF_WAIT_MIN = maxDelayBeforeCancelled;
         final SimulationResult result = new SimulationResult();
 
-        // Execute events scheduled at t=0
+        // Set correct starting simTime
+        simTime = startingTime();
         eventSchedular.step(simTime);
 
         int safetyCap = 1_000_000;
@@ -182,32 +176,32 @@ public class Simulation {
 
             releaseCompletedRunways();
 
-            result.recordHoldQueueSize(holdingPattern.size(), (double) simTime);
-            result.recordTakeoffQueueSize(takeOffQueue.size(), (double) simTime);
+            result.recordHoldQueueSize(holdingPattern.size(), simTime);
+            result.recordTakeoffQueueSize(takeOffQueue.size(), simTime);
 
             // diversion: remove fuel-critical aircraft from holding pattern
             while (true) {
-                Aircraft fuelCritical = holdingPattern.pollIfFuelCritical(simTime);
+                final Aircraft fuelCritical = holdingPattern.pollIfFuelCritical(simTime, fuelThresholdBeforeRedirected);
                 if (fuelCritical == null) {
                     break;
                 }
 
                 result.recordDiversion();
 
-                HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", fuelCritical.getCallSign());
+                final HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callsign", fuelCritical.getCallSign());
                 attr.put("reason", "FUEL_CRITICAL");
                 logEvent(EventType.DIVERSION_EVENT, simTime, attr);
             }
 
             // cancellation: remove aircraft that waited too long in takeoff queue
             while (true) {
-                Aircraft nextTake = takeOffQueue.peekNextAircraft();
+                final Aircraft nextTake = takeOffQueue.peekNextAircraft();
                 if (nextTake == null) {
                     break;
                 }
 
-                int waited = simTime - nextTake.getScheduledTime();
+                final int waited = simTime - nextTake.getScheduledTime();
                 if (waited < MAX_TAKEOFF_WAIT_MIN) {
                     break;
                 }
@@ -215,8 +209,8 @@ public class Simulation {
                 takeOffQueue.getNextAircraft();
                 result.recordCancellation();
 
-                HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", nextTake.getCallSign());
+                final HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callsign", nextTake.getCallSign());
                 attr.put("reason", "MAX_WAIT_EXCEEDED");
                 attr.put("waitedMinutes", waited);
                 logEvent(EventType.CANCELLATION_EVENT, simTime, attr);
@@ -247,8 +241,8 @@ public class Simulation {
                             continue;
                         }
 
-                        Aircraft nextHold = holdingPattern.peekNextAircraft();
-                        Aircraft nextTake = takeOffQueue.peekNextAircraft();
+                        final Aircraft nextHold = holdingPattern.peekNextAircraft();
+                        final Aircraft nextTake = takeOffQueue.peekNextAircraft();
 
                         if (nextHold == null && nextTake == null) {
                             chosen = null;
@@ -259,11 +253,11 @@ public class Simulation {
                             chosen = nextHold;
                             landing = true;
                         } else {
-                            int holdSlack = Math.max(
+                            final int holdSlack = Math.max(
                                     0,
                                     nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
                             );
-                            int takeSlack = Math.max(
+                            final int takeSlack = Math.max(
                                     0,
                                     MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime())
                             );
@@ -298,28 +292,25 @@ public class Simulation {
                 }
                 runwayBusyUntil.put(r.getRunwayNumber(), simTime + operationDuration);
 
-                HashMap<String, Object> attr = new HashMap<>();
-                attr.put("callSign", chosen.getCallSign());
+                final HashMap<String, Object> attr = new HashMap<>();
+                attr.put("callsign", chosen.getCallSign());
                 attr.put("runwayNumber", r.getRunwayNumber());
 
-                int delay = simTime - chosen.getScheduledTime();
-                if (delay < 0) {
-                    delay = 0;
-                }
+                final int delay = Math.max(simTime - chosen.getScheduledTime(), 0);
 
                 if (landing) {
-                    int holdTime = Math.max(0, simTime - chosen.getScheduledTime());
-                    result.recordHoldTime((double) holdTime);
-                    result.recordArrivalDelay((double) delay);
+                    final int holdTime = Math.max(0, simTime - chosen.getScheduledTime());
+                    result.recordHoldTime(holdTime);
+                    result.recordArrivalDelay(delay);
 
                     attr.put("holdMinutes", holdTime);
                     attr.put("arrivalDelay", delay);
                     attr.put("runwayOccupiedMinutes", operationDuration);
                     logEvent(EventType.LANDING_EVENT, simTime, attr);
                 } else {
-                    int waitTime = Math.max(0, simTime - chosen.getScheduledTime());
-                    result.recordTakeoffWait((double) waitTime);
-                    result.recordDepartureDelay((double) delay);
+                    final int waitTime = Math.max(0, simTime - chosen.getScheduledTime());
+                    result.recordTakeoffWait(waitTime);
+                    result.recordDepartureDelay(delay);
 
                     attr.put("waitMinutes", waitTime);
                     attr.put("departureDelay", delay);
@@ -340,6 +331,7 @@ public class Simulation {
 
     /**
      * Gets event schedular
+     *
      * @return the event schedular
      */
     public EventSchedular getEventSchedular() {
@@ -348,6 +340,7 @@ public class Simulation {
 
     /**
      * Gets the event log store
+     *
      * @return event log store
      */
     public EventLog getEventLogStore() {
@@ -356,6 +349,7 @@ public class Simulation {
 
     /**
      * Gets the holding pattern
+     *
      * @return the holding pattern
      */
     public HoldingPattern getHoldingPattern() {
@@ -364,6 +358,7 @@ public class Simulation {
 
     /**
      * Gets the takeoff queue
+     *
      * @return the takeoff queue
      */
     public TakeOffQueue getTakeOffQueue() {
@@ -372,6 +367,7 @@ public class Simulation {
 
     /**
      * Gets the runways
+     *
      * @return the runways
      */
     public List<Runway> getRunways() {
@@ -380,6 +376,7 @@ public class Simulation {
 
     /**
      * Adds an aircraft to a simulation
+     *
      * @param a         aircraft to add
      * @param scheduled time the aircraft is scheduled
      * @param interval  interval if event is recurring
@@ -391,10 +388,13 @@ public class Simulation {
         Objects.requireNonNull(a, "aircraft");
         Objects.requireNonNull(op, "op");
 
-        Runnable action = () -> {
-            HashMap<String, Object> attr = new HashMap<>();
-            attr.put("callSign", a.getCallSign());
+        final Consumer<Integer> action = (currSchedule) -> {
+            a.updateWith(currSchedule, simTime);
+
+            final HashMap<String, Object> attr = new HashMap<>();
+            attr.put("callsign", a.getCallSign());
             attr.put("op", op.toString());
+
 
             if (op == AircraftOp.ARRIVAL) {
                 holdingPattern.addAircraft(a);
@@ -402,7 +402,7 @@ public class Simulation {
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
             } else {
                 takeOffQueue.addAircraft(a);
-                logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
+                logEvent(EventType.HOLDING_EVENT, simTime, attr);
             }
         };
 
@@ -417,6 +417,7 @@ public class Simulation {
 
     /**
      * Adds a runway operation change event
+     *
      * @param runwayNumber the runway to modify
      * @param scheduled    the time the event should happen
      * @param interval     if recurring at what interval
@@ -427,10 +428,10 @@ public class Simulation {
         Objects.requireNonNull(mode, "mode");
 
         Runnable action = () -> {
-            Runway r = getRunwayByNumber(runwayNumber);
+            final Runway r = getRunwayByNumber(runwayNumber);
             r.setMode(mode);
 
-            HashMap<String, Object> attr = new HashMap<>();
+            final HashMap<String, Object> attr = new HashMap<>();
             attr.put("runwayNumber", runwayNumber);
             attr.put("mode", mode.toString());
             logEvent(EventType.RUNWAY_MODE_EVENT, simTime, attr);
@@ -447,6 +448,7 @@ public class Simulation {
 
     /**
      * Adds an aircraft emergency
+     *
      * @param a               the aircraft to add the emergency for
      * @param scheduled       the time to add the emergency
      * @param interval        if recurring the interval for the event
@@ -458,8 +460,8 @@ public class Simulation {
         Objects.requireNonNull(emergencyStatus, "emergencyStatus");
 
         Runnable action = () -> {
-            boolean entered = arrivalsEnteredSim.contains(a);
-            boolean inHolding = holdingPattern.containsAircraft(a);
+            final boolean entered = arrivalsEnteredSim.contains(a);
+            final boolean inHolding = holdingPattern.containsAircraft(a);
             if (entered && !inHolding) {
                 return;
             }
@@ -472,8 +474,8 @@ public class Simulation {
                 holdingPattern.addAircraft(a);
             }
 
-            HashMap<String, Object> attr = new HashMap<>();
-            attr.put("callSign", a.getCallSign());
+            final HashMap<String, Object> attr = new HashMap<>();
+            attr.put("callsign", a.getCallSign());
             attr.put("emergencyStatus", emergencyStatus.toString());
 
             logEvent(EventType.EMERGENCY_EVENT, simTime, attr);
@@ -491,6 +493,7 @@ public class Simulation {
 
     /**
      * Adds a runway status change event
+     *
      * @param runwayNumber the runway to change
      * @param scheduled    the time to change
      * @param interval     if recurring the interval
@@ -501,10 +504,10 @@ public class Simulation {
         Objects.requireNonNull(status, "status");
 
         Runnable action = () -> {
-            Runway r = getRunwayByNumber(runwayNumber);
+            final Runway r = getRunwayByNumber(runwayNumber);
             r.setStatus(status);
 
-            HashMap<String, Object> attr = new HashMap<>();
+            final HashMap<String, Object> attr = new HashMap<>();
             attr.put("runwayNumber", runwayNumber);
             attr.put("status", status.toString());
             logEvent(EventType.RUNWAY_STATUS_EVENT, simTime, attr);
@@ -521,8 +524,9 @@ public class Simulation {
 
     /**
      * Gets the runway from runway number
+     *
      * @param runwayNumber the runway number
-     * @return             the runway
+     * @return the runway
      */
     private Runway getRunwayByNumber(int runwayNumber) {
         for (Runway r : runways) {
@@ -535,6 +539,7 @@ public class Simulation {
 
     /**
      * Logs an event
+     *
      * @param type      the event type
      * @param timestamp the event timestamp
      * @param attr      the event attributes
@@ -617,19 +622,19 @@ public class Simulation {
 
     /**
      * Gets the mutex
+     *
      * @return get mutex for simulation
      */
     public Lock getMutex() {
         return mutex;
     }
 
-
     /**
      * Get Event Log Count
+     *
      * @return number of the events in the log
      */
-    public long getNumOfEventsInLog()
-    {
+    public long getNumOfEventsInLog() {
         return eventLog.getNumOfEvents();
     }
 }

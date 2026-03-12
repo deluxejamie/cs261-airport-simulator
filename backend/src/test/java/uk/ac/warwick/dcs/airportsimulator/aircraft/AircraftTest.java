@@ -78,7 +78,7 @@ class AircraftTest {
         );
 
         // at t=10 => 20 - 1*(10-0)=10 => NOT critical (strictly < 10)
-        assertFalse(a.isFuelCritical(10));
+        assertFalse(a.isFuelCritical(10, 10));
         assertEquals(10.0, a.getFuelRemaining(10), 1e-9);
     }
 
@@ -91,7 +91,7 @@ class AircraftTest {
         );
 
         // at t=10.1 => fuel = 9.9 => critical
-        assertTrue(a.isFuelCritical(11));
+        assertTrue(a.isFuelCritical(11, 10));
         assertTrue(a.getFuelRemaining(11) < 10.0);
     }
 }

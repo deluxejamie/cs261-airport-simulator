@@ -2,6 +2,7 @@ package uk.ac.warwick.dcs.airportsimulator.events;
 
 import java.io.Console;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class NormDistEvent implements IEvent {
     /**
@@ -11,7 +12,7 @@ public class NormDistEvent implements IEvent {
      * @param seed                 the seed for rng generator
      * @param action               the action this event should execute
      */
-    public NormDistEvent(int correctScheduledTime, long seed, Runnable action)
+    public NormDistEvent(int correctScheduledTime, long seed, Consumer<Integer> action)
     {
         this(correctScheduledTime, 0, 0, seed, action);
     }
@@ -25,7 +26,7 @@ public class NormDistEvent implements IEvent {
      * @param seed                 the seed for rng generator
      * @param action        the action this event should execute
      */
-    public NormDistEvent(int correctScheduledTime, int interval, int endTime, long seed, Runnable action) {
+    public NormDistEvent(int correctScheduledTime, int interval, int endTime, long seed, Consumer<Integer> action) {
         this(correctScheduledTime, interval, endTime, action, new Random(seed) );
     }
 
@@ -38,7 +39,7 @@ public class NormDistEvent implements IEvent {
      * @param action        the action this event should execute
      * @param rng           the random number generator
      */
-    private NormDistEvent(int correctScheduledTime, int interval, int endTime, Runnable action, Random rng)
+    private NormDistEvent(int correctScheduledTime, int interval, int endTime, Consumer<Integer> action, Random rng)
     {
         this.scheduledTime = (int) rng.nextGaussian(correctScheduledTime, 5);
         this.correctScheduledTime = correctScheduledTime;
@@ -63,7 +64,7 @@ public class NormDistEvent implements IEvent {
      */
     @Override
     public void execute() {
-        action.run();
+        action.accept(scheduledTime);
     }
 
     /**
@@ -103,7 +104,7 @@ public class NormDistEvent implements IEvent {
     final int endTime;
 
     /* Event action */
-    final Runnable action;
+    final Consumer<Integer> action;
 
     /* Random number generator */
     final Random rng;

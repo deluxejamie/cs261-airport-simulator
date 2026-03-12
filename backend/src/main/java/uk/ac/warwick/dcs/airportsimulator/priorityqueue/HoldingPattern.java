@@ -44,15 +44,15 @@ public final class HoldingPattern {
         this.capacity = capacity;
 
         this.queue = new PriorityQueue<>((e1, e2) -> {
-            Aircraft a = e1.aircraft;
-            Aircraft b = e2.aircraft;
+            final Aircraft a = e1.aircraft;
+            final Aircraft b = e2.aircraft;
 
-            boolean aEmer = a.getEmergencyStatus() != EmergencyStatus.NONE;
-            boolean bEmer = b.getEmergencyStatus() != EmergencyStatus.NONE;
+            final boolean aEmer = a.getEmergencyStatus() != EmergencyStatus.NONE;
+            final boolean bEmer = b.getEmergencyStatus() != EmergencyStatus.NONE;
             if (aEmer != bEmer) return aEmer ? -1 : 1;
 
             // Lower initial fuel => higher urgency
-            int fuelCmp = Integer.compare(a.getInitialFuel(), b.getInitialFuel());
+            final int fuelCmp = Integer.compare(a.getInitialFuel(), b.getInitialFuel());
             if (fuelCmp != 0) return fuelCmp;
 
             // FIFO tie-breaker
@@ -91,8 +91,9 @@ public final class HoldingPattern {
      * Peaks the next aircraft in the queue
      * @return the next aircraft in the holding pattern
      */
+
     public Aircraft peekNextAircraft() {
-        Entry e = queue.peek();
+        final Entry e = queue.peek();
         return e == null ? null : e.aircraft;
     }
 
@@ -102,19 +103,20 @@ public final class HoldingPattern {
      * @return the next aircraft in the queue
      */
     public Aircraft getNextAircraft() {
-        Entry e = queue.poll();
+        final Entry e = queue.poll();
         return e == null ? null : e.aircraft;
     }
 
     /**
      * Gets the next aircraft if the fuel is critical
-     * @param simTime the sim time
+     * @param simTime  the sim time
+     * @param critical the fuel at which it is critical
      * @return        the next aircraft if fuel is critical otherwise null
      */
-    public Aircraft pollIfFuelCritical(int simTime) {
-        Entry e = queue.peek();
+    public Aircraft pollIfFuelCritical(int simTime, int critical) {
+        final Entry e = queue.peek();
         if (e == null) return null;
-        if (e.aircraft.isFuelCritical(simTime)) {
+        if (e.aircraft.isFuelCritical(simTime, critical)) {
             queue.poll();
             return e.aircraft;
         }
@@ -132,6 +134,16 @@ public final class HoldingPattern {
         }
         return false;
     }
+
+
+    /**
+     * @return if the queue is empty
+     */
+    public boolean isEmpty()
+    {
+        return queue.isEmpty();
+    }
+
 
     /**
      * Removes an aircraft from the holding pattern

@@ -18,7 +18,8 @@ class NormDistEventTest {
         Random rng = new Random(seed);
         int expected = (int) rng.nextGaussian(correctTime, 5);
 
-        NormDistEvent e = new NormDistEvent(correctTime, seed, () -> {});
+        NormDistEvent e = new NormDistEvent(correctTime, seed, (x) -> {
+        });
 
         assertFalse(e.isRecurring());
         assertEquals(expected, e.getScheduledTime());
@@ -28,7 +29,7 @@ class NormDistEventTest {
     @Test
     void execute_shouldRunAction() {
         AtomicInteger counter = new AtomicInteger(0);
-        NormDistEvent e = new NormDistEvent(0, 123L, counter::incrementAndGet);
+        NormDistEvent e = new NormDistEvent(0, 123L, (x) -> counter.getAndIncrement());
 
         e.execute();
 
@@ -48,7 +49,8 @@ class NormDistEventTest {
         int nextCorrectTime = start + interval;
         int expectedSecondScheduled = (int) rng.nextGaussian(nextCorrectTime, 5);
 
-        NormDistEvent e = new NormDistEvent(start, interval, endTime, seed, () -> {});
+        NormDistEvent e = new NormDistEvent(start, interval, endTime, seed, (x) -> {
+        });
         assertTrue(e.isRecurring());
         assertEquals(expectedFirstScheduled, e.getScheduledTime());
 

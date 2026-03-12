@@ -43,11 +43,12 @@ public class Aircraft {
     /**
      * Gets whether the aircraft fuel is critical
      *
-     * @param simTime the current time in the sim
+     * @param simTime  the current time in the sim
+     * @param critical the fuel level at which it is critical
      * @return if the fuel is critical
      */
-    public boolean isFuelCritical(int simTime) {
-        return getFuelRemaining(simTime) < 10;
+    public boolean isFuelCritical(int simTime, int critical) {
+        return getFuelRemaining(simTime) < critical;
     }
 
     /**
@@ -119,6 +120,17 @@ public class Aircraft {
         this.emergencyStatus = emergencyStatus;
     }
 
+    /**
+     * Updates aircraft with new values
+     * @param scheduled   the new scheduled time
+     * @param currSimTime the current sim time
+     */
+    public void updateWith(int scheduled, int currSimTime)
+    {
+        this.scheduledTime = scheduled;
+        this.timeFuelRunsOut = initialFuel + currSimTime;
+    }
+
     /* The aircraft's initialFuel (in minutes) */
     private final int initialFuel;
 
@@ -132,7 +144,7 @@ public class Aircraft {
     private final String destination;
 
     /* The aircraft's scheduledTime */
-    private final int scheduledTime;
+    private int scheduledTime;
 
     /* The aircraft's altitude */
     private final int altitude;
@@ -144,5 +156,5 @@ public class Aircraft {
     private EmergencyStatus emergencyStatus;
 
     /* The time the aircraft has no fuel remaining */
-    private final int timeFuelRunsOut;
+    private int timeFuelRunsOut;
 }

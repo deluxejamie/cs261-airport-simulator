@@ -1,5 +1,7 @@
 package uk.ac.warwick.dcs.airportsimulator.controller;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
 /**
  * Event Log Item Response for frontend to consume
  */
@@ -7,8 +9,10 @@ public class EventLogItemResponse {
     /**
      * Private fields
      */
+    private final int id;
     private final String eventType;
     private final int simTimestamp;
+    @JsonRawValue
     private final String attributes;
 
     /**
@@ -17,7 +21,8 @@ public class EventLogItemResponse {
      * @param simTimestamp sim timestamp
      * @param attributes   attributes
      */
-    public EventLogItemResponse(String eventType, int simTimestamp, String attributes) {
+    public EventLogItemResponse(int id, String eventType, int simTimestamp, String attributes) {
+        this.id = id;
         this.eventType = eventType;
         this.simTimestamp = simTimestamp;
         this.attributes = attributes;
@@ -42,5 +47,12 @@ public class EventLogItemResponse {
      */
     public String getAttributes() {
         return attributes;
+    }
+
+    /**
+     * @return id
+     */
+    public int getId() {
+        return id;
     }
 }
