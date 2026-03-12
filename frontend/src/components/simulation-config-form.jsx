@@ -82,7 +82,7 @@ export default function SimulationConfigForm() {
 					gradient={{ from: "indigo", to: "cyan", deg: 90 }}
 					fullWidth
 					disabled={runways.length == 0 || flights.size == 0}
-					onClick={() => {
+					onClick={async () => {
 						if (runways.length == 0 || flights.size == 0) {
 							showNotification({
 								...notificationErrorOptions,
@@ -98,7 +98,7 @@ export default function SimulationConfigForm() {
 							hazards,
 						);
 
-						const simId = createSimulation(configData);
+						const simId = await createSimulation(configData);
 						if (simId == "request_failed") {
 							showNotification({
 								...notificationErrorOptions,

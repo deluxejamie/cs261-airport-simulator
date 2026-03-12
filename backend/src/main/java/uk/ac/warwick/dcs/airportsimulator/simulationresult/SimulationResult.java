@@ -1,4 +1,4 @@
-package uk.ac.warwick.dcs.airportsimulator.simulator;
+package uk.ac.warwick.dcs.airportsimulator.simulationresult;
 
 /**
  * Collects and stores outcome metrics of a simulation.
