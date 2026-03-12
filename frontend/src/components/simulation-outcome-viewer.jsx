@@ -50,6 +50,24 @@ const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual 
 const EVENTS_REQUESTED_PER_BATCH = 100; // the amount of events requested per batch
 const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures before the simulation log will display "failure to load"
 
+// number of minutes displayed per second
+const SPEED_VALS = [
+	10, 25, 40, 60, 80, 120, 150, 240, 360, 600, 840, 1080, 1440, 2880, 4320,
+	5760, 14400,
+];
+const formatSpeedVal = (val) => {
+	const hrs = Math.floor(val / 60) % 24;
+	const days = Math.floor(val / (60 * 24));
+	const mins = val % 60;
+	return [
+		days > 0 ? `${days} day${days > 1 ? "s" : ""}` : undefined,
+		hrs > 0 ? `${hrs} hour${hrs > 1 ? "s" : ""}` : undefined,
+		mins > 0 ? `${mins} mins` : undefined,
+	]
+		.filter((x) => !!x)
+		.join(" ");
+};
+
 export default function SimulationOutcomeFoundPage({ uuid }) {
 	return (
 		<>
@@ -429,23 +447,24 @@ const SimulationEventLogComponent = ({ uuid }) => {
 				<Stack>
 					<Group justify="space-between">
 						<Title order={4}>Configure Simulation Playback</Title>
-						<Text size="lg">Speed: {speed} minutes simulated/second</Text>
+						<Text size="md">
+							Speed: {formatSpeedVal(speed)} simulated/second
+						</Text>
 					</Group>
 					<Slider
 						color="blue"
 						pb="xl"
-						domain={[0, 100]}
-						min={10}
-						max={100}
+						min={0}
+						max={SPEED_VALS.length - 1}
 						defaultValue={DEFAULT_PLAY_SPEED}
-						onChange={setSpeed}
+						onChange={(i) => {
+							if (i !== null) setSpeed(SPEED_VALS[i]);
+						}}
+						label={() => null}
 						disabled={running && !finished}
-						marks={[
-							{ value: 10, label: "10" },
-							{ value: 40, label: "40" },
-							{ value: 70, label: "70" },
-							{ value: 100, label: "100" },
-						]}
+						marks={SPEED_VALS.map((x, i) => {
+							return { value: i, label: `${x}/s` };
+						})}
 					/>
 					<Button
 						fullWidth
@@ -650,7 +669,7 @@ const SimulationStatsComponent = ({ uuid }) => {
 								}
 							}}
 						>
-							Export configuration
+							Export simulation configuration
 						</Button>
 					</>
 				)}
