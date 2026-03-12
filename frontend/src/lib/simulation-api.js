@@ -185,7 +185,164 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 					status: "available",
 				},
 			},
+			{
+				id: 9,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 10,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 11,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 12,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 13,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 14,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 15,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 16,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 17,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 18,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 19,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 20,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
+			{
+				id: 21,
+				eventType: EventTypes.LANDING,
+				simulationId: uuid,
+				simTimestamp: 0,
+				attributes: {
+					callsign: "BA-1",
+					holdMinutes: 3,
+					runwayNumber: 2,
+					arrivalDelay: 4,
+				},
+			},
 		];
+
 		await sleep(300); // mock the time taken for a request, 300ms
 		return {
 			events: mockedEvents.slice(offset, offset + count),
@@ -206,4 +363,9 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 	} catch (e) {
 		return { success: false };
 	}
+}
+
+export async function getSimulationConfiguration(uuid) {
+	const safeID = encodeURIComponent(uuid);
+	return request(`/simulation/config/${safeID}`);
 }

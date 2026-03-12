@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	Alert,
 	Badge,
@@ -13,6 +13,10 @@ import {
 	Text,
 	Title,
 	Slider,
+	Switch,
+	SegmentedControl,
+	Center,
+	Affix,
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
@@ -33,6 +37,8 @@ import {
 	IconPlaneDeparture,
 	IconPlaneOff,
 	IconPlayerPlay,
+	IconPointer,
+	IconPointerOff,
 	IconRefresh,
 	IconSignRight,
 } from "@tabler/icons-react";
@@ -342,6 +348,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 	);
 	const finished = currentEvents.length == totalEvents;
 	const [serverUnavailable, setServerUnavailable] = useState(false);
+	const [autoScroll, setAutoScroll] = useState(true);
 
 	// update the time each tick
 	useEffect(() => {
@@ -353,10 +360,13 @@ const SimulationEventLogComponent = ({ uuid }) => {
 		}
 	}, [finished, speed, running]);
 
+	// scrolls down to the latest event
 	useEffect(() => {
 		const bottom = document.getElementById("bottom-of-page");
-		if (bottom) bottom.scrollIntoView({ behavior: "smooth" });
-	}, [currentEvents.length, serverUnavailable]);
+		if (bottom && autoScroll) {
+			bottom.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [currentEvents.length, serverUnavailable, autoScroll]);
 
 	// updates index seen up until this current tick
 	useEffect(() => {
@@ -388,7 +398,6 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						failedAttempts += 1;
 						continue;
 					}
-					console.log(eventsData);
 
 					setEventsFromSvr((e) => [...e, ...eventsData.events]);
 					setTotalEvents(eventsData.total_events);
@@ -502,6 +511,36 @@ const SimulationEventLogComponent = ({ uuid }) => {
 
 				<span id="bottom-of-page" />
 			</Stack>
+			{running ? (
+				<Affix position={{ bottom: 20, right: 20 }}>
+					<SegmentedControl
+						size="xl"
+						transitionDuration={350}
+						value={autoScroll ? "enabled" : "disabled"}
+						data={[
+							{
+								value: "enabled",
+								label: (
+									<Center>
+										<IconPointer />
+									</Center>
+								),
+							},
+							{
+								value: "disabled",
+								label: (
+									<Center>
+										<IconPointerOff />
+									</Center>
+								),
+							},
+						]}
+						onChange={(val) => {
+							if (val != null) setAutoScroll(val == "enabled");
+						}}
+					/>
+				</Affix>
+			) : undefined}
 		</>
 	);
 };

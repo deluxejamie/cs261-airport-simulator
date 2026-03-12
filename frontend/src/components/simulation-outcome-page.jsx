@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
+import {
+	Alert,
+	Badge,
+	Button,
+	Group,
+	Stack,
+	Text,
+	Title,
+	Card,
+	Loader,
+} from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
@@ -16,15 +26,17 @@ import { IconCircleArrowLeft } from "@tabler/icons-react";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
+const REDIRECT_DELAY_MS = 8000;
 
 const BADGE_COLORS = {
+	loading: "yellow",
 	in_progress: "yellow",
 	unavailable: "red",
 	complete: "green",
 };
 
 export default function SimulationOutcomeView({ uuid }) {
-	const [status, setStatus] = useState("in_progress");
+	const [status, setStatus] = useState("loading");
 	// This is now handled on the server side (in the simulation/[sim_id]/page.js file)
 	// const router = useRouter();
 	// useEffect(() => {
@@ -42,12 +54,19 @@ export default function SimulationOutcomeView({ uuid }) {
 	// }, [router, uuid]);
 
 	useEffect(() => {
+		let cancelled = false;
 		let currentDelay = 1000; // delay in ms between each request
 		let failedAccessAttempts = 0;
 		let finished = false;
 		(async () => {
-			while (failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+			while (
+				!cancelled &&
+				failedAccessAttempts < MAX_FAILED_ATTEMPTS &&
+				!finished
+			) {
 				const currentStatus = await getSimulationStatus(uuid);
+				if (cancelled) return;
+
 				if (currentStatus == "unavailable") failedAccessAttempts++;
 				else {
 					setStatus(currentStatus);
@@ -58,10 +77,13 @@ export default function SimulationOutcomeView({ uuid }) {
 					}
 				}
 			}
-			if (failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
+			if (!cancelled && failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
 				setStatus("unavailable");
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [uuid]);
 
 	return (
@@ -82,7 +104,7 @@ export default function SimulationOutcomeView({ uuid }) {
 				<Group justify="flex-start">
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
 					<Badge component="span" color={BADGE_COLORS[status]} size="sm">
-						{status}
+						{status.replace("_", " ")}
 					</Badge>
 				</Group>
 			</Stack>
@@ -91,9 +113,9 @@ export default function SimulationOutcomeView({ uuid }) {
 				<LoadingComponent />
 			) : status == "complete" ? (
 				<SimulationOutcomeFoundPage uuid={uuid} />
-			) : (
+			) : status == "unavailable" ? (
 				<SimulationNotFound />
-			)}
+			) : undefined}
 		</Stack>
 	);
 }
@@ -102,19 +124,49 @@ export default function SimulationOutcomeView({ uuid }) {
  * @returns A react component to be displayed when the simulation is currently running.
  */
 const LoadingComponent = () => {
-	// todo: implement loading component (SCRUM-35)
-	// should tell the user that the simulation is currently loading
-	// (the page will refresh from displaying this component automatically when it's ready)
-	// todo for yasvi
-	return <></>;
+	return (
+		<Card withBorder>
+			<Stack align="center" py="xl" gap="xs">
+				<Loader size="md" />
+				<Title order={3}>Simulation in progress</Title>
+				<Text c="dimmed" ta="center">
+					Please wait patiently while your simulation is executed. Once the
+					results have been gathered, this page will automatically refresh.
+				</Text>
+			</Stack>
+		</Card>
+	);
 };
 
 /**
  * @returns A react component to be displayed when a simulation is not found
  */
 const SimulationNotFound = () => {
-	// todo: implement a simulation not found component (SCRUM-38)
-	// should tell the user that the simulation has not been found in our system and redirect them to create one by sending them to index page
-	// todo for yasvi
-	return <></>;
+	const router = useRouter();
+
+	useEffect(() => {
+		const redirectTimeout = setTimeout(() => {
+			router.push("/");
+		}, REDIRECT_DELAY_MS);
+
+		return () => clearTimeout(redirectTimeout);
+	}, [router]);
+
+	return (
+		<Card withBorder>
+			<Stack gap="sm">
+				<Title order={3}>Simulation not found</Title>
+				<Alert color="red">
+					The simulation ID appears to be invalid or unavailable. You will be
+					redirected to the configuration page to run a new simulation.
+				</Alert>
+				<Text c="dimmed" size="sm">
+					If this issue persists, please contact your system administrator.
+				</Text>
+				<Button fullWidth onClick={() => router.push("/")}>
+					Run a new simulation
+				</Button>
+			</Stack>
+		</Card>
+	);
 };
