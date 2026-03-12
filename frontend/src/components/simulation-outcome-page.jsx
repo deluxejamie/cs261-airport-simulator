@@ -1,41 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert,
+import {
+	Alert,
 	Badge,
 	Button,
-	Card,
 	Group,
-	Loader,
 	Stack,
 	Text,
 	Title,
+	Card,
+	Loader,
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
 	getSimulationStatus,
+	sleep,
 } from "@/lib/simulation-api";
 import SimulationOutcomeFoundPage from "./simulation-outcome-viewer";
 import { useRouter } from "next/navigation";
 import { showNotification } from "@mantine/notifications";
 import { notificationErrorOptions } from "./export-import";
+import { IconCircleArrowLeft } from "@tabler/icons-react";
 
 const POLL_EXPONENTIAL_RATE = 1.5;
 const MAX_FAILED_ATTEMPTS = 2;
-const REDIRECT_DELAY_MS = 4000;
+const REDIRECT_DELAY_MS = 8000;
 
 const BADGE_COLORS = {
+	loading: "yellow",
 	in_progress: "yellow",
 	unavailable: "red",
 	complete: "green",
 };
 
-// extremely standard sleep fn, sleeps ms milliseconds.
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-
 export default function SimulationOutcomeView({ uuid }) {
-	const [status, setStatus] = useState("in_progress");
+	const [status, setStatus] = useState("loading");
 	// This is now handled on the server side (in the simulation/[sim_id]/page.js file)
 	// const router = useRouter();
 	// useEffect(() => {
@@ -53,12 +54,19 @@ export default function SimulationOutcomeView({ uuid }) {
 	// }, [router, uuid]);
 
 	useEffect(() => {
+		let cancelled = false;
 		let currentDelay = 1000; // delay in ms between each request
 		let failedAccessAttempts = 0;
 		let finished = false;
 		(async () => {
-			while (failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+			while (
+				!cancelled &&
+				failedAccessAttempts < MAX_FAILED_ATTEMPTS &&
+				!finished
+			) {
 				const currentStatus = await getSimulationStatus(uuid);
+				if (cancelled) return;
+
 				if (currentStatus == "unavailable") failedAccessAttempts++;
 				else {
 					setStatus(currentStatus);
@@ -69,29 +77,45 @@ export default function SimulationOutcomeView({ uuid }) {
 					}
 				}
 			}
-			if (failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
+			if (!cancelled && failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
 				setStatus("unavailable");
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [uuid]);
 
 	return (
 		<Stack maw={1000} mx="auto" p="xl" gap="lg">
-			<Group justify="space-between">
-				<div>
+			<Stack p="xs">
+				<Group justify="space-between" pb="0">
 					<Title order={1}>Simulation Outcome</Title>
+					<Button
+						component="a"
+						href="/"
+						target="_blank"
+						leftSection={<IconCircleArrowLeft />}
+						variant="light"
+					>
+						Simulation page
+					</Button>
+				</Group>
+				<Group justify="flex-start">
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
-				</div>
-				<Badge color={BADGE_COLORS[status]}>{status}</Badge>
-			</Group>
+					<Badge component="span" color={BADGE_COLORS[status]} size="sm">
+						{status.replace("_", " ")}
+					</Badge>
+				</Group>
+			</Stack>
 
 			{status == "in_progress" ? (
 				<LoadingComponent />
 			) : status == "complete" ? (
 				<SimulationOutcomeFoundPage uuid={uuid} />
-			) : (
+			) : status == "unavailable" ? (
 				<SimulationNotFound />
-			)}
+			) : undefined}
 		</Stack>
 	);
 }
@@ -100,11 +124,18 @@ export default function SimulationOutcomeView({ uuid }) {
  * @returns A react component to be displayed when the simulation is currently running.
  */
 const LoadingComponent = () => {
-	// todo: implement loading component (SCRUM-35)
-	// should tell the user that the simulation is currently loading
-	// (the page will refresh from displaying this component automatically when it's ready)
-	// todo for yasvi
-	return <></>;
+	return (
+		<Card withBorder>
+			<Stack align="center" py="xl" gap="xs">
+				<Loader size="md" />
+				<Title order={3}>Simulation in progress</Title>
+				<Text c="dimmed" ta="center">
+					Please wait patiently while your simulation is executed. Once the
+					results have been gathered, this page will automatically refresh.
+				</Text>
+			</Stack>
+		</Card>
+	);
 };
 
 /**
@@ -117,7 +148,7 @@ const SimulationNotFound = () => {
 		const redirectTimeout = setTimeout(() => {
 			router.push("/");
 		}, REDIRECT_DELAY_MS);
-	
+
 		return () => clearTimeout(redirectTimeout);
 	}, [router]);
 

@@ -19,7 +19,7 @@ public class EventLogEntryEntity {
     private Long id;
     private String simulationId;
     private String eventType;
-    private double simTimestamp;
+    private Long simTimestamp;
     @Column(columnDefinition = "TEXT")
     private String attributes; // JSON string
 
@@ -34,16 +34,16 @@ public class EventLogEntryEntity {
      * @param attributes JSON string containing additional event details
      */
 
-    public EventLogEntryEntity(String simulationId, String eventType, double simTimestamp, String attributes) {
+    public EventLogEntryEntity(String simulationId, String eventType, int simTimestamp, String attributes) {
         this.simulationId = simulationId;
         this.eventType = eventType;
-        this.simTimestamp = simTimestamp;
+        this.simTimestamp = (long) simTimestamp;
         this.attributes = attributes;
     }
 
     public Long getId() { return id; }
     public String getSimulationId() { return simulationId; }
     public String getEventType() { return eventType; }
-    public double getSimTimestamp() { return simTimestamp; }
+    public int getSimTimestamp() { return simTimestamp.intValue(); }
     public String getAttributes() { return attributes; }
 }

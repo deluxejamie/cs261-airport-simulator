@@ -12,6 +12,7 @@ import uk.ac.warwick.dcs.airportsimulator.simulationresult.SimulationResult;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 import uk.ac.warwick.dcs.airportsimulator.aircraft.Aircraft;
 import uk.ac.warwick.dcs.airportsimulator.eventlog.EventLog;
@@ -24,7 +25,8 @@ import uk.ac.warwick.dcs.airportsimulator.runway.Runway;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The simulation class represents the simulation
@@ -35,11 +37,19 @@ public class Simulation {
     private final HoldingPattern holdingPattern;
     private final TakeOffQueue takeOffQueue;
     private final Set<Aircraft> arrivalsEnteredSim = new HashSet<>();
+    private final Map<Integer, Integer> runwayBusyUntil = new HashMap<>();
 
     private int simTime;
 
     private final EventSchedular eventSchedular;
     private final EventLog eventLog;
+
+    private int maxDelayBeforeCancelled = 30;
+    private int fuelThresholdBeforeRedirected = 10;
+    private int timeTakenForTakeoff = 1;
+    private int timeTakenForLanding = 1;
+
+    private final Lock mutex = new ReentrantLock(true);
 
     /**
      * Constructs the simulation class with given runways
@@ -52,7 +62,11 @@ public class Simulation {
         this.simTime = 0;
 
         this.eventSchedular = new EventSchedular();
-        this.eventLog = new EventLog(); // requires public ctor
+        this.eventLog = new EventLog();
+
+        for (Runway runway : this.runways) {
+            runwayBusyUntil.put(runway.getRunwayNumber(), 0);
+        }
     }
 
     /**
@@ -70,7 +84,7 @@ public class Simulation {
             }
         }
 
-        boolean noPendingEvents = eventSchedular.isEmpty(); // add helper in EventSchedular
+        boolean noPendingEvents = eventSchedular.isEmpty();
         return queuesEmpty && !anyOccupied && noPendingEvents;
     }
 
@@ -84,7 +98,6 @@ public class Simulation {
         return eventLog.getEvents(offset, count);
     }
 
-
     /**
      * TODO: REMOVE THIS FUNCTION
      * This is for testing as certain tickets needed have not been merged
@@ -92,29 +105,72 @@ public class Simulation {
      *       behaviour but suffices for the tests.
      * @param dt change in sim time
      */
-    public void stepTestTillScrumMerged(int dt)
-    {
-        for (int i = 0; i < dt; ++i)
-        {
+    public void stepTestTillScrumMerged(int dt) {
+        for (int i = 0; i < dt; ++i) {
             simTime += 1;
             eventSchedular.step(simTime);
+
             final Aircraft landing = holdingPattern.peekNextAircraft();
-            if (landing != null && landing.getScheduledTime() >= simTime)
-            {
+            if (landing != null && landing.getScheduledTime() >= simTime) {
                 holdingPattern.getNextAircraft();
             }
 
             final Aircraft takeoff = takeOffQueue.peekNextAircraft();
-            if (takeoff != null && takeoff.getScheduledTime() >= simTime)
-            {
+            if (takeoff != null && takeoff.getScheduledTime() >= simTime) {
                 takeOffQueue.getNextAircraft();
             }
         }
+    }
 
+    /**
+     * Releases runways whose occupancy time has elapsed.
+     */
+    private void releaseCompletedRunways() {
+        for (Runway runway : runways) {
+            Integer busyUntil = runwayBusyUntil.get(runway.getRunwayNumber());
+            if (busyUntil != null && simTime >= busyUntil && runway.getOccupied() != null) {
+                runway.setOccupied(null);
+            }
+        }
+    }
+
+    /**
+     * Returns true if the runway is available for a new operation at the current time.
+     * @param runway runway to check
+     * @return whether the runway is available now
+     */
+    private boolean isRunwayAvailableNow(Runway runway) {
+        Integer busyUntil = runwayBusyUntil.get(runway.getRunwayNumber());
+        if (busyUntil == null) {
+            return runway.getOccupied() == null;
+        }
+        return runway.getOccupied() == null && simTime >= busyUntil;
+    }
+
+    /**
+     * Returns true if the runway can currently handle a landing.
+     * @param runway runway to check
+     * @return whether landing can be handled
+     */
+    private boolean canHandleLanding(Runway runway) {
+        return runway.getStatus() == RunwayStatus.AVAILABLE
+                && (runway.getMode() == RunwayMode.LANDING || runway.getMode() == RunwayMode.MIXED_MODE)
+                && isRunwayAvailableNow(runway);
+    }
+
+    /**
+     * Returns true if the runway can currently handle a takeoff.
+     * @param runway runway to check
+     * @return whether takeoff can be handled
+     */
+    private boolean canHandleTakeoff(Runway runway) {
+        return runway.getStatus() == RunwayStatus.AVAILABLE
+                && (runway.getMode() == RunwayMode.TAKE_OFF || runway.getMode() == RunwayMode.MIXED_MODE)
+                && isRunwayAvailableNow(runway);
     }
 
     public SimulationResult run() {
-        final int MAX_TAKEOFF_WAIT_MIN = 30; // spec default
+        final int MAX_TAKEOFF_WAIT_MIN = maxDelayBeforeCancelled;
         final SimulationResult result = new SimulationResult();
 
         // Execute events scheduled at t=0
@@ -122,15 +178,19 @@ public class Simulation {
 
         int safetyCap = 1_000_000;
         while (!isFinished() && safetyCap-- > 0) {
+            mutex.lock();
 
-            //  update max queue sizes
+            releaseCompletedRunways();
+
             result.recordHoldQueueSize(holdingPattern.size(), (double) simTime);
             result.recordTakeoffQueueSize(takeOffQueue.size(), (double) simTime);
 
             // diversion: remove fuel-critical aircraft from holding pattern
             while (true) {
                 Aircraft fuelCritical = holdingPattern.pollIfFuelCritical(simTime);
-                if (fuelCritical == null) break;
+                if (fuelCritical == null) {
+                    break;
+                }
 
                 result.recordDiversion();
 
@@ -143,11 +203,14 @@ public class Simulation {
             // cancellation: remove aircraft that waited too long in takeoff queue
             while (true) {
                 Aircraft nextTake = takeOffQueue.peekNextAircraft();
-                if (nextTake == null) break;
+                if (nextTake == null) {
+                    break;
+                }
 
-                // Assumption used in your current system: aircraft enters queue at its scheduled time
                 int waited = simTime - nextTake.getScheduledTime();
-                if (waited < MAX_TAKEOFF_WAIT_MIN) break;
+                if (waited < MAX_TAKEOFF_WAIT_MIN) {
+                    break;
+                }
 
                 takeOffQueue.getNextAircraft();
                 result.recordCancellation();
@@ -161,22 +224,29 @@ public class Simulation {
 
             // runway assignment
             for (Runway r : runways) {
-                if (r.getStatus() != RunwayStatus.AVAILABLE) continue;
-                if (r.getOccupied() != null) continue;
-
                 Aircraft chosen = null;
                 boolean landing = false;
 
                 switch (r.getMode()) {
                     case LANDING -> {
+                        if (!canHandleLanding(r)) {
+                            continue;
+                        }
                         chosen = holdingPattern.peekNextAircraft();
                         landing = true;
                     }
                     case TAKE_OFF -> {
+                        if (!canHandleTakeoff(r)) {
+                            continue;
+                        }
                         chosen = takeOffQueue.peekNextAircraft();
                         landing = false;
                     }
                     case MIXED_MODE -> {
+                        if (r.getStatus() != RunwayStatus.AVAILABLE || !isRunwayAvailableNow(r)) {
+                            continue;
+                        }
+
                         Aircraft nextHold = holdingPattern.peekNextAircraft();
                         Aircraft nextTake = takeOffQueue.peekNextAircraft();
 
@@ -189,9 +259,14 @@ public class Simulation {
                             chosen = nextHold;
                             landing = true;
                         } else {
-                            // pick whichever will hit diversion/cancel first
-                            int holdSlack = Math.max(0, nextHold.getFuelRemaining(simTime) - 10);
-                            int takeSlack = Math.max(0, MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime()));
+                            int holdSlack = Math.max(
+                                    0,
+                                    nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
+                            );
+                            int takeSlack = Math.max(
+                                    0,
+                                    MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime())
+                            );
 
                             if (holdSlack <= takeSlack) {
                                 chosen = nextHold;
@@ -204,7 +279,9 @@ public class Simulation {
                     }
                 }
 
-                if (chosen == null) continue;
+                if (chosen == null) {
+                    continue;
+                }
 
                 // remove from queue
                 if (landing) {
@@ -213,42 +290,48 @@ public class Simulation {
                     takeOffQueue.getNextAircraft();
                 }
 
-                // occupy runway briefly and release (runway-zone abstraction)
+                // occupy runway for configured duration
                 r.setOccupied(chosen);
-                r.setOccupied(null);
+                int operationDuration = landing ? timeTakenForLanding : timeTakenForTakeoff;
+                if (operationDuration < 1) {
+                    operationDuration = 1;
+                }
+                runwayBusyUntil.put(r.getRunwayNumber(), simTime + operationDuration);
 
-                // metrics + log
                 HashMap<String, Object> attr = new HashMap<>();
                 attr.put("callSign", chosen.getCallSign());
                 attr.put("runwayNumber", r.getRunwayNumber());
 
                 int delay = simTime - chosen.getScheduledTime();
-                if (delay < 0) delay = 0;
+                if (delay < 0) {
+                    delay = 0;
+                }
 
                 if (landing) {
-                    // With current data available, hold time is approximated as time since scheduled arrival
                     int holdTime = Math.max(0, simTime - chosen.getScheduledTime());
                     result.recordHoldTime((double) holdTime);
                     result.recordArrivalDelay((double) delay);
 
                     attr.put("holdMinutes", holdTime);
                     attr.put("arrivalDelay", delay);
+                    attr.put("runwayOccupiedMinutes", operationDuration);
                     logEvent(EventType.LANDING_EVENT, simTime, attr);
                 } else {
-                    // With current data available, wait time approximated as time since scheduled departure
                     int waitTime = Math.max(0, simTime - chosen.getScheduledTime());
                     result.recordTakeoffWait((double) waitTime);
                     result.recordDepartureDelay((double) delay);
 
                     attr.put("waitMinutes", waitTime);
                     attr.put("departureDelay", delay);
+                    attr.put("runwayOccupiedMinutes", operationDuration);
                     logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
                 }
             }
 
-            // advance time and execute due events
             simTime += 1;
             eventSchedular.step(simTime);
+
+            mutex.unlock();
         }
 
         result.finalizeAverages();
@@ -259,31 +342,41 @@ public class Simulation {
      * Gets event schedular
      * @return the event schedular
      */
-    public EventSchedular getEventSchedular() { return eventSchedular; }
+    public EventSchedular getEventSchedular() {
+        return eventSchedular;
+    }
 
     /**
      * Gets the event log store
      * @return event log store
      */
-    public EventLog getEventLogStore() { return eventLog; }
+    public EventLog getEventLogStore() {
+        return eventLog;
+    }
 
     /**
      * Gets the holding pattern
      * @return the holding pattern
      */
-    public HoldingPattern getHoldingPattern() { return holdingPattern; }
+    public HoldingPattern getHoldingPattern() {
+        return holdingPattern;
+    }
 
     /**
      * Gets the takeoff queue
      * @return the takeoff queue
      */
-    public TakeOffQueue getTakeOffQueue() { return takeOffQueue; }
+    public TakeOffQueue getTakeOffQueue() {
+        return takeOffQueue;
+    }
 
     /**
      * Gets the runways
      * @return the runways
      */
-    public List<Runway> getRunways() { return List.copyOf(runways); }
+    public List<Runway> getRunways() {
+        return List.copyOf(runways);
+    }
 
     /**
      * Adds an aircraft to a simulation
@@ -291,9 +384,10 @@ public class Simulation {
      * @param scheduled time the aircraft is scheduled
      * @param interval  interval if event is recurring
      * @param end       time to end if the event is recurring
+     * @param seed      the seed for the aircraft
      * @param op        the aircraft operation
      */
-    public void addAircraft(Aircraft a, int scheduled, int interval, int end, AircraftOp op) {
+    public void addAircraft(Aircraft a, int scheduled, int interval, int end, long seed, AircraftOp op) {
         Objects.requireNonNull(a, "aircraft");
         Objects.requireNonNull(op, "op");
 
@@ -312,7 +406,6 @@ public class Simulation {
             }
         };
 
-        long seed = a.getCallSign().hashCode();
         IEvent event;
         if (interval > 0) {
             event = new NormDistEvent(scheduled, interval, end, seed, action);
@@ -378,6 +471,7 @@ public class Simulation {
             if (inHolding) {
                 holdingPattern.addAircraft(a);
             }
+
             HashMap<String, Object> attr = new HashMap<>();
             attr.put("callSign", a.getCallSign());
             attr.put("emergencyStatus", emergencyStatus.toString());
@@ -432,9 +526,11 @@ public class Simulation {
      */
     private Runway getRunwayByNumber(int runwayNumber) {
         for (Runway r : runways) {
-            if (r.getRunwayNumber() == runwayNumber) return r;
+            if (r.getRunwayNumber() == runwayNumber) {
+                return r;
+            }
         }
-        throw new IllegalArgumentException("Invalid runway number: "+runwayNumber);
+        throw new IllegalArgumentException("Invalid runway number: " + runwayNumber);
     }
 
     /**
@@ -445,5 +541,95 @@ public class Simulation {
      */
     private void logEvent(EventType type, int timestamp, HashMap<String, Object> attr) {
         eventLog.addEntry(new EventLogEntry(type, timestamp, attr));
+    }
+
+    /**
+     * Returns the maximum delay allowed before a flight is cancelled.
+     *
+     * @return the maximum delay before cancellation
+     */
+    public int getMaxDelayBeforeCancelled() {
+        return maxDelayBeforeCancelled;
+    }
+
+    /**
+     * Sets the maximum delay allowed before a flight is cancelled.
+     *
+     * @param maxDelayBeforeCancelled the maximum delay before cancellation
+     */
+    public void setMaxDelayBeforeCancelled(int maxDelayBeforeCancelled) {
+        this.maxDelayBeforeCancelled = maxDelayBeforeCancelled;
+    }
+
+    /**
+     * Returns the fuel threshold below which an aircraft may be redirected.
+     *
+     * @return the fuel threshold before redirection
+     */
+    public int getFuelThresholdBeforeRedirected() {
+        return fuelThresholdBeforeRedirected;
+    }
+
+    /**
+     * Sets the fuel threshold below which an aircraft may be redirected.
+     *
+     * @param fuelThresholdBeforeRedirected the fuel threshold before redirection
+     */
+    public void setFuelThresholdBeforeRedirected(int fuelThresholdBeforeRedirected) {
+        this.fuelThresholdBeforeRedirected = fuelThresholdBeforeRedirected;
+    }
+
+    /**
+     * Returns the time required for a takeoff operation.
+     *
+     * @return the time taken for takeoff
+     */
+    public int getTimeTakenForTakeoff() {
+        return timeTakenForTakeoff;
+    }
+
+    /**
+     * Sets the time required for a takeoff operation.
+     *
+     * @param timeTakenForTakeoff the time taken for takeoff
+     */
+    public void setTimeTakenForTakeoff(int timeTakenForTakeoff) {
+        this.timeTakenForTakeoff = timeTakenForTakeoff;
+    }
+
+    /**
+     * Returns the time required for a landing operation.
+     *
+     * @return the time taken for landing
+     */
+    public int getTimeTakenForLanding() {
+        return timeTakenForLanding;
+    }
+
+    /**
+     * Sets the time required for a landing operation.
+     *
+     * @param timeTakenForLanding the time taken for landing
+     */
+    public void setTimeTakenForLanding(int timeTakenForLanding) {
+        this.timeTakenForLanding = timeTakenForLanding;
+    }
+
+    /**
+     * Gets the mutex
+     * @return get mutex for simulation
+     */
+    public Lock getMutex() {
+        return mutex;
+    }
+
+
+    /**
+     * Get Event Log Count
+     * @return number of the events in the log
+     */
+    public long getNumOfEventsInLog()
+    {
+        return eventLog.getNumOfEvents();
     }
 }

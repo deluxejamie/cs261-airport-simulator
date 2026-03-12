@@ -32,7 +32,7 @@ public class DataBaseTest
     {
         final String uuid = UUID.randomUUID().toString();
         final String eventType = randomString();
-        final double timestamp = randomDouble();
+        final int timestamp = randomInt();
         final String attr = randomString();
 
         final EventLogEntryEntity e = new EventLogEntryEntity(uuid, eventType, timestamp, attr);
@@ -104,13 +104,13 @@ public class DataBaseTest
 
         final String uuid = createInitialSim();
 
-        double timestamp = 0;
+        int timestamp = 0;
 
         /* Create random test data */
         for (int i = 0; i < TEST_ITERATIONS; ++i)
         {
             final String eventType = randomString();
-            timestamp += randomDouble();
+            timestamp += randomInt();
             final String attr = randomString();
 
             final EventLogEntryEntity e = new EventLogEntryEntity(uuid, eventType, timestamp, attr);
