@@ -563,10 +563,12 @@ const SimulationStatsComponent = ({ uuid }) => {
 			setLoading(true);
 			setError(null);
 			try {
+				console.log(uuid);
 				const fetchedResult = await getSimulationResult(uuid);
 				if (!isMounted) return;
 				setResult(fetchedResult);
 			} catch (e) {
+				console.log(e);
 				if (!isMounted) return;
 				setError("Failed to load simulation statistics.");
 			} finally {
@@ -595,28 +597,6 @@ const SimulationStatsComponent = ({ uuid }) => {
 		];
 	}, [result]);
 
-	const downloadConfiguration = useCallback(async () => {
-		setExporting(true);
-		setError(null);
-		try {
-			const response = await getSimulationConfiguration(uuid);
-			const configString =
-				typeof response === "string"
-					? response
-					: (response?.config ?? JSON.stringify(response, null, 2));
-
-			const tempLink = document.createElement("a");
-			tempLink.href = window.URL.createObjectURL(new Blob([configString]));
-			tempLink.setAttribute("download", `simulation_${uuid}_config.json`);
-			document.body.appendChild(tempLink);
-			tempLink.click();
-			document.body.removeChild(tempLink);
-		} catch (e) {
-			setError("Failed to download the simulation configuration.");
-		} finally {
-			setExporting(false);
-		}
-	}, [uuid]);
 	return (
 		<Card withBorder>
 			<Stack>
@@ -644,7 +624,31 @@ const SimulationStatsComponent = ({ uuid }) => {
 							variant="light"
 							leftSection={<IconDownload size={16} />}
 							loading={exporting}
-							onClick={downloadConfiguration}
+							onClick={() => {
+								setExporting(true);
+								setError(null);
+
+								try {
+									const response = result.configData;
+									const configString =
+										typeof response === "string"
+											? response
+											: (response?.config ?? JSON.stringify(response, null, 2));
+
+									const tempLink = document.createElement("a");
+									tempLink.href = window.URL.createObjectURL(
+										new Blob([configString]),
+									);
+									tempLink.setAttribute("download", `${uuid}.json`);
+									document.body.appendChild(tempLink);
+									tempLink.click();
+									document.body.removeChild(tempLink);
+								} catch (e) {
+									setError("Failed to download the simulation configuration.");
+								} finally {
+									setExporting(false);
+								}
+							}}
 						>
 							Export configuration
 						</Button>
