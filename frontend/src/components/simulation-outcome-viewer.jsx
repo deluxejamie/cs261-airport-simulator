@@ -463,7 +463,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 						label={() => null}
 						disabled={running && !finished}
 						marks={SPEED_VALS.map((x, i) => {
-							return { value: i, label: null };
+							return { value: i, label: `${x}/s` };
 						})}
 					/>
 					<Button
