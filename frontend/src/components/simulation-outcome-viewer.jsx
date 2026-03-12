@@ -335,7 +335,7 @@ const SimulationCompleteCard = ({ style }) => {
  * @param {{ uuid: String}} param0 The uuid for the simulation
  * @returns A react component
  */
-const SimulationEventLogComponent = ({ uuid: uuid }) => {
+const SimulationEventLogComponent = ({ uuid }) => {
 	// display the simulation event log (SCRUM-37)
 	const [eventsFromSvr, setEventsFromSvr] = useState([]);
 	const [speed, setSpeed] = useState(DEFAULT_PLAY_SPEED); // number of minutes displayed per second of playthrough
