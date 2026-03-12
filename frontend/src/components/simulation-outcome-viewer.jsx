@@ -511,33 +511,36 @@ const SimulationEventLogComponent = ({ uuid }) => {
 
 				<span id="bottom-of-page" />
 			</Stack>
-			<Affix position={{ bottom: 20, right: 20 }}>
-				<SegmentedControl
-					size="xl"
-					transitionDuration={350}
-					data={[
-						{
-							value: "enabled",
-							label: (
-								<Center>
-									<IconPointer />
-								</Center>
-							),
-						},
-						{
-							value: "disabled",
-							label: (
-								<Center>
-									<IconPointerOff />
-								</Center>
-							),
-						},
-					]}
-					onChange={(val) => {
-						if (val != +null) setAutoScroll(val == "enabled");
-					}}
-				/>
-			</Affix>
+			{running ? (
+				<Affix position={{ bottom: 20, right: 20 }}>
+					<SegmentedControl
+						size="xl"
+						transitionDuration={350}
+						value={autoScroll ? "enabled" : "disabled"}
+						data={[
+							{
+								value: "enabled",
+								label: (
+									<Center>
+										<IconPointer />
+									</Center>
+								),
+							},
+							{
+								value: "disabled",
+								label: (
+									<Center>
+										<IconPointerOff />
+									</Center>
+								),
+							},
+						]}
+						onChange={(val) => {
+							if (val != null) setAutoScroll(val == "enabled");
+						}}
+					/>
+				</Affix>
+			) : undefined}
 		</>
 	);
 };

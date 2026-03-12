@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
+import {
+	Badge,
+	Button,
+	Group,
+	Stack,
+	Text,
+	Title,
+	Card,
+	Loader,
+} from "@mantine/core";
 import {
 	getSimulationEventLog,
 	getSimulationResult,
@@ -42,12 +51,19 @@ export default function SimulationOutcomeView({ uuid }) {
 	// }, [router, uuid]);
 
 	useEffect(() => {
+		let cancelled = false;
 		let currentDelay = 1000; // delay in ms between each request
 		let failedAccessAttempts = 0;
 		let finished = false;
 		(async () => {
-			while (failedAccessAttempts < MAX_FAILED_ATTEMPTS && !finished) {
+			while (
+				!cancelled &&
+				failedAccessAttempts < MAX_FAILED_ATTEMPTS &&
+				!finished
+			) {
 				const currentStatus = await getSimulationStatus(uuid);
+				if (cancelled) return;
+
 				if (currentStatus == "unavailable") failedAccessAttempts++;
 				else {
 					setStatus(currentStatus);
@@ -58,10 +74,13 @@ export default function SimulationOutcomeView({ uuid }) {
 					}
 				}
 			}
-			if (failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
+			if (!cancelled && failedAccessAttempts == MAX_FAILED_ATTEMPTS) {
 				setStatus("unavailable");
 			}
 		})();
+		return () => {
+			cancelled = true;
+		};
 	}, [uuid]);
 
 	return (
@@ -82,7 +101,7 @@ export default function SimulationOutcomeView({ uuid }) {
 				<Group justify="flex-start">
 					<Text c="dimmed">Simulation ID: {uuid}</Text>
 					<Badge component="span" color={BADGE_COLORS[status]} size="sm">
-						{status}
+						{status.replace("_", " ")}
 					</Badge>
 				</Group>
 			</Stack>
@@ -102,11 +121,18 @@ export default function SimulationOutcomeView({ uuid }) {
  * @returns A react component to be displayed when the simulation is currently running.
  */
 const LoadingComponent = () => {
-	// todo: implement loading component (SCRUM-35)
-	// should tell the user that the simulation is currently loading
-	// (the page will refresh from displaying this component automatically when it's ready)
-	// todo for yasvi
-	return <></>;
+	return (
+		<Card withBorder>
+			<Stack align="center" py="xl" gap="xs">
+				<Loader size="md" />
+				<Title order={3}>Simulation in progress</Title>
+				<Text c="dimmed" ta="center">
+					Please wait patiently while your simulation is executed. Once the
+					results have been gathered, this page will automatically refresh.
+				</Text>
+			</Stack>
+		</Card>
+	);
 };
 
 /**
