@@ -84,7 +84,9 @@ export default function RunwayConfigurationSection() {
 						min={1}
 						max={10}
 						value={desiredRunwayCount}
-						onChange={(value) => setDesiredRunwayCount(Number(value ?? 1))}
+						onChange={(value) => {
+							if (value !== null) setDesiredRunwayCount(Number(value ?? 1));
+						}}
 					/>
 					<Button onClick={handleApplyRunwayCount}>Apply runway count</Button>
 				</Group>
@@ -113,7 +115,9 @@ export default function RunwayConfigurationSection() {
 										<Select
 											value={runway.mode}
 											data={RUNWAY_MODE_OPTIONS}
-											onChange={(value) => handleModeChange(runway.id, value)}
+											onChange={(value) => {
+												if (value !== null) handleModeChange(runway.id, value);
+											}}
 										/>
 									</Table.Td>
 									<Table.Td>
