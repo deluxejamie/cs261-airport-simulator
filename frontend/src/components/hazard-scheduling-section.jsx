@@ -108,9 +108,10 @@ export default function HazardSchedulingSection() {
 				<Select
 					label="Hazard type"
 					value={hazardType}
-					onChange={(value) =>
-						setHazardType(value || HazardType.RUNWAY_CLOSURE)
-					}
+					onChange={(value) => {
+						if (value !== null)
+							setHazardType(value || HazardType.RUNWAY_CLOSURE);
+					}}
 					data={[
 						{
 							label: "Runway closure hazard",
@@ -130,7 +131,9 @@ export default function HazardSchedulingSection() {
 							min={0}
 							value={startTimeMinutes}
 							disabled={runways.length === 0}
-							onChange={(value) => setStartTimeMinutes(Number(value ?? 0))}
+							onChange={(value) => {
+								if (value !== null) setStartTimeMinutes(Number(value ?? 0));
+							}}
 						/>
 
 						<NumberInput
@@ -138,7 +141,9 @@ export default function HazardSchedulingSection() {
 							min={1}
 							value={durationMinutes}
 							disabled={runways.length === 0}
-							onChange={(value) => setDurationMinutes(Number(value ?? 1))}
+							onChange={(value) => {
+								if (value !== null) setDurationMinutes(Number(value ?? 1));
+							}}
 						/>
 
 						<Select
@@ -149,15 +154,18 @@ export default function HazardSchedulingSection() {
 								label: `Runway ${r.id}`,
 							}))}
 							disabled={runways.length === 0}
-							onChange={(value) => setAffectedRunway(Number(value ?? 1))}
+							onChange={(value) => {
+								if (value !== null) setAffectedRunway(Number(value ?? 1));
+							}}
 						/>
 
 						<Select
 							label="Closure mode"
 							value={closureMode}
-							onChange={(value) =>
-								setClosureMode(value || RunwayClosureMode.SNOW_CLEARANCE)
-							}
+							onChange={(value) => {
+								if (value !== null)
+									setClosureMode(value || RunwayClosureMode.SNOW_CLEARANCE);
+							}}
 							data={Object.values(RunwayClosureMode).map((mode) => ({
 								value: mode,
 								label: formatLabel(mode),
@@ -188,7 +196,9 @@ export default function HazardSchedulingSection() {
 							label="Incident time (mins from start of simulation)"
 							min={1}
 							value={timeFromStartOfSimulation}
-							onChange={(value) => setTimeFromStartOfSim(Number(value ?? 1))}
+							onChange={(value) => {
+								if (value !== null) setTimeFromStartOfSim(Number(value ?? 1));
+							}}
 							disabled={arrivalCallsigns.length === 0}
 						/>
 						<Select

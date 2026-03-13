@@ -107,7 +107,9 @@ export default function FlightSchedulingSection() {
 					<Select
 						label="Flight schedule type"
 						value={flightType}
-						onChange={(value) => setFlightType(value || FlightType.DEPARTURE)}
+						onChange={(value) => {
+							if (value !== null) setFlightType(value || FlightType.DEPARTURE);
+						}}
 						data={[
 							{ label: "Departure", value: FlightType.DEPARTURE },
 							{ label: "Arrival", value: FlightType.ARRIVAL },
@@ -118,7 +120,9 @@ export default function FlightSchedulingSection() {
 						label="Aircraft operator"
 						placeholder="EASYJET"
 						value={operator}
-						onChange={(event) => setOperator(event.currentTarget.value)}
+						onChange={(event) => {
+							if (event !== null) setOperator(event.currentTarget.value);
+						}}
 					/>
 
 					<NumberInput
@@ -129,7 +133,9 @@ export default function FlightSchedulingSection() {
 						}
 						min={0}
 						value={expectedTimeMinutes}
-						onChange={(value) => setExpectedTimeMinutes(Number(value ?? 0))}
+						onChange={(value) => {
+							if (value !== null) setExpectedTimeMinutes(Number(value ?? 0));
+						}}
 					/>
 				</Group>
 
@@ -139,15 +145,18 @@ export default function FlightSchedulingSection() {
 							label="Fuel at arrival into aircraft space (minutes)"
 							min={1}
 							value={arrivalFuelMinutes}
-							onChange={(value) => setArrivalFuelMinutes(Number(value ?? 1))}
+							onChange={(value) => {
+								if (value !== null) setArrivalFuelMinutes(Number(value ?? 1));
+							}}
 						/>
 
 						<Select
 							label="Emergency status at airspace entry"
 							value={arrivalEmergencyStatus}
-							onChange={(value) =>
-								setArrivalEmergencyStatus(value || EmergencyStatus.NONE)
-							}
+							onChange={(value) => {
+								if (value !== null)
+									setArrivalEmergencyStatus(value || EmergencyStatus.NONE);
+							}}
 							data={[
 								{
 									label: "None",
@@ -177,16 +186,19 @@ export default function FlightSchedulingSection() {
 							label="Repeat every (minutes)"
 							min={1}
 							value={repeatPeriod}
-							onChange={(value) => setRepeatPeriod(Number(value ?? 1))}
+							onChange={(value) => {
+								if (value !== null) setRepeatPeriod(Number(value ?? 1));
+							}}
 						/>
 
 						<NumberInput
 							label="Repeat until time (minutes)"
 							min={expectedTimeMinutes}
 							value={repeatEnd}
-							onChange={(value) =>
-								setRepeatEnd(Number(value ?? expectedTimeMinutes))
-							}
+							onChange={(value) => {
+								if (value !== null)
+									setRepeatEnd(Number(value ?? expectedTimeMinutes));
+							}}
 						/>
 					</Group>
 				)}

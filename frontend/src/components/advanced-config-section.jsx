@@ -45,9 +45,10 @@ export default function AdvancedConfigSection() {
 									rightSection={<span>minutes</span>}
 									rightSectionWidth={70}
 									value={advancedConfig.maxDelayBeforeCancelled}
-									onChange={(value) =>
-										applyUpdate(setMaxDelayBeforeCancelled, value)
-									}
+									onChange={(value) => {
+										if (value !== null)
+											applyUpdate(setMaxDelayBeforeCancelled, value);
+									}}
 								/>
 
 								<NumberInput
@@ -56,9 +57,10 @@ export default function AdvancedConfigSection() {
 									rightSection={<span>minutes</span>}
 									rightSectionWidth={70}
 									value={advancedConfig.fuelThresholdBeforeRedirected}
-									onChange={(value) =>
-										applyUpdate(setFuelThresholdBeforeRedirected, value)
-									}
+									onChange={(value) => {
+										if (value !== null)
+											applyUpdate(setFuelThresholdBeforeRedirected, value);
+									}}
 								/>
 
 								<NumberInput
@@ -67,9 +69,10 @@ export default function AdvancedConfigSection() {
 									rightSection={<span>minutes</span>}
 									rightSectionWidth={70}
 									value={advancedConfig.timeTakenForTakeoff}
-									onChange={(value) =>
-										applyUpdate(setTimeTakenForTakeoff, value)
-									}
+									onChange={(value) => {
+										if (value !== null)
+											applyUpdate(setTimeTakenForTakeoff, value);
+									}}
 								/>
 
 								<NumberInput
@@ -78,9 +81,10 @@ export default function AdvancedConfigSection() {
 									rightSection={<span>minutes</span>}
 									rightSectionWidth={70}
 									value={advancedConfig.timeTakenForLanding}
-									onChange={(value) =>
-										applyUpdate(setTimeTakenForLanding, value)
-									}
+									onChange={(value) => {
+										if (value !== null)
+											applyUpdate(setTimeTakenForLanding, value);
+									}}
 								/>
 
 								<Text size="sm" c="dimmed">
