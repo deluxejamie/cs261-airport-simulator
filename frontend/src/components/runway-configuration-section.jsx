@@ -39,7 +39,7 @@ export default function RunwayConfigurationSection() {
 				for (let i = 0; i < needToadd; i++) {
 					addRunway(RunwayModes.MIXED_MODE);
 				}
-			} else {
+			} else if (needToadd < 0) {
 				const runwaysToRemove = runways.slice(needToadd);
 				for (const runway of runwaysToRemove) {
 					removeRunway(runway.id);
