@@ -176,7 +176,7 @@ export async function getSimulationEventLog(uuid, offset = 0, count = 50) {
 				attributes: {
 					callsign: "EASYJET-5",
 					reason: `insufficient takeoff capacity`,
-					waitingMinutes: 20,
+					waitedMinutes: 20,
 				},
 			},
 			{

@@ -45,8 +45,8 @@ import {
 	IconSignRight,
 } from "@tabler/icons-react";
 
-const THRESHOLD_RESIDUAL_EVENTS = 100; // the minimum number of events residual to have before more should be fetched
-const EVENTS_REQUESTED_PER_BATCH = 100; // the amount of events requested per batch
+const THRESHOLD_RESIDUAL_EVENTS = 250; // the minimum number of events residual to have before more should be fetched
+const EVENTS_REQUESTED_PER_BATCH = 1000; // the amount of events requested per batch
 const CONSECUTIVE_FAILURES_THRESHOLD = 2; // The number of consecutive failures before the simulation log will display "failure to load"
 
 // number of minutes displayed per second
@@ -192,10 +192,10 @@ const eventDisplayers = Object.fromEntries([
 				return (
 					<Group justify="flex-start">
 						<Badge variant="light" color="orange">
-							Wait time {attributes.waitingMinutes} min
+							Wait time {attributes.waitedMinutes} min
 						</Badge>
 						<Badge variant="light" color="red">
-							{attributes.reason}
+							{attributes.reason.replaceAll("_", " ")}
 						</Badge>
 					</Group>
 				);
