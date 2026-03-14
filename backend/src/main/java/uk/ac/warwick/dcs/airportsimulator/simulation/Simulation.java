@@ -406,13 +406,7 @@ public class Simulation {
                 holdingPattern.addAircraft(a);
                 arrivalsEnteredSim.add(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
-                if (a.getEmergencyStatus() != null && a.getEmergencyStatus() != EmergencyStatus.NONE) {
-                    HashMap<String, Object> emergencyAttr = new HashMap<>();
-                    emergencyAttr.put("callSign", a.getCallSign());
-                    emergencyAttr.put("emergencyStatus", a.getEmergencyStatus().toString());
-                    emergencyAttr.put("source", "INITIAL_FLIGHT_CONFIG");
-                    logEvent(EventType.EMERGENCY_EVENT, simTime, emergencyAttr);
-                }
+
             } else {
                 takeOffQueue.addAircraft(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
