@@ -253,14 +253,20 @@ public class Simulation {
                             chosen = nextHold;
                             landing = true;
                         } else {
-                            final int holdSlack = Math.max(
-                                    0,
-                                    nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
-                            );
+                            // PRIORITISE EMERGENCY ARRIVALS
+                            if (nextHold.getEmergencyStatus() != EmergencyStatus.NONE) {
+                                chosen = nextHold;
+                                landing = true;
+                            } else {
+
+                                final int holdSlack = Math.max(
+                                        0,
+                                        nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
+                                );
                             final int takeSlack = Math.max(
                                     0,
                                     MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime())
-                            );
+                            ); 
 
                             if (holdSlack <= takeSlack) {
                                 chosen = nextHold;
@@ -268,6 +274,7 @@ public class Simulation {
                             } else {
                                 chosen = nextTake;
                                 landing = false;
+                            }
                             }
                         }
                     }
@@ -395,11 +402,17 @@ public class Simulation {
             attr.put("callsign", a.getCallSign());
             attr.put("op", op.toString());
 
-
             if (op == AircraftOp.ARRIVAL) {
                 holdingPattern.addAircraft(a);
                 arrivalsEnteredSim.add(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
+                if (a.getEmergencyStatus() != null && a.getEmergencyStatus() != EmergencyStatus.NONE) {
+                    HashMap<String, Object> emergencyAttr = new HashMap<>();
+                    emergencyAttr.put("callSign", a.getCallSign());
+                    emergencyAttr.put("emergencyStatus", a.getEmergencyStatus().toString());
+                    emergencyAttr.put("source", "INITIAL_FLIGHT_CONFIG");
+                    logEvent(EventType.EMERGENCY_EVENT, simTime, emergencyAttr);
+                }
             } else {
                 takeOffQueue.addAircraft(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
