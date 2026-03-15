@@ -17,6 +17,7 @@ import {
 	SegmentedControl,
 	Center,
 	Affix,
+	VisuallyHidden,
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
@@ -543,6 +544,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 								label: (
 									<Center>
 										<IconPointer />
+										<VisuallyHidden>Enable automatic scrolling</VisuallyHidden>
 									</Center>
 								),
 							},
@@ -551,6 +553,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 								label: (
 									<Center>
 										<IconPointerOff />
+										<VisuallyHidden>Disable automatic scrolling</VisuallyHidden>
 									</Center>
 								),
 							},
