@@ -114,7 +114,7 @@ public class SimulationAddAircraftRunwayTest {
 
         {
             final EventLogEntry ele = sim.getEventLog(0, 100).getLast();
-            assertEquals(EventType.HOLDING_EVENT, ele.getType());
+            assertEquals(EventType.EMERGENCY_EVENT, ele.getType());
         }
 
         simTester.step(200); // 300 atp
