@@ -533,6 +533,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 				<span id="bottom-of-page" />
 			</Stack>
 			{running ? (
+				// https://mantine.dev/core/segmented-control/#react-node-as-label
 				<Affix position={{ bottom: 20, right: 20 }}>
 					<SegmentedControl
 						size="xl"
