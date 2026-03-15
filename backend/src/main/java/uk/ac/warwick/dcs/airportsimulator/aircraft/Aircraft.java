@@ -18,6 +18,7 @@ public class Aircraft {
      * @param emergencyStatus the aircraft's emergencyStatus
      * @param timeAddedToSim  the time the aircraft was added to the sim 
      */
+    
     public Aircraft(String callSign, String origin, String destination, int scheduledTime, int altitude, int groundSpeed, int initialFuel, EmergencyStatus emergencyStatus, int timeAddedToSim) {
         this.callSign = callSign;
         this.origin = origin;

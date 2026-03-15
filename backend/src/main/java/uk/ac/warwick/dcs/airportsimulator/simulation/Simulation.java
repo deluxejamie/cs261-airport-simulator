@@ -253,21 +253,28 @@ public class Simulation {
                             chosen = nextHold;
                             landing = true;
                         } else {
-                            final int holdSlack = Math.max(
-                                    0,
-                                    nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
-                            );
-                            final int takeSlack = Math.max(
-                                    0,
-                                    MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime())
-                            );
-
-                            if (holdSlack <= takeSlack) {
+                            // PRIORITISE EMERGENCY ARRIVALS
+                            if (nextHold.getEmergencyStatus() != EmergencyStatus.NONE) {
                                 chosen = nextHold;
                                 landing = true;
                             } else {
-                                chosen = nextTake;
-                                landing = false;
+
+                                final int holdSlack = Math.max(
+                                        0,
+                                        nextHold.getFuelRemaining(simTime) - fuelThresholdBeforeRedirected
+                                );
+                                final int takeSlack = Math.max(
+                                        0,
+                                        MAX_TAKEOFF_WAIT_MIN - (simTime - nextTake.getScheduledTime())
+                                );
+
+                                if (holdSlack <= takeSlack) {
+                                    chosen = nextHold;
+                                    landing = true;
+                                } else {
+                                    chosen = nextTake;
+                                    landing = false;
+                                }
                             }
                         }
                     }
@@ -275,13 +282,6 @@ public class Simulation {
 
                 if (chosen == null) {
                     continue;
-                }
-
-                // remove from queue
-                if (landing) {
-                    holdingPattern.getNextAircraft();
-                } else {
-                    takeOffQueue.getNextAircraft();
                 }
 
                 // occupy runway for configured duration
@@ -307,6 +307,8 @@ public class Simulation {
                     attr.put("arrivalDelay", delay);
                     attr.put("runwayOccupiedMinutes", operationDuration);
                     logEvent(EventType.LANDING_EVENT, simTime, attr);
+
+                    holdingPattern.getNextAircraft();
                 } else {
                     final int waitTime = Math.max(0, simTime - chosen.getScheduledTime());
                     result.recordTakeoffWait(waitTime);
@@ -316,6 +318,8 @@ public class Simulation {
                     attr.put("departureDelay", delay);
                     attr.put("runwayOccupiedMinutes", operationDuration);
                     logEvent(EventType.TAKEOFF_EVENT, simTime, attr);
+
+                    takeOffQueue.getNextAircraft();
                 }
             }
 
@@ -395,14 +399,20 @@ public class Simulation {
             attr.put("callsign", a.getCallSign());
             attr.put("op", op.toString());
 
-
-            if (op == AircraftOp.ARRIVAL) {
-                holdingPattern.addAircraft(a);
-                arrivalsEnteredSim.add(a);
-                logEvent(EventType.HOLDING_EVENT, simTime, attr);
-            } else {
+            if (op == AircraftOp.DEPARTURE) {
                 takeOffQueue.addAircraft(a);
                 logEvent(EventType.HOLDING_EVENT, simTime, attr);
+                return;
+            }
+
+            holdingPattern.addAircraft(a);
+            arrivalsEnteredSim.add(a);
+            logEvent(EventType.HOLDING_EVENT, simTime, attr);
+
+            if (a.getEmergencyStatus() != EmergencyStatus.NONE)
+            {
+                attr.put("emergencyStatus", a.getEmergencyStatus().toString());
+                logEvent(EventType.EMERGENCY_EVENT, simTime, attr);
             }
         };
 
