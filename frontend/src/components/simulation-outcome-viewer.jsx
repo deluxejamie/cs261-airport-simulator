@@ -17,6 +17,7 @@ import {
 	SegmentedControl,
 	Center,
 	Affix,
+	VisuallyHidden,
 } from "@mantine/core";
 import {
 	getSimulationEventLog,
@@ -535,6 +536,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 				<span id="bottom-of-page" />
 			</Stack>
 			{running ? (
+				// https://mantine.dev/core/segmented-control/#react-node-as-label
 				<Affix position={{ bottom: 20, right: 20 }}>
 					<SegmentedControl
 						size="xl"
@@ -546,6 +548,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 								label: (
 									<Center>
 										<IconPointer />
+										<VisuallyHidden>Enable automatic scrolling</VisuallyHidden>
 									</Center>
 								),
 							},
@@ -554,6 +557,7 @@ const SimulationEventLogComponent = ({ uuid }) => {
 								label: (
 									<Center>
 										<IconPointerOff />
+										<VisuallyHidden>Disable automatic scrolling</VisuallyHidden>
 									</Center>
 								),
 							},
