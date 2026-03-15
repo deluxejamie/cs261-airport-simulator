@@ -240,7 +240,10 @@ const eventDisplayers = Object.fromEntries([
 					<Group justify="flex-start">
 						<Badge
 							variant="light"
-							color={eventBadgeColor(attributes.status == "available", "green")}
+							color={eventBadgeColor(
+								attributes.status === "AVAILABLE",
+								"green",
+							)}
 						>
 							{attributes.status.replace("_", " ")}
 						</Badge>
