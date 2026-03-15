@@ -2,6 +2,8 @@
 
 This is group 4's implementation of the Software Engineering coursework for 2025/2026 academic year.
 
+Noteworthy additions to spec: threadpooling, data persistance, configuration import and export
+
 ## Frontend Service
 
 ### Running the frontend service
